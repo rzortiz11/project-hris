@@ -1,1 +1,6 @@
 # morepower-hris
+
+
+#BACKEND 
+#: LARAVEL FRAMEWORK - PHP 
+#: ADMIN PANEL - FILAMENT 
