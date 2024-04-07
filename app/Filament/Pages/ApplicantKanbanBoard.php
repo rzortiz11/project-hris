@@ -21,9 +21,9 @@ class ApplicantKanbanBoard extends KanbanBoard
     protected static string $model = Applicant::class;
     protected static string $statusEnum = ApplicationStatusTypeEnum::class;
 
-    protected static ?string $navigationGroup = 'Application Management';
+    protected static ?string $navigationGroup = 'Recruitment Management';
     
-    protected static ?string $navigationLabel = 'Recruitment Board';
+    protected static ?string $navigationLabel = 'Applicant Board';
 
     protected static string $recordTitleAttribute = 'name';
     protected static string $recordStatusAttribute = 'status';
