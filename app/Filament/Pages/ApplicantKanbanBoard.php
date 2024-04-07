@@ -22,7 +22,8 @@ class ApplicantKanbanBoard extends KanbanBoard
     protected static string $statusEnum = ApplicationStatusTypeEnum::class;
 
     protected static ?string $navigationGroup = 'Application Management';
-    protected static ?string $navigationLabel = 'Applicant Board';
+    
+    protected static ?string $navigationLabel = 'Recruitment Board';
 
     protected static string $recordTitleAttribute = 'name';
     protected static string $recordStatusAttribute = 'status';
@@ -46,12 +47,21 @@ class ApplicantKanbanBoard extends KanbanBoard
                     Wizard\Step::make('Application Details')
                         ->icon('heroicon-m-user')
                         ->schema([
-                            TextInput::make('first_name'),
-                            TextInput::make('last_name'),
+                            TextInput::make('first_name')->required(),
+                            TextInput::make('last_name')->required(),
                             TextInput::make('middle_name'),
                             TextInput::make('suffix'),
-                            TextInput::make('mobile'),
-                            TextInput::make('email'),
+                            TextInput::make('mobile')->required(),
+                            TextInput::make('email')->required(),        
+                            Forms\Components\Select::make('assigned_to')->label('Assigned To')
+                            ->required()
+                            ->options(User::all()->pluck('name','user_id')->map(function ($name) {
+                                return ucwords(strtolower($name));
+                            })->toArray())
+                            ->searchable()
+                            ->preload(),
+                            Forms\Components\Placeholder::make('created_by')
+                            ->label('Created By')
                         ])
                         ->columns(4),
                     Wizard\Step::make('Employment History')
@@ -82,12 +92,22 @@ class ApplicantKanbanBoard extends KanbanBoard
                 Wizard\Step::make('Application Details')
                     ->icon('heroicon-m-user')
                     ->schema([
-                        TextInput::make('first_name'),
-                        TextInput::make('last_name'),
+                        TextInput::make('first_name')->required(),
+                        TextInput::make('last_name')->required(),
                         TextInput::make('middle_name'),
                         TextInput::make('suffix'),
-                        TextInput::make('mobile'),
-                        TextInput::make('email'),
+                        TextInput::make('mobile')->required(),
+                        TextInput::make('email')->required(),
+                        Forms\Components\Select::make('assigned_to')->label('Assigned To')
+                        ->required()
+                        ->options(User::all()->pluck('name','user_id')->map(function ($name) {
+                            return ucwords(strtolower($name));
+                        })->toArray())
+                        ->searchable()
+                        ->preload(),
+                        Forms\Components\Placeholder::make('created_by')
+                        ->label('Created By')
+                        ->content(fn (?Applicant $record): ?string => $record ? $record->user->name : ""),             
                     ])
                     ->columns(4),
                 Wizard\Step::make('Employment History')

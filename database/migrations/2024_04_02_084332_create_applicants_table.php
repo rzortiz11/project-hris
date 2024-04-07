@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('mobile')->unique()->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('status')->default('New Applicant');
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('assigned_to')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
