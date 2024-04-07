@@ -53,6 +53,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+            ])->colors([
+                'primary' => Color::Rose,
             ]);
+            // ->sidebarWidth('18rem')
     }
 }
