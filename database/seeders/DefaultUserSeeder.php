@@ -14,14 +14,22 @@ class DefaultUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $default = [
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'email' => 'admin@morepower.ph',
-            'password' => Hash::make('admin1234')
+        $defaults = [
+            [
+                'first_name' => 'Admin', 
+                'last_name' => 'User',
+                'email' => 'admin@morepower.ph',
+                'password' => Hash::make('admin1234')
+            ],
         ];
 
-        $user = User::create($default);
-        // $user->assignRole('Admin');
+        foreach ($defaults as $row) {
+            $existingRecord = User::where('email', $row['email'])->first();
+    
+            if (!$existingRecord) {
+                $user = User::create($row);
+                // $user->assignRole('Admin');
+            }
+        }
     }
 }
