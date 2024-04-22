@@ -41,7 +41,7 @@ class UserResource extends Resource
                     ->getStateUsing(function (User $user): string {
                         return $user->first_name . ' ' . $user->last_name;
                     }),
-                Tables\Columns\TextColumn::make('mobile')->label('Mobile')->searchable()
+                Tables\Columns\TextColumn::make('email')->label('Email')->searchable()
             ])
             ->filters([
                 // Filter::make('roles')

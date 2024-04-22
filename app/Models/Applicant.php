@@ -11,7 +11,7 @@ class Applicant extends Model
 {
     use HasFactory, SoftDeletes;
     protected $primaryKey = 'applicant_id';
-    protected $fillable = ['first_name','last_name','suffix','middle_name','mobile','email', 'status','created_by','assigned_to'];
+    protected $fillable = ['first_name','last_name','suffix','middle_name','mobile','email', 'status', 'progress','created_by','assigned_to'];
 
     /** Modify name attribute  */
     public function getNameAttribute()
