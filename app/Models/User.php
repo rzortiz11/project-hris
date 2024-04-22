@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Filament\Panel;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasName
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles; 
 
     protected $primaryKey = 'user_id';
     /**
@@ -25,7 +26,6 @@ class User extends Authenticatable implements FilamentUser, HasName
         'first_name',
         'last_name',
         'middle_name',
-        'mobile',
         'email',
         'password',
     ];

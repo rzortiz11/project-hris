@@ -58,7 +58,8 @@ class AdminPanelProvider extends PanelProvider
             ->spa()
             ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
             ->colors([
-                'primary' => Color::Rose,
+                // 'primary' => Color::Rose,
+                'primary' => Color::Slate,
             ]);
             // ->sidebarWidth('18rem')
     }

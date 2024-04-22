@@ -77,6 +77,7 @@ class ApplicantKanbanBoard extends KanbanBoard
                             // ...
                         ]),
                     Wizard\Step::make('Remarks')
+                    ->label('Remarks')
                     ->schema([
                         // ...
                     ]),                        
@@ -107,7 +108,7 @@ class ApplicantKanbanBoard extends KanbanBoard
                         ->preload(),
                         Forms\Components\Placeholder::make('created_by')
                         ->label('Created By')
-                        ->content(fn (?Applicant $record): ?string => $record ? $record->user->name : ""),             
+                        ->content(fn (?Applicant $record): ?string => isset($record->user->name) ? $record->user->name : ""),             
                     ])
                     ->columns(4),
                 Wizard\Step::make('Employment History')
@@ -125,8 +126,8 @@ class ApplicantKanbanBoard extends KanbanBoard
                 Wizard\Step::make('Remarks')
                 ->schema([
                     // ...
-                ]),
-            ])                    
+                ])
+            ])->skippable(),          
       
         ];
     }

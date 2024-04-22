@@ -28,7 +28,7 @@ class DefaultUserSeeder extends Seeder
     
             if (!$existingRecord) {
                 $user = User::create($row);
-                // $user->assignRole('Admin');
+                $user->assignRole('Admin');
             }
         }
     }
