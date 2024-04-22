@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('employee_health_benefit_details', function (Blueprint $table) {
             $table->id('employee_health_benefit_id');
             $table->unsignedBigInteger('employee_id');
+            $table->string('name')->nullable();
             $table->date('enrollment_date')->nullable();
             $table->date('coverage_start_date')->nullable();
             $table->date('coverage_end_date')->nullable();
