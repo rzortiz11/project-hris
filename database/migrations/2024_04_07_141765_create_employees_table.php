@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('religion')->nullable();
             $table->string('nationality')->nullable();
             $table->string('picture')->nullable();
+            $table->boolean('is_active')->default(1);
+            $table->integer('progress')->default(0);
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
             $table->softDeletes();

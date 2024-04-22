@@ -12,5 +12,5 @@ class Employee extends Model
 
     protected $primaryKey = 'employee_id';
     
-    protected $fillable = ['employee_reference','user_id','title','gender','birthdate','religion', 'nationality', 'picture','created_by'];
+    protected $fillable = ['employee_reference','user_id','title','gender','birthdate','religion', 'nationality', 'picture','is_active', 'progress','created_by'];
 }
