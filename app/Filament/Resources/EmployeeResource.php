@@ -65,23 +65,23 @@ class EmployeeResource extends Resource
                             ->tabs([
                                Tab::make('Basic Details')
                                     ->schema([
-                                        static::basicDetailGrid()
+                                        static::PersonalInformation()
                                     ])->columns(2),
                                Tab::make('Contact Details')
                                     ->schema([
-                                        static::contactAddressDetailSection(),
-                                        static::contactDetailSection(),
-                                        static::contactEmergencyPersonSection(),                   
+                                        static::contactAddressInformation(),
+                                        static::contactInformation(),
+                                        static::emergencyContactPersonInformation(),                   
                                     ]),     
                                Tab::make('Work Details')
                                     ->schema([
-                                        static::employementDetailSection(),  
-                                        static::employementPositionSection(),  
+                                        static::employementInformation(),  
+                                        static::employementPositionInformation(),  
                                     ]),    
                                Tab::make('Salary Details')                                
                                     ->schema([
-                                        static::salaryDetailSection(),  
-                                        static::payComponentSection(),                                    
+                                        static::salaryInformation(),  
+                                        static::payComponent(),                                    
                                     ]),  
                                Tab::make('Family/Dependent Details')                                
                                 ->schema([
@@ -201,11 +201,12 @@ class EmployeeResource extends Resource
         ];
     }
 
-    public static function basicDetailGrid(): Grid
+    public static function PersonalInformation(): Section
     {
-        return Grid::make([
-            'default' => 1
-        ])->schema([
+        return Section::make('PERSONAL INFORTMATION')
+        ->description('Employee Personal Details')
+        ->icon('heroicon-s-user-circle')
+        ->schema([
             Grid::make([
                 'default' => 1
             ])
@@ -246,10 +247,10 @@ class EmployeeResource extends Resource
         ])->columns(2);
     }
 
-    public static function contactAddressDetailSection(): Section 
+    public static function contactAddressInformation(): Section 
     {
-        return Section::make('ADDRESS DETAILS')
-        ->description('Employee Address Information')
+        return Section::make('ADDRESS INFORTMATION')
+        ->description('Employee Address Details')
         ->icon('heroicon-s-home-modern')
         ->schema([
             Repeater::make('addresses')
@@ -298,7 +299,7 @@ class EmployeeResource extends Resource
         ->collapsed(false);
     }
 
-    public static function contactDetailSection(): Section 
+    public static function contactInformation(): Section 
     {
         return  Section::make('CONTACT INFORMATION')
         ->description('Employee Contact Information')
@@ -333,7 +334,7 @@ class EmployeeResource extends Resource
         ->columns(2);
     }
 
-    public static function contactEmergencyPersonSection(): Section 
+    public static function emergencyContactPersonInformation(): Section 
     {
         return Section::make('EMERGENCY CONTACT PERSON INFORMATION')
         ->icon('heroicon-m-phone-arrow-down-left')
@@ -368,7 +369,7 @@ class EmployeeResource extends Resource
         ->columns(1);                     
     }
 
-    public static function employementDetailSection(): Section
+    public static function employementInformation(): Section
     {
         return Section::make('EMPLOYEMENT DETAILS')
         ->description('Employee Employement Information')
@@ -451,7 +452,7 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function employementPositionSection(): Section
+    public static function employementPositionInformation(): Section
     {
         return Section::make('POSITION DETAILS')
         ->description('Employee Position Information')
@@ -505,7 +506,7 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function salaryDetailSection() : Section
+    public static function salaryInformation() : Section
     {
         return Section::make(function (Employee $employee) {
             return 'SALARY DETAILS : '. strtoupper($employee->user->fullname) ?? 'SALARY DETAILS';
@@ -536,7 +537,7 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function payComponentSection(): Section
+    public static function payComponent(): Section
     {
         return Section::make('Pay Component')
         ->schema([
