@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id('employee_id');
             $table->string('employee_reference')->unique();
             $table->unsignedBigInteger('user_id');
-            $table->string('title')->nullable();
+            $table->string('title')->nullable()->comment('Mr,Mrs,Doc,Atty');
             $table->string('gender', 20)->nullable();
             $table->date('birthdate')->nullable();
             $table->string('religion')->nullable();

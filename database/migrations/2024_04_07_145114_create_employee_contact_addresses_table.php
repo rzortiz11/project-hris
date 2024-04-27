@@ -14,15 +14,16 @@ return new class extends Migration
         Schema::create('employee_contact_addresses', function (Blueprint $table) {
             $table->id('employee_contact_address_id');
             $table->unsignedBigInteger('employee_id');
-            $table->unsignedBigInteger('region_id');
-            $table->unsignedBigInteger('city_id');
-            $table->unsignedBigInteger('district_id');
-            $table->unsignedBigInteger('barangay_id');
+            $table->unsignedBigInteger('region_id')->nullable();
+            $table->unsignedBigInteger('city_id')->nullable();
+            $table->unsignedBigInteger('district_id')->nullable();
+            $table->unsignedBigInteger('barangay_id')->nullable();
             $table->string('landmark')->nullable();
             $table->string('unit_no')->nullable();
             $table->string('bldg_floor')->nullable();
             $table->string('street')->nullable();
             $table->string('subdivision')->nullable();
+            $table->enum('type',['TEMPORARY','PERMANENT'])->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

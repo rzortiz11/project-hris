@@ -5,19 +5,43 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Filament\Resources\EmployeeResource\RelationManagers;
 use App\Models\Employee;
+use App\Models\User;
+use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Split;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Support\Enums\IconPosition;
+use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Tabs\Tab;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Support\Enums\Alignment;
+use Filament\Support\Enums\VerticalAlignment;
 
 class EmployeeResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-user-group';
 
     protected static ?string $navigationGroup = 'System Administration';
 
@@ -25,9 +49,104 @@ class EmployeeResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // $products = Product::get();
+
         return $form
             ->schema([
-                //
+                Grid::make([
+                    'default' => 1])
+                ->schema([
+                    Split::make([
+                        Grid::make([
+                            'default' => 1
+                        ])
+                        ->schema([
+                           Tabs::make()
+                            ->tabs([
+                               Tab::make('Basic Details')
+                                    ->schema([
+                                        static::basicDetailGrid()
+                                    ])->columns(2),
+                               Tab::make('Contact Details')
+                                    ->schema([
+                                        static::contactAddressDetailSection(),
+                                        static::contactDetailSection(),
+                                        static::contactEmergencyPersonSection(),                   
+                                    ]),     
+                               Tab::make('Work Details')
+                                    ->schema([
+                                        static::employementDetailSection(),  
+                                        static::employementPositionSection(),  
+                                    ]),    
+                               Tab::make('Salary Details')                                
+                                    ->schema([
+                                        static::salaryDetailSection(),  
+                                        static::payComponentSection(),                                    
+                                    ]),  
+                               Tab::make('Family/Dependent Details')                                
+                                ->schema([
+                                    // ...
+                                ]),                                                                                                                                                        
+                               Tab::make('Education Details')
+                                    ->schema([
+                                        // ...
+                                    ]),
+                               Tab::make('Training Details')
+                                ->schema([
+                                    // ...
+                                ]),
+                               Tab::make('Document Details')
+                                    ->schema([
+                                        // ...
+                                    ]),                                      
+                            ])
+                            ->persistTabInQueryString()
+                        ]),
+                        Grid::make([
+                            'default' => 1
+                        ])
+                        ->schema([
+                            Section::make('')
+                            ->schema([
+                                FileUpload::make('picture')->label('')
+                                ->disk('public')
+                                ->visibility('private')
+                                ->directory('employe/picture')
+                                ->avatar()
+                                ->imageEditor()
+                                ->imageEditorAspectRatios([
+                                    '16:9',
+                                    '4:3',
+                                    '1:1',
+                                ]),
+                                Placeholder::make('Employee Name')->label('')
+                                ->content(fn (Employee $record): ?string => $record ? $record->user->name : "")
+                                ->extraAttributes(['class' => 'text-xs']),
+                                Placeholder::make('Position')->label('')                                
+                                ->content(fn (Employee $record): ?string => isset($record->position) ? $record->position->job_position : "N/A")
+                                ->extraAttributes(['class' => 'text-xs']),
+                                Placeholder::make('Employee Number')->label('')
+                                ->content(fn (Employee $record): ?string => $record ? $record->employee_reference : "")
+                                ->extraAttributes(['class' => 'text-xs']),
+                            ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
+                            ->columns(1),
+                            Fieldset::make('Profile Completion')
+                            ->schema([
+                                Placeholder::make('')->content("0%"),
+                                Placeholder::make('')->content("OVERALL PROFILE COMPLETION")->extraAttributes(['class' => 'text-xs']),
+                            ])
+                            ->extraAttributes(['class' => 'text-center'])
+                            ->columns(1),
+                        ])
+                        ->extraAttributes(['class' => 'bg-gray-600'])
+                        ->columns(1)
+                        ->grow(false),
+                        // Section::make()->schema([]),
+                        // Section::make()->schema([])
+                        // ->columns(1)
+                        // ->grow(false),
+                    ])->from('lg')
+                ])
             ]);
     }
 
@@ -35,7 +154,23 @@ class EmployeeResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('employee_id')->label('ID'),
+                Tables\Columns\TextColumn::make('employee_reference')->searchable(),
+                Tables\Columns\TextColumn::make('user.name')->label('User')->searchable(['first_name','last_name']),
+                Tables\Columns\TextColumn::make('active')->badge()
+                ->color(fn (string $state): string => match($state) {
+                    'active' => 'success',
+                    'inactive' => 'danger',
+                })
+                ->getStateUsing(function (Employee $record): string {
+                    return $record->is_active ? 'active': 'inactive';
+                }),
+                Tables\Columns\TextColumn::make('created_at')->label('Created Date and Time')               
+                ->getStateUsing(function (Employee $employee): string {
+
+                    $created_at = Carbon::parse($employee->created_at);
+                    return $created_at->format('Y-m-d H:i:s');
+                })->searchable()                    
             ])
             ->filters([
                 //
@@ -45,7 +180,7 @@ class EmployeeResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()->requiresConfirmation(),
                 ]),
             ]);
     }
@@ -61,8 +196,563 @@ class EmployeeResource extends Resource
     {
         return [
             'index' => Pages\ListEmployees::route('/'),
-            'create' => Pages\CreateEmployee::route('/create'),
+            // 'create' => Pages\CreateEmployee::route('/create'),
             'edit' => Pages\EditEmployee::route('/{record}/edit'),
         ];
+    }
+
+    public static function basicDetailGrid(): Grid
+    {
+        return Grid::make([
+            'default' => 1
+        ])->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            ->relationship('user')
+            ->schema([
+                TextInput::make('first_name')->required(),
+                TextInput::make('last_name')->required(),
+                TextInput::make('middle_name'),
+                TextInput::make('suffix'),
+            ])->columns(4),
+            Grid::make([
+                'default' => 1
+            ])
+            ->relationship('user')
+            ->schema([
+                TextInput::make('mobile')
+                ->suffixIcon('heroicon-o-device-phone-mobile')
+                ->unique(ignoreRecord: true)
+                ->required(),
+                TextInput::make('email')
+                ->email()
+                ->suffixIcon('heroicon-o-envelope')
+                ->default('')
+                ->unique(ignoreRecord: true)
+                ->placeholder('morepower.ph')
+                ->readonly()
+                ->required(),
+            ])->columns(2),
+            TextInput::make('title'),
+            DatePicker::make('birthdate')
+            ->suffixIcon('heroicon-o-calendar-days')
+            ->maxDate(now()),
+            TextInput::make('religion'),
+            TextInput::make('nationality'),
+            TextInput::make('gender'),
+            Placeholder::make('employee_reference')
+            ->content(fn (Employee $record): ?string => $record ? $record->employee_reference : ""),
+        ])->columns(2);
+    }
+
+    public static function contactAddressDetailSection(): Section 
+    {
+        return Section::make('ADDRESS DETAILS')
+        ->description('Employee Address Information')
+        ->icon('heroicon-s-home-modern')
+        ->schema([
+            Repeater::make('addresses')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    TextInput::make('street'),
+                    TextInput::make('landmark'),  
+                ])->columns(2),                                                
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    TextInput::make('unit_no'),   
+                    TextInput::make('bldg_floor'),   
+                    TextInput::make('subdivision'),
+                ])->columns(3),
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    Select::make('region_id')->label('Region'),
+                    Select::make('city_id')->label('City'),
+                    Select::make('district_id')->label('District/Municipality'),
+                    Select::make('barangay_id')->label('Barangay'),   
+                ])->columns(2)
+            ])
+            ->itemLabel(function (array $state): ?string {
+                if ($state['type'] == 'TEMPORARY') {
+                    return 'TEMPORARY ADDRESS';
+                } elseif ($state['type'] == 'PERMANENT') {
+                    return 'PERMANENT ADDRESS';
+                }
+                return null;
+            })
+            ->reorderable(false)
+            ->deletable(false)
+            ->addable(false)
+            ->columns(1)
+            ->grid(2)
+        ])
+        ->collapsed(false);
+    }
+
+    public static function contactDetailSection(): Section 
+    {
+        return  Section::make('CONTACT INFORMATION')
+        ->description('Employee Contact Information')
+        ->icon('heroicon-s-device-phone-mobile')
+        ->schema([
+            Placeholder::make('mobile')
+            ->content(fn (Employee $record): ?string => $record ? $record->user->mobile : ""),
+            Placeholder::make('email')
+            ->content(fn (Employee $record): ?string => $record ? $record->user->email : ""),
+            Grid::make([
+                'default' => 1
+            ])
+            ->relationship('contact')
+            ->schema([
+                TextInput::make('secondary_mobile')
+                ->suffixIcon('heroicon-o-device-phone-mobile'),
+                TextInput::make('secondary_email')
+                ->suffixIcon('heroicon-o-envelope')
+                ->default('')
+                ->email()
+                ->placeholder('personal-email'),
+                TextInput::make('telephone')
+                ->suffixIcon('heroicon-o-phone'), 
+                TextInput::make('secondary_telephone')
+                ->suffixIcon('heroicon-o-phone'),                                               
+                TextInput::make('facebook_profile'),   
+                TextInput::make('linkedIn_profile')                                 
+         
+            ])->columns(2),
+        ])
+        ->collapsed(false)
+        ->columns(2);
+    }
+
+    public static function contactEmergencyPersonSection(): Section 
+    {
+        return Section::make('EMERGENCY CONTACT PERSON INFORMATION')
+        ->icon('heroicon-m-phone-arrow-down-left')
+        ->description('Employee Emergency Contact Persons')
+        ->schema([
+            Repeater::make('emergency_contacts')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    TextInput::make('name')->label('Full Name'),
+                    Select::make('relationship')->label('Relationship to the employee'),   
+                    TextInput::make('mobile'),
+                    TextInput::make('telephone'),
+                    TextInput::make('email'),
+                    TextInput::make('address'),
+                ])->columns(2)
+            ])
+            ->itemLabel(function (array $state): ?string {
+                if ($state['name']) {
+                    return strtoupper('* INCASE OF EMERGENCY CONTACT - '. $state['name']).' *';
+                } 
+                return null;
+            })
+            ->reorderable(false)
+            ->columns(1)
+        ])
+        ->collapsed(false)
+        ->columns(1);                     
+    }
+
+    public static function employementDetailSection(): Section
+    {
+        return Section::make('EMPLOYEMENT DETAILS')
+        ->description('Employee Employement Information')
+        ->icon('heroicon-m-briefcase')
+        ->schema([
+            Split::make([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->relationship('employment')
+                ->schema([
+                    Grid::make([
+                        'default' => 1
+                    ])
+                    ->schema([
+                        Select::make('employment_type')->options([
+                            'PROBATION' => 'Probation',
+                            'REGULAR' => 'Regular'
+                        ])
+                        ->required()
+                        ->preload(),
+                        Select::make('employment_category')->options([
+                            'PARTTIME' => 'Part-time',
+                            'FULLTIME' => 'Full-time',
+                            'THIRDPARTY' => 'Third-Party'
+                        ])
+                        ->required()
+                        ->preload(),
+                        Select::make('employment_status')->options([
+                            'EMPLOYED' => 'Employed',
+                            'TERMINATED' => 'Terminated',
+                            'RESIGNED' => 'Resigned',
+                            'OTHERS' => "Other's"
+                        ])
+                        ->required()
+                        ->preload(),
+                        Select::make('work_arrangement')->options([
+                            'ONSITE' => 'On-site',
+                            'WFH' => 'Work from home',
+                            'HYBRID' => 'Hybrid'
+                        ])
+                        ->required()
+                        ->preload(),
+                    ])->columns(4),
+                    TextInput::make('shift_schedule'),
+                    Select::make('payment_structure')
+                    ->options([
+                        'COMPANY' => 'Company',
+                    ])
+                    ->required()
+                    ->searchable(),                                                    
+                    Select::make('payroll_cycle')->options([
+                        'BI-MONTHLY' => 'Bi-montly',
+                        'MONTHLY' => 'Monthly'
+                    ])->preload()
+                    ->required(),
+                    DatePicker::make('employement_date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                    ->required(),
+                    DatePicker::make('probation_end_date')
+                    ->suffixIcon('heroicon-o-calendar-days'),
+                    DatePicker::make('termination_date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                ])->columns(3),
+                Grid::make([
+                    'default' => 1
+                ])
+                ->relationship('employment')
+                ->schema([
+                    Radio::make('overtime_entitlement')
+                    ->label('Entitled for Overtime')
+                    ->boolean()
+                    ->inline()
+                    ->inlineLabel(false),
+                ])
+                ->columns(1)
+                ->grow(false),
+            ])
+            ->from('lg')
+        ]);
+    }
+
+    public static function employementPositionSection(): Section
+    {
+        return Section::make('POSITION DETAILS')
+        ->description('Employee Position Information')
+        ->icon('heroicon-s-flag')
+        ->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            ->relationship('position')
+            ->schema([
+                Select::make('job_position')->label('Position')
+                ->options([
+                    'BACKEND' => 'Back-end Developer',
+                    'FRONTEND' => 'Front-end Developer',
+                    'FULLSTACK' => 'Full-stack Developer'
+                ])
+                ->required()
+                ->searchable(),
+                Select::make('job_category')
+                ->options([
+                    'SPECIALIST' => 'Specialist',
+                ])
+                ->required()
+                ->searchable(),
+                // Select::make('joined_designation'),
+                Select::make('reporting_person')->label('Reporting To')
+                ->required()
+                ->options(User::all()->pluck('name','user_id')->map(function ($name) {
+                    return ucwords(strtolower($name));
+                })->toArray())
+                ->searchable()
+                ->preload(),
+                Select::make('reporting_designation')->label('Reporting Designation/Department')
+                ->options([
+                    'ITDEPARTMENT' => 'IT Deparment',
+                    'FINANCE' => 'Finance Department',
+                    'HUMANRESOURCE' => 'Human Resource Department'
+                ])
+                ->preload()
+                ->required()
+                ->searchable(),
+                Select::make('location')->label('Location/Office')->options([
+                    'ILOILO' => 'Iloilo Main Office',
+                    'BACOLOD' => 'Bacolod Main Office',
+                    'BOHOL' => 'Bohol Main Office'
+                ])
+                ->required()
+                ->searchable(),
+                Textarea::make('job_description')->columnSpanFull()
+            ])->columns(3),
+        ]);
+    }
+
+    public static function salaryDetailSection() : Section
+    {
+        return Section::make(function (Employee $employee) {
+            return 'SALARY DETAILS : '. strtoupper($employee->user->fullname) ?? 'SALARY DETAILS';
+        })
+        ->description()
+        ->icon('heroicon-s-banknotes')
+        ->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Placeholder::make('fullname')->label('Employee Name')
+                ->content(fn (Employee $record): ?string => isset($record->user->fullname) ? $record->user->fullname : ""),
+                Placeholder::make('category')->label('Category')
+                ->content(fn (Employee $record): ?string => isset($record->position->job_category) ? $record->position->job_category : ""),
+                Placeholder::make('job_position')->label('Job Position')
+                ->content(fn (Employee $record): ?string => isset($record->position->job_position) ? $record->position->job_position : ""),
+                Placeholder::make('payroll_cycle')->label('Payroll Cycle')
+                ->content(fn (Employee $record): ?string => isset($record->employment->payroll_cycle) ? $record->employment->payroll_cycle : ""),
+                Placeholder::make('payment_structure')->label('Payment Structure')
+                ->content(fn (Employee $record): ?string => isset($record->employment->payment_structure) ? $record->employment->payment_structure : ""),
+                Placeholder::make('employement_date')->label('Effective Date From')
+                ->content(fn (Employee $record): ?string => isset($record->employment->employement_date) ? $record->employment->employement_date : ""),
+                Grid::make([
+                    'default' => 1
+                ])
+            ])->columns(6),
+        ]);
+    }
+
+    public static function payComponentSection(): Section
+    {
+        return Section::make('Pay Component')
+        ->schema([
+            Tabs::make('Tabs')
+            ->tabs([
+               Tab::make('View')
+                    ->schema([
+                        static::viewSalaryRepeater(),
+                    ]),
+               Tab::make('Add/Modify')
+                    ->schema([
+                        static::getAddSalaryRepeater(),
+                    ]),
+               Tab::make('History')
+                    ->schema([
+
+                    ]),
+            ])->contained(false),
+        ]);     
+    }
+
+    public static function viewSalaryRepeater(): Grid
+    {
+        return 
+        Grid::make([
+            'default' => 1
+        ])
+        ->schema([
+            // Add salary Header
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Placeholder::make('')->content('Guaranteed'),
+                Placeholder::make('')->content('Monthly'),
+                Placeholder::make('')->content('Yearly'),
+            ])->columns(3),
+
+            // View Salary Body
+            Repeater::make('salaryView')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Select::make('type')->label('Type')
+                ->options([
+                    'BASIC-SALARY' => 'Basic Salary',
+                    'DE-MINIMIS' => 'De Minimis Allowance',
+                    'MEDICAL' => 'Medical Allowance',
+                    'CLOTHING' => 'Clothing Allowance',
+                    'TRANSPORATION' => 'Transportation Allowance',
+                    '13-MONTH' => '13th Month Pay',
+                    '14-MONTH' => '14th Month Pay',
+                ])
+                ->preload(),
+                TextInput::make('monthly_amount')
+                ->disabled(),
+                TextInput::make('yearly_amount')
+                ->disabled(),
+            ])
+            ->disabled()
+            ->addable(false)
+            ->deletable(false)
+            ->columns(3),
+
+            // View salary Footer
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Placeholder::make('')->content(''),
+                TextInput::make('total_month_guaranteed')
+                ->label('Guaranteed Total Montly')
+                ->numeric()
+                ->disabled()
+                ->prefix('₱')
+                // This enables us to display the total month on the edit page load
+                ->afterStateHydrated(function (Get $get, Set $set) {
+                    self::viewTotals($get, $set);
+                }),
+                TextInput::make('total_year_guaranteed')
+                ->label('Guaranteed Total Yearly')
+                ->numeric()
+                ->disabled()
+                ->prefix('₱')
+                // This enables us to display the total yearly on the edit page load
+                ->afterStateHydrated(function (Get $get, Set $set) {
+                    self::viewTotals($get, $set);
+                }),
+            ])->columns(3),
+        ]);
+
+    }
+
+    public static function getAddSalaryRepeater(): Grid
+    {
+        $salary = Grid::make([
+            'default' => 1
+        ])
+        ->schema([
+            // Add salary Header
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Placeholder::make('')->content('Guaranteed'),
+                Placeholder::make('')->content('Monthly'),
+                Placeholder::make('')->content('Yearly'),
+            ])->columns(3),
+
+            // Add salary Body repeater
+            Repeater::make('salary')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Select::make('type')->label('Pay Type')
+                ->options([
+                    'BASIC-SALARY' => 'Basic Salary',
+                    'DE-MINIMIS' => 'De Minimis Allowance',
+                    'MEDICAL' => 'Medical Allowance',
+                    'CLOTHING' => 'Clothing Allowance',
+                    'TRANSPORATION' => 'Transportation Allowance',
+                    '13-MONTH' => '13th Month Pay',
+                    '14-MONTH' => '14th Month Pay',
+                ])
+                ->preload()
+                ->required()
+                ->searchable(),
+                TextInput::make('monthly_amount')
+                ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+
+                    if ($old !== $state) {
+                        $yearly = $get('monthly_amount') ? $get('monthly_amount') * 12 : 0;
+                        $set('yearly_amount', $yearly);
+                    }
+                })
+                ->live(debounce: 1000)
+                ->prefix('₱')
+                ->numeric()
+                ->required()
+                ->placeholder(0),
+                TextInput::make('yearly_amount')
+                ->prefix('₱')
+                ->readOnly()
+                ->numeric()
+                ->placeholder(0),
+            ])
+            ->live()
+            ->afterStateUpdated(function (Get $get, Set $set){
+                self::updateTotals($get, $set);
+            })
+            ->addActionLabel('Add Pay Component')
+            ->deleteAction(
+                fn (Action $action) => $action->requiresConfirmation(),
+            )
+            ->columns(3),
+
+            // Add salary Footer
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Placeholder::make('')->content(''),
+                TextInput::make('total_month_guaranteed')
+                ->label('Guaranteed Total Montly')
+                ->numeric()
+                ->disabled()
+                ->prefix('₱')
+                // This enables us to display the total month on the edit page load
+                ->afterStateHydrated(function (Get $get, Set $set) {
+                    self::updateTotals($get, $set);
+                }),
+                TextInput::make('total_year_guaranteed')
+                ->label('Guaranteed Total Yearly')
+                ->numeric()
+                ->disabled()
+                ->prefix('₱')
+                // This enables us to display the total yearly on the edit page load
+                ->afterStateHydrated(function (Get $get, Set $set) {
+                    self::updateTotals($get, $set);
+                }),
+            ])->columns(3),
+        ]);
+
+        return $salary;
+    }
+
+    // This function updates totals based on the selected products and quantities
+    public static function updateTotals(Get $get, Set $set): void
+    {
+        // Retrieve all selected Salary and remove empty rows
+        $selectedSalary = collect($get('salary'))->filter(function ($item) {
+            return !empty($item['monthly_amount']) && !empty($item['yearly_amount']);
+        });
+        
+        // Sum up all the total_month_guaranteed and total_year_guaranteed values
+        $totalMonthGuaranteed = $selectedSalary->sum('monthly_amount');
+        $totalYearGuaranteed = $selectedSalary->sum('yearly_amount');
+        
+        // Update the state with the new values
+        $set('total_month_guaranteed', $totalMonthGuaranteed);
+        $set('total_year_guaranteed', $totalYearGuaranteed);
+    }
+
+    public static function viewTotals(Get $get, Set $set): void
+    {
+        // Retrieve all selected Salary and remove empty rows
+        $selectedSalary = collect($get('salary'))->filter(function ($item) {
+            return !empty($item['monthly_amount']) && !empty($item['yearly_amount']);
+        });
+        
+        // Sum up all the total_month_guaranteed and total_year_guaranteed values
+        $totalMonthGuaranteed = $selectedSalary->sum('monthly_amount');
+        $totalYearGuaranteed = $selectedSalary->sum('yearly_amount');
+        
+        // Update the state with the new values
+        $set('total_month_guaranteed', $totalMonthGuaranteed);
+        $set('total_year_guaranteed', $totalYearGuaranteed);
     }
 }

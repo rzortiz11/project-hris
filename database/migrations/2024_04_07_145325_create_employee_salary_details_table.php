@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employee_contact_people', function (Blueprint $table) {
-            $table->id('employee_contact_people_id');
+        Schema::create('employee_salary_details', function (Blueprint $table) {
+            $table->id('employee_salary_id');
             $table->unsignedBigInteger('employee_id');
-            $table->string('name');
-            $table->string('relationship')->nullable();
-            $table->string('mobile')->nullable();
-            $table->string('telephone')->nullable();
-            $table->string('email')->nullable();
-            $table->string('address')->nullable();
+            $table->string('type')->comment('basic salary,transportation allowance, de minimis,13 month');
+            // $table->integer('daily_amount')->default(0);
+            $table->decimal('monthly_amount', 10, 2)->default(0.00);
+            $table->decimal('yearly_amount', 10, 2)->default(0.00);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_contact_people');
+        Schema::dropIfExists('employee_salary_details');
     }
 };

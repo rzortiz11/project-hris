@@ -10,7 +10,7 @@ class EmployeePositionDetail extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $primaryKey = 'employee_employment_id';
+    protected $primaryKey = 'employee_position_id';
     
-    protected $fillable = ['employee_id','job_category','job_description','designation','joined_designation','reporting_person', 'reporting_designation', 'location'];
+    protected $fillable = ['employee_id','job_position','job_category','job_description','joined_designation','reporting_person', 'reporting_designation', 'location'];
 }

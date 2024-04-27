@@ -12,5 +12,5 @@ class EmployeeContactAddress extends Model
 
     protected $primaryKey = 'employee_contact_address_id';
     
-    protected $fillable = ['employee_id','region_id','city_id','district_id','barangay_id','landmark', 'unit_no', 'bldg_floor','street', 'subdivision'];
+    protected $fillable = ['employee_id','region_id','city_id','district_id','barangay_id','landmark', 'unit_no', 'bldg_floor','street', 'subdivision','type'];
 }
