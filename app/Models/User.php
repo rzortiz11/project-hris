@@ -10,10 +10,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements FilamentUser, HasName
 {
+    // use HasFactory, Notifiable, HasRoles, SoftDeletes; 
     use HasFactory, Notifiable, HasRoles; 
 
     protected $primaryKey = 'user_id';
@@ -26,6 +29,8 @@ class User extends Authenticatable implements FilamentUser, HasName
         'first_name',
         'last_name',
         'middle_name',
+        'suffix',
+        'mobile',
         'email',
         'password',
     ];
@@ -52,6 +57,12 @@ class User extends Authenticatable implements FilamentUser, HasName
         return $this->first_name . ' ' . $this->last_name;
     }
 
+    /** Modify name attribute  */
+    public function getFullnameAttribute()
+    {
+        return $this->first_name . ' '. $this->middle_name .' ' . $this->last_name;
+    }
+
     /** Set allowed user to access panel */
     public function canAccessPanel(Panel $panel): bool
     {
@@ -70,5 +81,10 @@ class User extends Authenticatable implements FilamentUser, HasName
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function employee(): HasOne
+    {
+        return $this->hasOne(Employee::class, 'user_id', 'user_id');
     }
 }

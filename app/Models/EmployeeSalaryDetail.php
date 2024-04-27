@@ -12,5 +12,5 @@ class EmployeeSalaryDetail extends Model
 
     protected $primaryKey = 'employee_salary_id';
     
-    protected $fillable = ['employee_id','type','basic_amount','montly_amount','yearly_amount'];
+    protected $fillable = ['employee_id','type','monthly_amount','yearly_amount'];
 }

@@ -12,5 +12,5 @@ class EmployeeEmploymentDetail extends Model
 
     protected $primaryKey = 'employee_employment_id';
     
-    protected $fillable = ['employee_id','employment_type','shift_schedule','status','overtime_entitlement','employement_date', 'probation_end_date', 'employment_status','payroll_cycle','paymet_structure', 'termination_date'];
+    protected $fillable = ['employee_id','employment_type','employment_category','shift_schedule', 'overtime_entitlement','employement_date', 'probation_end_date', 'employment_status','payroll_cycle','payment_structure','work_arrangement', 'termination_date'];
 }
