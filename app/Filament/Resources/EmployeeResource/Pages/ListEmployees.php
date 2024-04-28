@@ -23,6 +23,7 @@ class ListEmployees extends ListRecords
             'Regular' => Tab::make(),
             'Employed' => Tab::make(),
             'Terminated' => Tab::make(),
+            'Resigned' => Tab::make(),
             'Others' => Tab::make(),
         ];
     }
@@ -85,6 +86,16 @@ class ListEmployees extends ListRecords
                         'type' => $type,
                     ]);
                 }
+
+                // Create Father, Mother, Spouse default type
+                $family = ['FATHER','MOTHER','SPOUSE'];
+
+                foreach($family as $type ){
+                    $employee->family()->create([
+                        'relationship' => $type,
+                    ]);
+                }
+
                 // //delete for continue using
                 // $result = $user->delete();
                 // dd($result);

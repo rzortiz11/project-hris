@@ -37,7 +37,7 @@ class Employee extends Model
         return $this->hasMany(EmployeeContactAddress::class, 'employee_id', 'employee_id');
     }
 
-    public function emergency_contacts(): HasMany
+    public function emergencyContacts(): HasMany
     {
         return $this->hasMany(EmployeeContactPerson::class, 'employee_id', 'employee_id');
     }
@@ -60,5 +60,29 @@ class Employee extends Model
     public function salaryView(): HasMany
     {
         return $this->hasMany(EmployeeSalaryDetail::class, 'employee_id', 'employee_id');
+    }
+
+    public function family(): HasMany {
+        return $this->hasMany(EmployeeFamilyDetail::class, 'employee_id', 'employee_id');
+    }
+
+    public function employeeFather(): HasOne {
+        return $this->hasOne(EmployeeFamilyDetail::class, 'employee_id', 'employee_id')
+            ->where('relationship', 'FATHER');
+    }
+
+    public function employeeMother(): HasOne {
+        return $this->hasOne(EmployeeFamilyDetail::class, 'employee_id', 'employee_id')
+            ->where('relationship', 'MOTHER');
+    }
+
+    public function employeeSpouse(): HasOne {
+        return $this->hasOne(EmployeeFamilyDetail::class, 'employee_id', 'employee_id')
+            ->where('relationship', 'SPOUSE');
+    }
+
+    public function employeeChildren(): HasMany{
+        return $this->hasMany(EmployeeFamilyDetail::class, 'employee_id', 'employee_id')
+            ->where('relationship', 'CHILD');
     }
 }
