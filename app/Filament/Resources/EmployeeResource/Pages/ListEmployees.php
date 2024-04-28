@@ -6,6 +6,7 @@ use App\Filament\Resources\EmployeeResource;
 use App\Models\User;
 use Filament\Actions;
 use Filament\Forms\Components\Section;
+use Filament\Resources\Components\Tab;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -13,6 +14,19 @@ use Filament\Resources\Pages\ListRecords;
 class ListEmployees extends ListRecords
 {
     protected static string $resource = EmployeeResource::class;
+
+    public function getTabs(): array
+    {
+        return [
+            'All' => Tab::make(),
+            'Probation' => Tab::make(),
+            'Regular' => Tab::make(),
+            'Employed' => Tab::make(),
+            'Terminated' => Tab::make(),
+            'Resigned' => Tab::make(),
+            'Others' => Tab::make(),
+        ];
+    }
 
     protected function getHeaderActions(): array
     {
@@ -72,6 +86,16 @@ class ListEmployees extends ListRecords
                         'type' => $type,
                     ]);
                 }
+
+                // Create Father, Mother, Spouse default type
+                $family = ['FATHER','MOTHER','SPOUSE'];
+
+                foreach($family as $type ){
+                    $employee->family()->create([
+                        'relationship' => $type,
+                    ]);
+                }
+
                 // //delete for continue using
                 // $result = $user->delete();
                 // dd($result);

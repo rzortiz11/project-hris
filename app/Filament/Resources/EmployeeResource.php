@@ -65,29 +65,36 @@ class EmployeeResource extends Resource
                             ->tabs([
                                Tab::make('Basic Details')
                                     ->schema([
-                                        static::basicDetailGrid()
+                                        static::PersonalInformation()
                                     ])->columns(2),
                                Tab::make('Contact Details')
                                     ->schema([
-                                        static::contactAddressDetailSection(),
-                                        static::contactDetailSection(),
-                                        static::contactEmergencyPersonSection(),                   
+                                        static::contactAddressInformation(),
+                                        static::contactInformation(),
+                                        static::emergencyContactPersonInformation(),                   
                                     ]),     
                                Tab::make('Work Details')
                                     ->schema([
-                                        static::employementDetailSection(),  
-                                        static::employementPositionSection(),  
+                                        static::employementInformation(),  
+                                        static::employementPositionInformation(),  
                                     ]),    
                                Tab::make('Salary Details')                                
                                     ->schema([
-                                        static::salaryDetailSection(),  
-                                        static::payComponentSection(),                                    
+                                        static::salaryInformation(),  
+                                        static::payComponent(),                                    
                                     ]),  
-                               Tab::make('Family/Dependent Details')                                
+                               Tab::make('Family Details')                                
+                                    ->schema([
+                                        static::parentInformartion(),
+                                        static::spouseInformation(),
+                                        static::childrenInformation(),
+                                        // static::dependentInformation(),
+                                    ]),           
+                                Tab::make('Dependent & Health Benefit Details')
                                 ->schema([
                                     // ...
-                                ]),                                                                                                                                                        
-                               Tab::make('Education Details')
+                                ]),                                                                                                                                                                                 
+                               Tab::make('Education & Work History Details')
                                     ->schema([
                                         // ...
                                     ]),
@@ -201,11 +208,12 @@ class EmployeeResource extends Resource
         ];
     }
 
-    public static function basicDetailGrid(): Grid
+    public static function PersonalInformation(): Section
     {
-        return Grid::make([
-            'default' => 1
-        ])->schema([
+        return Section::make('PERSONAL INFORTMATION')
+        ->description('Employee Personal Details')
+        ->icon('heroicon-s-user-circle')
+        ->schema([
             Grid::make([
                 'default' => 1
             ])
@@ -235,9 +243,16 @@ class EmployeeResource extends Resource
                 ->required(),
             ])->columns(2),
             TextInput::make('title'),
-            DatePicker::make('birthdate')
-            ->suffixIcon('heroicon-o-calendar-days')
-            ->maxDate(now()),
+            Split::make([
+                DatePicker::make('birthdate')
+                ->label('Date of Birth')
+                ->suffixIcon('heroicon-o-calendar-days')
+                ->maxDate(now()),
+                Placeholder::make('age')->label("Age")
+                ->content(function ($record) {
+                    return static::getAge(isset($record->birthdate) ? $record->birthdate : "");
+                }),
+            ])->from('lg'),
             TextInput::make('religion'),
             TextInput::make('nationality'),
             TextInput::make('gender'),
@@ -246,10 +261,10 @@ class EmployeeResource extends Resource
         ])->columns(2);
     }
 
-    public static function contactAddressDetailSection(): Section 
+    public static function contactAddressInformation(): Section 
     {
-        return Section::make('ADDRESS DETAILS')
-        ->description('Employee Address Information')
+        return Section::make('ADDRESS INFORTMATION')
+        ->description('Employee Address Details')
         ->icon('heroicon-s-home-modern')
         ->schema([
             Repeater::make('addresses')
@@ -298,7 +313,7 @@ class EmployeeResource extends Resource
         ->collapsed(false);
     }
 
-    public static function contactDetailSection(): Section 
+    public static function contactInformation(): Section 
     {
         return  Section::make('CONTACT INFORMATION')
         ->description('Employee Contact Information')
@@ -333,13 +348,13 @@ class EmployeeResource extends Resource
         ->columns(2);
     }
 
-    public static function contactEmergencyPersonSection(): Section 
+    public static function emergencyContactPersonInformation(): Section 
     {
         return Section::make('EMERGENCY CONTACT PERSON INFORMATION')
-        ->icon('heroicon-m-phone-arrow-down-left')
+        ->icon('heroicon-s-phone-arrow-down-left')
         ->description('Employee Emergency Contact Persons')
         ->schema([
-            Repeater::make('emergency_contacts')
+            Repeater::make('emergencyContacts')
             ->label('')
             ->relationship()
             ->schema([
@@ -361,6 +376,9 @@ class EmployeeResource extends Resource
                 } 
                 return null;
             })
+            ->deleteAction(
+                fn (Action $action) => $action->requiresConfirmation(),
+            )
             ->reorderable(false)
             ->columns(1)
         ])
@@ -368,11 +386,11 @@ class EmployeeResource extends Resource
         ->columns(1);                     
     }
 
-    public static function employementDetailSection(): Section
+    public static function employementInformation(): Section
     {
-        return Section::make('EMPLOYEMENT DETAILS')
+        return Section::make('EMPLOYMENT DETAILS')
         ->description('Employee Employement Information')
-        ->icon('heroicon-m-briefcase')
+        ->icon('heroicon-s-briefcase')
         ->schema([
             Split::make([
                 Grid::make([
@@ -451,7 +469,7 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function employementPositionSection(): Section
+    public static function employementPositionInformation(): Section
     {
         return Section::make('POSITION DETAILS')
         ->description('Employee Position Information')
@@ -505,7 +523,7 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function salaryDetailSection() : Section
+    public static function salaryInformation() : Section
     {
         return Section::make(function (Employee $employee) {
             return 'SALARY DETAILS : '. strtoupper($employee->user->fullname) ?? 'SALARY DETAILS';
@@ -536,7 +554,7 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function payComponentSection(): Section
+    public static function payComponent(): Section
     {
         return Section::make('Pay Component')
         ->schema([
@@ -723,7 +741,6 @@ class EmployeeResource extends Resource
         return $salary;
     }
 
-    // This function updates totals based on the selected products and quantities
     public static function updateTotals(Get $get, Set $set): void
     {
         // Retrieve all selected Salary and remove empty rows
@@ -742,17 +759,302 @@ class EmployeeResource extends Resource
 
     public static function viewTotals(Get $get, Set $set): void
     {
-        // Retrieve all selected Salary and remove empty rows
         $selectedSalary = collect($get('salary'))->filter(function ($item) {
             return !empty($item['monthly_amount']) && !empty($item['yearly_amount']);
         });
         
-        // Sum up all the total_month_guaranteed and total_year_guaranteed values
         $totalMonthGuaranteed = $selectedSalary->sum('monthly_amount');
         $totalYearGuaranteed = $selectedSalary->sum('yearly_amount');
         
-        // Update the state with the new values
         $set('total_month_guaranteed', $totalMonthGuaranteed);
         $set('total_year_guaranteed', $totalYearGuaranteed);
+    }
+
+    public static function parentInformartion() : Section 
+    {
+        return Section::make('Family Information')
+        ->description('Employee Family Details')
+        ->icon('heroicon-s-users')
+        ->schema([
+            Section::make("FATHER'S DETAILS")
+            ->relationship('employeeFather')
+            ->schema([
+                static::parentFieldInformation()
+            ]),
+
+            Section::make("MOTHER'S DETAILS")
+            ->relationship('employeeMother')
+            ->schema([
+                static::parentFieldInformation()
+            ]),
+        ])->collapsed(false);
+    }
+
+    public static function parentFieldInformation() : Split 
+    {
+        return Split::make([
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                TextInput::make('name')->label('Full Name'),
+                TextInput::make('occupation'),
+                TextInput::make('employer'),
+            ])->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                DatePicker::make('birthdate')->label('Date of Birth')
+                ->suffixIcon('heroicon-o-calendar-days')
+                ->maxDate(now()),
+                TextInput::make('mobile')
+                ->suffixIcon('heroicon-o-device-phone-mobile'),
+                TextInput::make('address'),
+            ])
+            ->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Placeholder::make('age')->label("Age")
+                ->content(function ($record) {
+                    return static::getAge(isset($record->birthdate) ? $record->birthdate : "");
+                })
+            ])
+            ->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Toggle::make('is_alive')
+                ->label('is Alive?')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),
+                Toggle::make('is_medical_entitled')
+                ->label('is Covered by medical scheme?')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),
+                Toggle::make('is_disabled')
+                ->label('is Disabled')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),
+                Toggle::make('is_dependent')
+                ->label('is Dependent? (Field disabled*)')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline()
+                ->disabled()                                                        
+            ])
+            ->columns(1)
+        ])->from('lg');
+    }
+
+    public static function spouseInformation() : Section 
+    {
+        return Section::make('Spouse Information')
+        ->description('Employee Spouse Details')
+        ->icon('heroicon-s-user')
+        ->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            ->relationship('employeeSpouse')
+            ->schema([
+                static::spouseInformationFields()
+            ])->columns(1),
+        ])->collapsed(false);
+    }
+
+    public static function spouseInformationFields() : Split 
+    {
+        return Split::make([
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                TextInput::make('name')->label('Full Name'),
+                TextInput::make('occupation'),
+                TextInput::make('employer'),
+            ])->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                DatePicker::make('birthdate')->label('Date of Birth')
+                ->suffixIcon('heroicon-o-calendar-days')
+                ->maxDate(now()),
+                TextInput::make('mobile')
+                ->suffixIcon('heroicon-o-device-phone-mobile'),
+                TextInput::make('address'),
+            ])
+            ->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Placeholder::make('age')->label("Age")
+                ->content(function ($record) {
+                        return static::getAge(isset($record->birthdate) ? $record->birthdate : "");
+                    }),
+                    DatePicker::make('anniversary')->label('Anniversary Date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                    ->maxDate(now()),
+                ])
+            ->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Toggle::make('is_alive')
+                ->label('is Alive?')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),
+                Toggle::make('is_medical_entitled')
+                ->label('is Covered by medical scheme?')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),
+                Toggle::make('is_disabled')
+                ->label('is Disabled')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),
+                Toggle::make('is_dependent')
+                ->label('is Dependent? (Field disabled*)')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline()
+                ->disabled()                                                        
+            ])
+            ->columns(1)
+        ])->from('lg');
+    }
+
+    public static function childrenInformation() : Section 
+    {
+        return Section::make("CHILDREN'S INFORMATION")
+        ->icon('heroicon-s-user-group')
+        ->description("Employee Children's Details")
+        ->schema([
+            Repeater::make('employeeChildren')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    static::childerInformationFields(),
+                ])->columns(1)
+            ])
+            ->itemLabel(function (array $state): ?string {
+                if ($state['name']) {
+                    return strtoupper($state['name']);
+                } 
+                return null;
+            })
+            ->deleteAction(
+                fn (Action $action) => $action->requiresConfirmation(),
+            )
+            ->reorderable(false)
+            ->columns(1)
+        ])
+        ->collapsed(false)
+        ->columns(1);   
+    }
+
+    public static function childerInformationFields() : Split 
+    {
+        return Split::make([
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                TextInput::make('name')->label('Full Name'),
+                TextInput::make('occupation'),
+                TextInput::make('employer'),
+            ])->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                DatePicker::make('birthdate')->label('Date of Birth')
+                ->suffixIcon('heroicon-o-calendar-days')
+                ->maxDate(now()),
+                TextInput::make('mobile')
+                ->suffixIcon('heroicon-o-device-phone-mobile'),
+                TextInput::make('address'),
+            ])
+            ->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Placeholder::make('age')->label("Age")
+                ->content(function ($record) {
+                         return static::getAge(isset($record->birthdate) ? $record->birthdate : "");
+                    }),
+                    TextInput::make('school')->label('School/University'),
+                    TextInput::make('relationship')
+                    ->default('CHILD')
+                    ->readOnly()
+                ])
+            ->columns(1),
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Toggle::make('is_alive')
+                ->label('is Alive?')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->default(1)
+                ->inline(),
+                Toggle::make('is_medical_entitled')
+                ->label('is Covered by medical scheme?')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),
+                Toggle::make('is_disabled')
+                ->label('is Disabled?')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),
+                Toggle::make('is_adopted')
+                ->label('is Adopted?')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline(),              
+                Toggle::make('is_dependent')
+                ->label('is Dependent? (Field disabled*)')
+                ->onIcon('heroicon-s-check')
+                ->offIcon('heroicon-s-x-mark')
+                ->inline()
+                ->disabled()                                           
+            ])
+            ->columns(1)
+        ])->from('lg');
+    }
+
+    public static function getAge($birthdate): ?string
+    {
+        if ($birthdate) {
+            $birthdate = Carbon::parse($birthdate);
+            $ageYears = $birthdate->age;
+            $ageMonths = $birthdate->diff(Carbon::now())->format('%m');
+    
+            if ($ageMonths > 0) {
+                return "$ageYears years and $ageMonths months old";
+            } else {
+                return "$ageYears years old";
+            }
+        } else {
+            return "N/A";
+        }
     }
 }
