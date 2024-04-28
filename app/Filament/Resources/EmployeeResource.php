@@ -90,11 +90,11 @@ class EmployeeResource extends Resource
                                         static::childrenInformation(),
                                         // static::dependentInformation(),
                                     ]),           
-                                Tab::make('Dependent & Health Benefit')
+                                Tab::make('Dependent & Health Benefit Details')
                                 ->schema([
                                     // ...
                                 ]),                                                                                                                                                                                 
-                               Tab::make('Education & Work History')
+                               Tab::make('Education & Work History Details')
                                     ->schema([
                                         // ...
                                     ]),
