@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employee_id_details', function (Blueprint $table) {
-            $table->id('employee_id_detail_id');
+        Schema::create('employee_issued_items', function (Blueprint $table) {
+            $table->id('employee_issued_item_id');
             $table->unsignedBigInteger('employee_id');
-            $table->string('employee_number')->unique();
-            $table->string('sss_number')->nullable();
-            $table->string('pagibig_number')->nullable();
-            $table->string('philhealth_number')->nullable();
-            $table->string('tin_number')->nullable();
+            $table->string('item_type')->nullable();
+            $table->string('item_name')->nullable();
+            $table->string('item_model')->nullable();
+            $table->date('issued_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_id_details');
+        Schema::dropIfExists('employee_issued_items');
     }
 };

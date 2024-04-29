@@ -52,6 +52,10 @@ class Employee extends Model
         return $this->hasOne(EmployeeEmploymentDetail::class, 'employee_id', 'employee_id');
     }
 
+    public function issued_items(): HasMany {
+        return $this->hasMany(EmployeeIssuedItem::class, 'employee_id', 'employee_id');
+    }
+
     public function salary(): HasMany
     {
         return $this->hasMany(EmployeeSalaryDetail::class, 'employee_id', 'employee_id');
@@ -84,5 +88,30 @@ class Employee extends Model
     public function employeeChildren(): HasMany{
         return $this->hasMany(EmployeeFamilyDetail::class, 'employee_id', 'employee_id')
             ->where('relationship', 'CHILD');
+    }
+
+    public function healthBenefits(): HasMany
+    {
+        return $this->hasMany(EmployeeHealthBenefitDetail::class, 'employee_id', 'employee_id');
+    }
+
+    public function dependents(): HasMany {
+        return $this->hasMany(EmployeeDependent::class, 'employee_id', 'employee_id');
+    }
+
+    public function trainings(): HasMany {
+        return $this->hasMany(EmployeeTraining::class, 'employee_id', 'employee_id');
+    }
+
+    public function id_details(): HasOne {
+        return $this->hasOne(EmployeeIdDetail::class, 'employee_id', 'employee_id');
+    }
+
+    public function bank(): HasOne {
+        return $this->hasOne(EmployeeBankDetail::class, 'employee_id', 'employee_id');
+    }
+
+    public function employeeDocuments(): HasMany {
+        return $this->hasMany(EmployeeDocument::class, 'employee_id', 'employee_id');
     }
 }

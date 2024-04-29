@@ -5,6 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Filament\Resources\EmployeeResource\RelationManagers;
 use App\Models\Employee;
+use App\Models\EmployeeDependent;
+use App\Models\EmployeeDocument;
+use App\Models\EmployeeFamilyDetail;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -34,8 +37,10 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\VerticalAlignment;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeResource extends Resource
 {
@@ -77,11 +82,12 @@ class EmployeeResource extends Resource
                                     ->schema([
                                         static::employementInformation(),  
                                         static::employementPositionInformation(),  
+                                        static::issuedItemInformation(),  
                                     ]),    
                                Tab::make('Salary Details')                                
                                     ->schema([
                                         static::salaryInformation(),  
-                                        static::payComponent(),                                    
+                                        static::payComponentInformation(),                                    
                                     ]),  
                                Tab::make('Family Details')                                
                                     ->schema([
@@ -90,21 +96,26 @@ class EmployeeResource extends Resource
                                         static::childrenInformation(),
                                         // static::dependentInformation(),
                                     ]),           
-                                Tab::make('Dependent & Health Benefit Details')
+                                Tab::make('Dependent Details')
                                 ->schema([
-                                    // ...
+                                    static::DependentAndhealthBenefitInformation(),
                                 ]),                                                                                                                                                                                 
-                               Tab::make('Education & Work History Details')
+                               Tab::make('Education Details')
                                     ->schema([
                                         // ...
                                     ]),
                                Tab::make('Training Details')
                                 ->schema([
-                                    // ...
+                                    static::trainingInformation(),  
                                 ]),
+                                Tab::make('ID & Bank Details')
+                                ->schema([
+                                    static::idInformation(),
+                                    static::bankInformation()
+                                ]),                                                                
                                Tab::make('Document Details')
                                     ->schema([
-                                        // ...
+                                        static::documentInformation()
                                     ]),                                      
                             ])
                             ->persistTabInQueryString()
@@ -364,10 +375,14 @@ class EmployeeResource extends Resource
                 ->schema([
                     TextInput::make('name')->label('Full Name'),
                     Select::make('relationship')->label('Relationship to the employee'),   
-                    TextInput::make('mobile'),
-                    TextInput::make('telephone'),
-                    TextInput::make('email'),
-                    TextInput::make('address'),
+                    TextInput::make('mobile')
+                    ->suffixIcon('heroicon-o-phone'),
+                    TextInput::make('telephone')
+                    ->suffixIcon('heroicon-o-phone'),
+                    TextInput::make('email')
+                    ->suffixIcon('heroicon-o-envelope'),
+                    TextInput::make('address')
+                    ->suffixIcon('heroicon-o-map')
                 ])->columns(2)
             ])
             ->itemLabel(function (array $state): ?string {
@@ -523,6 +538,44 @@ class EmployeeResource extends Resource
         ]);
     }
 
+    public static function issuedItemInformation(): Section
+    {
+        return Section::make('ISSUED ITEM DETAILS')
+        ->description('Employee Issued Item Information')
+        ->icon('heroicon-s-wrench-screwdriver')
+        ->schema([
+            Repeater::make('issued_items')
+            ->label('')
+            ->relationship()
+            ->schema([
+                    Select::make('item_type')
+                    ->options([
+                        'MOBILE' => 'Mobile Phone',
+                        'LAPTOP' => 'Laptop',
+                        'VEHICLE' => 'Vehicle',
+                        'MOTORCYCLE' => 'Motorcycle',
+                    ])
+                    ->required(),
+                    TextInput::make('item_name'),
+                    TextInput::make('item_model'),   
+                    DatePicker::make('issued_date')
+                    ->label('Issued Date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                    ->maxDate(now()),
+            ])
+            ->deleteAction(
+                fn (Action $action) => $action->requiresConfirmation(),
+            )
+            ->itemLabel(function (array $state): ?string {
+                if ($state['item_name']) {
+                    return strtoupper($state['item_name']);
+                } 
+                return null;
+            })
+            ->columns(4)
+        ])->collapsed(false);
+    }
+
     public static function salaryInformation() : Section
     {
         return Section::make(function (Employee $employee) {
@@ -554,7 +607,7 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function payComponent(): Section
+    public static function payComponentInformation(): Section
     {
         return Section::make('Pay Component')
         ->schema([
@@ -810,7 +863,8 @@ class EmployeeResource extends Resource
                 ->maxDate(now()),
                 TextInput::make('mobile')
                 ->suffixIcon('heroicon-o-device-phone-mobile'),
-                TextInput::make('address'),
+                TextInput::make('address')
+                ->suffixIcon('heroicon-o-map'),
             ])
             ->columns(1),
             Grid::make([
@@ -889,7 +943,8 @@ class EmployeeResource extends Resource
                 ->maxDate(now()),
                 TextInput::make('mobile')
                 ->suffixIcon('heroicon-o-device-phone-mobile'),
-                TextInput::make('address'),
+                TextInput::make('address')
+                ->suffixIcon('heroicon-o-map'),
             ])
             ->columns(1),
             Grid::make([
@@ -903,6 +958,9 @@ class EmployeeResource extends Resource
                     DatePicker::make('anniversary')->label('Anniversary Date')
                     ->suffixIcon('heroicon-o-calendar-days')
                     ->maxDate(now()),
+                    TextInput::make('relationship')
+                    ->default('SPOUSE')
+                    ->readOnly()
                 ])
             ->columns(1),
             Grid::make([
@@ -988,7 +1046,8 @@ class EmployeeResource extends Resource
                 ->maxDate(now()),
                 TextInput::make('mobile')
                 ->suffixIcon('heroicon-o-device-phone-mobile'),
-                TextInput::make('address'),
+                TextInput::make('address')
+                ->suffixIcon('heroicon-o-map'),
             ])
             ->columns(1),
             Grid::make([
@@ -1056,5 +1115,280 @@ class EmployeeResource extends Resource
         } else {
             return "N/A";
         }
+    }
+
+    public static function DependentAndhealthBenefitInformation() : Split
+    {
+        return Split::make([
+            static::healthBenefitFields(),
+            static::dpendentFields()
+        ]);
+    }
+
+    public static function healthBenefitFields(): Section
+    {
+        return Section::make('HEALTH BENEFIT DETAILS')
+        ->description('Employee Health Benefit Information')
+        ->icon('heroicon-o-beaker')
+        ->schema([
+            Repeater::make('healthBenefits')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    TextInput::make('name'),
+                    DatePicker::make('enrollment_date')
+                    ->label('Enrollment Date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                    ->maxDate(now()),
+                    TextInput::make('monthly_premium')   
+                ])
+                ->columns(3),    
+                DatePicker::make('coverage_start_date')
+                ->label('Coverage Start Date')
+                ->suffixIcon('heroicon-o-calendar-days')
+                ->maxDate(now()),
+                DatePicker::make('coverage_end_date')
+                ->label('Coverage End Date')
+                ->suffixIcon('heroicon-o-calendar-days')
+                ->maxDate(now()),   
+            ])
+            ->itemLabel(function (array $state): ?string {
+                if ($state['name']) {
+                    return strtoupper($state['name']);
+                } 
+                return null;
+            })
+            ->columns(2)
+        ]);
+    }
+
+    public static function dpendentFields(): Section
+    {
+        return   Section::make('DEPENDENT DETAILS')
+        ->description('Employee Dependent Information')
+        ->icon('heroicon-s-face-smile')
+        ->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Repeater::make('dependents')
+                ->label('')
+                ->relationship()
+                ->schema([
+                    Select::make('employee_family_id')
+                    ->options(EmployeeFamilyDetail::all()->pluck('name', 'employee_family_id')->map(function ($name) {
+                        return ucwords(strtolower($name));
+                    }))
+                    ->label('Dependent Name')
+                    ->preload()
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+
+                            $family_id = $state;
+                            $family = EmployeeFamilyDetail::where('employee_family_id', $family_id)->first();
+                            $set('relationship', $family->relationship);
+                    })
+                    ->searchable()
+                ])
+                ->addActionLabel('Add Dependent')
+                ->deleteAction(
+                    fn (Action $action) => $action->requiresConfirmation()
+                )
+                // ->mutateRelationshipDataBeforeFillUsing(function (array $data): array {
+                //     // if UPDATE existing Dependent family
+                //     if(isset($data['employee_family_id'])){
+                //         $family = EmployeeFamilyDetail::where('employee_family_id', $data['employee_family_id'])->first();
+             
+                //         if ($family) {
+                //             $family->is_dependent = true; 
+                //             $family->save();
+                //         }
+                //     }
+
+                //     return $data;
+                // })
+                ->columns(2), 
+            ])
+            ->columns(1)
+        ]);
+    }    
+
+    public static function trainingInformation() : Section
+    {
+         return Section::make('TRAINING DETAILS')
+        ->description('Employee Training Information')
+        ->icon('heroicon-s-arrow-trending-up')
+        ->schema([
+            Repeater::make('trainings')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    Select::make('training_status_type_id')->options([
+                        '1' => 'Ongoing',
+                        '2' => 'Completed'
+                    ])
+                    ->required()
+                    ->preload(),
+                    Select::make('training_type_id')->options([
+                        '1' => 'Workshop',
+                        '2' => 'Online Course',
+                        '3' => 'Certification Program',
+                    ])
+                    ->required()
+                    ->preload(),
+                    TextInput::make('course_title'),
+                    TextInput::make('course_url'),
+                    TextArea::make('description'),
+                    TextInput::make('credit_hours'),
+                    DatePicker::make('start_date')
+                    ->suffixIcon('heroicon-o-calendar-days'),
+                    DatePicker::make('completion_date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                ])->columns(4),
+            ])
+            ->deleteAction(
+                fn (Action $action) => $action->requiresConfirmation(),
+            ),
+        ])->collapsed(false);
+    }
+
+    public static function idInformation(): Section
+    {
+        return Section::make(function (Employee $employee) {
+            return 'ID DETAILS - EMPLOYEE NUMBER : '. strtoupper($employee->employee_reference) ?? 'ID DETAILS';
+        })
+        ->description('Employee ID Information')
+        ->icon('heroicon-s-identification')
+        ->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            ->relationship('id_details')
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    TextInput::make('sss_number')->label('SSS ID :'),
+                    TextInput::make('pagibig_number')->label('PAG-IBIG ID :'),
+                    TextInput::make('philhealth_number')->label('PHILHEALTH ID :'),
+                    TextInput::make('tin_number')->label('TIN ID :'),
+                ])->columns(4)
+            ]),
+        ]);
+    }
+
+    public static function bankInformation(): Section
+    {
+        return Section::make(['BANK DETAILS'])
+        ->description('Employee Bank Information')
+        ->icon('heroicon-s-credit-card')
+        ->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            ->relationship('bank')
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    TextInput::make('bank_name')->label('Bank Account Name'),
+                    TextInput::make('account_name')->label('Account Number'),
+                    TextInput::make('account_no')->label('Account Number'),
+                ])->columns(3)
+            ]),
+        ]);
+    }
+
+    public static function documentInformation(): Section
+    {
+        return Section::make('DOCUMENTS')
+        ->description('Employee Document Information List')
+        ->icon('heroicon-s-clipboard-document')
+        ->headerActions([
+            Action::make('Upload')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->form([
+                    Section::make('')->label('')
+                    ->schema([
+                        Grid::make([
+                            'default' => 1
+                        ])
+                        ->schema([
+                            Select::make('document_type')->label("Document Type")->options([
+                                'REQUIREMENTS' => 'Requirements',
+                                'PHILHEALTH' => 'Phil-Health ID',
+                                'PAGIBIG' => 'Pag-ibig ID',
+                                'SSS' => 'SSS ID',
+                                'TIN' => 'TIN ID',
+                                'TOR' => 'Transcript of Records',
+                                'OTHERS' => "Other's"
+                            ])
+                            ->searchable(),
+                           TextArea::make('document_remarks')->label('Document Remarks'),
+                        ])->columns(2),
+                        FileUpload::make('attachments')
+                        ->disk('public')
+                        ->directory('document/attachments')
+                        ->multiple()
+                        // ->acceptedFileTypes(['application/pdf'])
+                    ])
+                ])
+                ->action(function (array $data,$record) {
+
+                   $result = EmployeeDocument::create([
+                        'employee_id' => $record->employee_id,
+                        'document_type' => $data['document_type'],
+                        'document_remarks' => $data['document_remarks'],
+                    ]);
+
+                    foreach($data['attachments'] as $attachment){
+
+                        $file = Storage::disk('public')->exists($attachment);
+
+                        if($file) {
+                            $path = $attachment;
+                            $filename = pathinfo($path, PATHINFO_FILENAME);
+                            $type = pathinfo($path, PATHINFO_EXTENSION);
+                            $result->attachments()->create([
+                                'filename'=> $filename,
+                                'type' => $type,
+                                'path' => $path
+                            ]);
+
+                            
+                            Notification::make()
+                            ->title('Upload file successfully.')
+                            ->success()
+                            ->send();
+                        }
+                    }
+                }),
+        ])
+        ->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            // ->relationship('bank')
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                 
+                ])->columns(1)
+            ]),
+        ]);
     }
 }

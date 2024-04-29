@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class EmployeeIdDetail extends Model
+class EmployeeIssuedItem extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $primaryKey = 'employee_id_detail_id';
+    protected $primaryKey = 'employee_issued_item_id';
     
-    protected $fillable = ['employee_id','sss_number','pagibig_number', 'philhealth_number', 'tin_number'];
+    protected $fillable = ['employee_id','item_type','item_name', 'item_model', 'issued_date'];
 }
