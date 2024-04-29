@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employee_bank_details', function (Blueprint $table) {
-            $table->id('employee_bank_id');
+        Schema::create('employee_id_details', function (Blueprint $table) {
+            $table->id('employee_id_detail_id');
             $table->unsignedBigInteger('employee_id');
-            $table->string('bank_name')->nullable();
-            $table->string('account_name')->nullable();
+            // $table->string('employee_number')->unique();
+            $table->string('sss_number')->nullable();
+            $table->string('pagibig_number')->nullable();
+            $table->string('philhealth_number')->nullable();
+            $table->string('tin_number')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_bank_details');
+        Schema::dropIfExists('employee_id_details');
     }
 };

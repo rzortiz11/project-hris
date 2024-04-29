@@ -12,5 +12,5 @@ class EmployeeBankDetail extends Model
 
     protected $primaryKey = 'employee_bank_id';
 
-    protected $fillable = ['employee_id','bank_name','account_name'];
+    protected $fillable = ['employee_id','bank_name','account_name','account_no'];
 }

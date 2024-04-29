@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('employee_documents', function (Blueprint $table) {
             $table->id('employee_document_id');
             $table->unsignedBigInteger('employee_id');
-            $table->string('filename');
-            $table->string('type')->comment('REQUIREMENTS,GOVERNMENT_ID, ETC.');
-            $table->string('path');
+            $table->string('document_type')->nullable()->comment('REQUIREMENTS,GOVERNMENT_ID, ETC.');
+            $table->string('document_remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
