@@ -1405,7 +1405,6 @@ class EmployeeResource extends Resource
                                 // ->readOnly(),
                                 FileUpload::make('path')
                                 ->panelAspectRatio('2:1')
-                                ->panelLayout('integrated')
                                 ->label('')
                                 ->disk('public')
                                 ->directory('document/attachments')  
