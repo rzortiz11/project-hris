@@ -27,6 +27,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Tabs\Tab;
+use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 
@@ -422,7 +423,7 @@ class EmployeeResource extends Resource
                             'EMPLOYED' => 'Employed',
                             'TERMINATED' => 'Terminated',
                             'RESIGNED' => 'Resigned',
-                            'OTHERS' => "Other's"
+                            'SEPERATED' => "Seperated"
                         ])
                         ->required()
                         ->preload(),
@@ -434,7 +435,6 @@ class EmployeeResource extends Resource
                         ->required()
                         ->preload(),
                     ])->columns(4),
-                    TextInput::make('shift_schedule'),
                     Select::make('payment_structure')
                     ->options([
                         'COMPANY' => 'Company',
@@ -452,6 +452,8 @@ class EmployeeResource extends Resource
                     DatePicker::make('probation_end_date')
                     ->suffixIcon('heroicon-o-calendar-days'),
                     DatePicker::make('termination_date')
+                    ->suffixIcon('heroicon-o-calendar-days'),
+                    DatePicker::make('seperation_date')
                     ->suffixIcon('heroicon-o-calendar-days')
                 ])->columns(3),
                 Grid::make([
@@ -459,6 +461,17 @@ class EmployeeResource extends Resource
                 ])
                 ->relationship('employment')
                 ->schema([
+                    Section::make('Shift Schedule')
+                    ->description('')
+                    ->icon('heroicon-s-clock')
+                    ->schema([
+                        TimePicker::make('time_in')
+                        ->seconds(false)
+                        ->label('Time-in'),
+                        TimePicker::make('time_out')
+                        ->seconds(false)
+                        ->label('Time-out'),
+                    ])->columns(),
                     Radio::make('overtime_entitlement')
                     ->label('Entitled for Overtime')
                     ->boolean()

@@ -23,6 +23,7 @@ class ListEmployees extends ListRecords
             'Regular' => Tab::make(),
             'Employed' => Tab::make(),
             'Terminated' => Tab::make(),
+            'Seperated' => Tab::make(),
             'Resigned' => Tab::make(),
             'Others' => Tab::make(),
         ];
@@ -36,6 +37,7 @@ class ListEmployees extends ListRecords
             ->form([
                 Section::make('Employee Basic Details')
                 ->description('Fill out the required * Employee Details')
+                ->icon('heroicon-s-user-circle')
                 ->schema([
                     TextInput::make('first_name')->required()->default("John"),
                     TextInput::make('last_name')->required()->default("Doe"),
