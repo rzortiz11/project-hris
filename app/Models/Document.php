@@ -14,8 +14,4 @@ class Document extends Model
     protected $primaryKey = 'document_id';
 
     protected $fillable = ['employee_document_id','filename','type','path'];
-
-    protected $casts = [
-        'attachments' => 'array',
-    ];
 }

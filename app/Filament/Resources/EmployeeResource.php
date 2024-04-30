@@ -3,14 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeResource\Pages;
-use App\Filament\Resources\EmployeeResource\RelationManagers;
 use App\Models\Employee;
-use App\Models\EmployeeDependent;
-use App\Models\EmployeeDocument;
 use App\Models\EmployeeFamilyDetail;
 use App\Models\User;
 use Carbon\Carbon;
-use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
@@ -20,10 +16,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Split;
@@ -31,16 +24,11 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Support\Enums\IconPosition;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Notifications\Notification;
-use Filament\Support\Enums\Alignment;
-use Filament\Support\Enums\VerticalAlignment;
-use Illuminate\Support\Facades\Storage;
 
 class EmployeeResource extends Resource
 {
@@ -108,7 +96,7 @@ class EmployeeResource extends Resource
                                 ->schema([
                                     static::trainingInformation(),  
                                 ]),
-                                Tab::make('ID & Bank Details')
+                                Tab::make('Gov ID & Bank Details')
                                 ->schema([
                                     static::idInformation(),
                                     static::bankInformation()
@@ -1129,7 +1117,7 @@ class EmployeeResource extends Resource
     {
         return Section::make('HEALTH BENEFIT DETAILS')
         ->description('Employee Health Benefit Information')
-        ->icon('heroicon-o-beaker')
+        ->icon('heroicon-c-plus-circle')
         ->schema([
             Repeater::make('healthBenefits')
             ->label('')
@@ -1170,7 +1158,7 @@ class EmployeeResource extends Resource
     {
         return   Section::make('DEPENDENT DETAILS')
         ->description('Employee Dependent Information')
-        ->icon('heroicon-s-face-smile')
+        ->icon('heroicon-c-face-smile')
         ->schema([
             Grid::make([
                 'default' => 1
@@ -1179,7 +1167,8 @@ class EmployeeResource extends Resource
                 Repeater::make('dependents')
                 ->label('')
                 ->relationship()
-                ->schema([
+                ->simple(
+                    
                     Select::make('employee_family_id')
                     ->options(EmployeeFamilyDetail::all()->pluck('name', 'employee_family_id')->map(function ($name) {
                         return ucwords(strtolower($name));
@@ -1195,7 +1184,7 @@ class EmployeeResource extends Resource
                             $set('relationship', $family->relationship);
                     })
                     ->searchable()
-                ])
+                )
                 ->addActionLabel('Add Dependent')
                 ->deleteAction(
                     fn (Action $action) => $action->requiresConfirmation()
@@ -1213,7 +1202,7 @@ class EmployeeResource extends Resource
 
                 //     return $data;
                 // })
-                ->columns(2), 
+                ->columns(1), 
             ])
             ->columns(1)
         ]);
@@ -1317,13 +1306,77 @@ class EmployeeResource extends Resource
         ->description('Employee Document Information List')
         ->icon('heroicon-s-clipboard-document')
         ->headerActions([
-            Action::make('Upload')
-                ->icon('heroicon-o-arrow-up-tray')
-                ->form([
-                    Section::make('')->label('')
-                    ->schema([
+            // Action::make('Upload')
+            //     ->icon('heroicon-o-arrow-up-tray')
+            //     ->form([
+            //         Section::make('')->label('')
+            //         ->schema([
+            //             Grid::make([
+            //                 'default' => 1
+            //             ])
+            //             ->schema([
+            //                 Select::make('document_type')->label("Document Type")->options([
+            //                     'REQUIREMENTS' => 'Requirements',
+            //                     'PHILHEALTH' => 'Phil-Health ID',
+            //                     'PAGIBIG' => 'Pag-ibig ID',
+            //                     'SSS' => 'SSS ID',
+            //                     'TIN' => 'TIN ID',
+            //                     'TOR' => 'Transcript of Records',
+            //                     'OTHERS' => "Other's"
+            //                 ])
+            //                 ->searchable(),
+            //                TextArea::make('document_remarks')->label('Document Remarks'),
+            //             ])->columns(2),
+            //             FileUpload::make('attachments')
+            //             ->disk('public')
+            //             ->directory('document/attachments')
+            //             ->multiple()
+            //         ])
+            //     ])
+            //     ->action(function (array $data,$record) {
+
+            //        $result = EmployeeDocument::create([
+            //             'employee_id' => $record->employee_id,
+            //             'document_type' => $data['document_type'],
+            //             'document_remarks' => $data['document_remarks'],
+            //         ]);
+
+            //         foreach($data['attachments'] as $attachment){
+
+            //             $file = Storage::disk('public')->exists($attachment);
+
+            //             if($file) {
+            //                 $path = $attachment;
+            //                 $filename = pathinfo($path, PATHINFO_FILENAME);
+            //                 $type = pathinfo($path, PATHINFO_EXTENSION);
+            //                 $result->attachments()->create([
+            //                     'filename'=> $filename,
+            //                     'type' => $type,
+            //                     'path' => $path
+            //                 ]);
+
+                            
+            //                 Notification::make()
+            //                 ->title('Upload file successfully.')
+            //                 ->success()
+            //                 ->send();
+            //             }
+            //         }
+
+            //         redirect()->route('filament.admin.resources.employees.edit', ['record' => $record->employee_id, 'tab' => '-document-details-tab']);
+            //     }),
+        ])
+        ->schema([
+            Grid::make([
+                'default' => 1
+            ])
+            ->schema([
+                Repeater::make('employeeDocuments')
+                ->label('')
+                ->relationship()
+                ->schema([
                         Grid::make([
-                            'default' => 1
+                                'default' => 1
                         ])
                         ->schema([
                             Select::make('document_type')->label("Document Type")->options([
@@ -1335,59 +1388,47 @@ class EmployeeResource extends Resource
                                 'TOR' => 'Transcript of Records',
                                 'OTHERS' => "Other's"
                             ])
+                            ->required()
                             ->searchable(),
-                           TextArea::make('document_remarks')->label('Document Remarks'),
+                            TextInput::make('document_remarks')
+                            ->label('Document Remarks'),
                         ])->columns(2),
-                        FileUpload::make('attachments')
-                        ->disk('public')
-                        ->directory('document/attachments')
-                        ->multiple()
-                        // ->acceptedFileTypes(['application/pdf'])
-                    ])
+                        Grid::make([
+                            'default' => 1
+                        ])
+                        ->schema([      
+                            Repeater::make('attachments')
+                            ->label('')
+                            ->relationship()
+                            ->simple(
+                                // TextInput::make('filename')
+                                // ->readOnly(),
+                                FileUpload::make('path')
+                                ->panelAspectRatio('2:1')
+                                ->panelLayout('integrated')
+                                ->label('')
+                                ->disk('public')
+                                ->directory('document/attachments')  
+                                ->storeFileNamesIn('filename')                          
+                                ->previewable()
+                                ->openable()
+                                ->downloadable()
+                            )
+                            ->grid(3)
+                            ->addActionLabel('New Attachment')   
+                        ])       
                 ])
-                ->action(function (array $data,$record) {
-
-                   $result = EmployeeDocument::create([
-                        'employee_id' => $record->employee_id,
-                        'document_type' => $data['document_type'],
-                        'document_remarks' => $data['document_remarks'],
-                    ]);
-
-                    foreach($data['attachments'] as $attachment){
-
-                        $file = Storage::disk('public')->exists($attachment);
-
-                        if($file) {
-                            $path = $attachment;
-                            $filename = pathinfo($path, PATHINFO_FILENAME);
-                            $type = pathinfo($path, PATHINFO_EXTENSION);
-                            $result->attachments()->create([
-                                'filename'=> $filename,
-                                'type' => $type,
-                                'path' => $path
-                            ]);
-
-                            
-                            Notification::make()
-                            ->title('Upload file successfully.')
-                            ->success()
-                            ->send();
-                        }
-                    }
-                }),
-        ])
-        ->schema([
-            Grid::make([
-                'default' => 1
-            ])
-            // ->relationship('bank')
-            ->schema([
-                Grid::make([
-                    'default' => 1
-                ])
-                ->schema([
-                 
-                ])->columns(1)
+                ->collapsed()
+                ->addActionLabel('Add Document')   
+                ->itemLabel(function (array $state): ?string {
+                    if ($state['document_type']) {
+                        return strtoupper($state['document_type']);
+                    } 
+                    return null;
+                })
+                ->deleteAction(
+                    fn (Action $action) => $action->requiresConfirmation(),
+                )
             ]),
         ]);
     }
