@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class EmployeeEducation extends Model
+class EmployeeEmploymentHistory extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $primaryKey = 'employee_education_id';
+    protected $primaryKey = 'employment_history_id';
     
-    protected $fillable = ['employee_id','school','course','degree','year_started','year_ended', 'remarks'];
+    protected $fillable = ['employee_id','company_name','job_title','job_description', 'start_date', 'end_date'];
 }

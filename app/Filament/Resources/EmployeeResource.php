@@ -83,15 +83,14 @@ class EmployeeResource extends Resource
                                         static::parentInformartion(),
                                         static::spouseInformation(),
                                         static::childrenInformation(),
-                                        // static::dependentInformation(),
                                     ]),           
                                 Tab::make('Dependent Details')
                                 ->schema([
-                                    static::DependentAndhealthBenefitInformation(),
+                                        static::dependentAndhealthBenefitInformation(),
                                 ]),                                                                                                                                                                                 
                                Tab::make('Education Details')
                                     ->schema([
-                                        // ...
+                                        static::educationAndWorkHistoryInformation(),
                                     ]),
                                Tab::make('Training Details')
                                 ->schema([
@@ -113,37 +112,7 @@ class EmployeeResource extends Resource
                             'default' => 1
                         ])
                         ->schema([
-                            Section::make('')
-                            ->schema([
-                                FileUpload::make('picture')->label('')
-                                ->disk('public')
-                                ->visibility('private')
-                                ->directory('employe/picture')
-                                ->avatar()
-                                ->imageEditor()
-                                ->imageEditorAspectRatios([
-                                    '16:9',
-                                    '4:3',
-                                    '1:1',
-                                ]),
-                                Placeholder::make('Employee Name')->label('')
-                                ->content(fn (Employee $record): ?string => $record ? $record->user->name : "")
-                                ->extraAttributes(['class' => 'text-xs']),
-                                Placeholder::make('Position')->label('')                                
-                                ->content(fn (Employee $record): ?string => isset($record->position) ? $record->position->job_position : "N/A")
-                                ->extraAttributes(['class' => 'text-xs']),
-                                Placeholder::make('Employee Number')->label('')
-                                ->content(fn (Employee $record): ?string => $record ? $record->employee_reference : "")
-                                ->extraAttributes(['class' => 'text-xs']),
-                            ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
-                            ->columns(1),
-                            Fieldset::make('Profile Completion')
-                            ->schema([
-                                Placeholder::make('')->content("0%"),
-                                Placeholder::make('')->content("OVERALL PROFILE COMPLETION")->extraAttributes(['class' => 'text-xs']),
-                            ])
-                            ->extraAttributes(['class' => 'text-center'])
-                            ->columns(1),
+                            static::profileDisplay(),
                         ])
                         ->extraAttributes(['class' => 'bg-gray-600'])
                         ->columns(1)
@@ -206,6 +175,50 @@ class EmployeeResource extends Resource
             // 'create' => Pages\CreateEmployee::route('/create'),
             'edit' => Pages\EditEmployee::route('/{record}/edit'),
         ];
+    }
+
+    public static function profileDisplay(): Grid
+    {
+        return Grid::make([
+            'default' => 1
+        ])
+        ->schema([
+            Section::make('')
+            ->schema([
+                FileUpload::make('picture')->label('')
+                ->disk('public')
+                ->visibility('private')
+                ->directory('employe/picture')
+                ->avatar()
+                ->imageEditor()
+                ->imageEditorAspectRatios([
+                    '16:9',
+                    '4:3',
+                    '1:1',
+                ]),
+                Placeholder::make('Employee Name')->label('')
+                ->content(fn (Employee $record): ?string => $record ? $record->user->name : "")
+                ->extraAttributes(['class' => 'text-xs']),
+                Placeholder::make('Position')->label('')                                
+                ->content(fn (Employee $record): ?string => isset($record->position) ? $record->position->job_position : "N/A")
+                ->extraAttributes(['class' => 'text-xs']),
+                Placeholder::make('Employee Number')->label('')
+                ->content(fn (Employee $record): ?string => $record ? $record->employee_reference : "")
+                ->extraAttributes(['class' => 'text-xs']),
+            ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
+            ->columns(1),
+            
+            Section::make('')
+            ->schema([
+                Fieldset::make('Profile Completion')
+                ->schema([
+                    Placeholder::make('')->content("0%"),
+                    Placeholder::make('')->content("OVERALL PROFILE COMPLETION")->extraAttributes(['class' => 'text-xs']),
+                ])
+                ->extraAttributes(['class' => 'text-center'])
+                ->columns(1)
+            ])
+        ]);
     }
 
     public static function PersonalInformation(): Section
@@ -1059,7 +1072,7 @@ class EmployeeResource extends Resource
                 ->content(function ($record) {
                          return static::getAge(isset($record->birthdate) ? $record->birthdate : "");
                     }),
-                    TextInput::make('school')->label('School/University'),
+                    TextInput::make('school')->label('School/Institute'),
                     TextInput::make('relationship')
                     ->default('CHILD')
                     ->readOnly()
@@ -1118,7 +1131,116 @@ class EmployeeResource extends Resource
         }
     }
 
-    public static function DependentAndhealthBenefitInformation() : Split
+    public static function educationAndWorkHistoryInformation() : Grid
+    {
+        return Grid::make([
+            'default' => 1
+        ])
+        ->schema([
+            static::educationFields(),
+            static::workHistoryFields()
+        ]);
+    }
+
+    public static function educationFields(): Section
+    {
+        return Section::make('EDUCATION DETAILS')
+        ->description('Employee Education Information')
+        ->icon('heroicon-m-academic-cap')
+        ->schema([
+            Repeater::make('education')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    TextInput::make('school')->label('School/Institute'),
+                    Select::make('course')->options([
+                        'B.S in Information Technology' => 'B.S in Information Technology',
+                        'B.S in Civil Engineering' => 'B.S in Civil Engineering'
+                    ]),
+                    Select::make('degree')->options([
+                        'ELEMENTARY' => 'Elementary',
+                        'HIGHSCHOOL' => 'HighSchool',
+                        'COLLEGE' => 'College',
+                        'MASTERAL' => 'Masteral',
+                        'EDUCATION' => 'Education'
+                    ]),
+                ])
+                ->columns(3),    
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    DatePicker::make('year_started')
+                    ->label('Year Start Date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                    ->maxDate(now()),
+                    DatePicker::make('year_end')
+                    ->label('Year End Date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                    ->maxDate(now()),   
+                ])
+                ->columns(2),                  
+                TextArea::make('remarks')
+            ])
+            ->itemLabel(function (array $state): ?string {
+                if ($state['school']) {
+                    return strtoupper($state['school']);
+                } 
+                return null;
+            })->collapsed()
+            ->columns(1)
+        ]);
+    }
+
+    public static function workHistoryFields(): Section
+    {
+        return Section::make('WORK HISTORY DETAILS')
+        ->description('Employee Work History Information')
+        ->icon('heroicon-s-newspaper')
+        ->schema([
+            Repeater::make('employment_history')
+            ->label('')
+            ->relationship()
+            ->schema([
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    TextInput::make('company_name')->label('Company Name'),
+                    TextInput::make('job_title')->label('Job Title'),
+                    TextInput::make('job_description')->label('Job Description'),
+                ])
+                ->columns(3),    
+                Grid::make([
+                    'default' => 1
+                ])
+                ->schema([
+                    DatePicker::make('start_date')
+                    ->label('Start Date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                    ->maxDate(now()),
+                    DatePicker::make('end_date')
+                    ->label('End Date')
+                    ->suffixIcon('heroicon-o-calendar-days')
+                    ->maxDate(now()),   
+                ])
+                ->columns(2)                 
+            ])
+            ->itemLabel(function (array $state): ?string {
+                if ($state['company_name']) {
+                    return strtoupper($state['company_name']);
+                } 
+                return null;
+            })->collapsed()
+            ->columns(1)
+        ]);
+    }
+
+    public static function dependentAndhealthBenefitInformation() : Split
     {
         return Split::make([
             static::healthBenefitFields(),

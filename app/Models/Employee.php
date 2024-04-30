@@ -114,4 +114,12 @@ class Employee extends Model
     public function employeeDocuments(): HasMany {
         return $this->hasMany(EmployeeDocument::class, 'employee_id', 'employee_id');
     }
+
+    public function education(): HasMany {
+        return $this->hasMany(EmployeeEducation::class, 'employee_id', 'employee_id');
+    }
+
+    public function employment_history(): HasMany {
+        return $this->hasMany(EmployeeEmploymentHistory::class, 'employee_id', 'employee_id');
+    }
 }
