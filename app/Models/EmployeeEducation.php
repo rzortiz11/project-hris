@@ -12,5 +12,5 @@ class EmployeeEducation extends Model
 
     protected $primaryKey = 'employee_education_id';
     
-    protected $fillable = ['employee_id','school','course','degree','from','to', 'remarks'];
+    protected $fillable = ['employee_id','school','course','degree','year_started','year_ended', 'remarks'];
 }

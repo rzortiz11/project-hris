@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('school')->nullable();
             $table->string('course')->nullable();
             $table->string('degree')->nullable();
-            $table->date('from')->nullable();
-            $table->date('to')->nullable();
+            $table->date('year_started')->nullable();
+            $table->date('year_end')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();
             $table->softDeletes();
