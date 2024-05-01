@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('time_sheet_id');
             $table->unsignedBigInteger('employee_id');
             $table->date('date')->nullable();
+            $table->string('shift_schedule')->nullable();
             $table->time('time_in')->nullable();
             $table->string('in_location')->nullable()->comment('WFH,OFFICE,ONFIELD');
             $table->string('in_latitude')->nullable();

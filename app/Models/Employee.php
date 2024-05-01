@@ -122,4 +122,8 @@ class Employee extends Model
     public function employment_history(): HasMany {
         return $this->hasMany(EmployeeEmploymentHistory::class, 'employee_id', 'employee_id');
     }
+
+    public function employee_timesheets(): HasMany {
+        return $this->hasMany(TimeSheet::class, 'employee_id', 'employee_id');
+    }
 }

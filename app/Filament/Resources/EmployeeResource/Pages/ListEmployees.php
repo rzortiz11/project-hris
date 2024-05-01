@@ -4,6 +4,7 @@ namespace App\Filament\Resources\EmployeeResource\Pages;
 
 use App\Filament\Resources\EmployeeResource;
 use App\Models\User;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms\Components\Section;
 use Filament\Resources\Components\Tab;
@@ -97,6 +98,23 @@ class ListEmployees extends ListRecords
                         'relationship' => $type,
                     ]);
                 }
+
+
+                // Create a asynchronos to generate timesheet from current date to end of the month
+                // when done, Notify that timesheet is created for this user. 
+                $currentDate = Carbon::now();
+                $endOfMonth = Carbon::now()->endOfMonth();
+
+                while ($currentDate <= $endOfMonth) {
+
+                    $employee->employee_timesheets()->create([
+                        'date' => $currentDate,
+                    ]);
+
+                    $currentDate->addDay();
+                }
+         
+     
 
                 // //delete for continue using
                 // $result = $user->delete();
