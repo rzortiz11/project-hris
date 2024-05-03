@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('time_logs', function (Blueprint $table) {
             $table->id('time_log_id');
             $table->unsignedBigInteger('employee_id');
-            $table->string('day');
-            $table->string('type');
+            $table->date('date')->nullable();
+            $table->string('day')->nullable();
+            $table->string('type')->nullable();
             $table->time('time')->nullable();
             $table->string('location')->nullable()->comment('WFH,OFFICE,ONFIELD');
             $table->string('latitude')->nullable();
