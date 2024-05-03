@@ -84,11 +84,11 @@ class EmployeeResource extends Resource
                                         static::spouseInformation(),
                                         static::childrenInformation(),
                                     ]),           
-                                Tab::make('Dependent Details')
+                                Tab::make('Dependent & HMO')
                                 ->schema([
                                         static::dependentAndhealthBenefitInformation(),
                                 ]),                                                                                                                                                                                 
-                               Tab::make('Education Details')
+                               Tab::make('Education & Work History')
                                     ->schema([
                                         static::educationAndWorkHistoryInformation(),
                                     ]),
@@ -1138,7 +1138,7 @@ class EmployeeResource extends Resource
         ])
         ->schema([
             static::educationFields(),
-            static::workHistoryFields()
+            static::employmentHistory()
         ]);
     }
 
@@ -1196,10 +1196,10 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function workHistoryFields(): Section
+    public static function employmentHistory(): Section
     {
-        return Section::make('WORK HISTORY DETAILS')
-        ->description('Employee Work History Information')
+        return Section::make('EMPLOYMENT HISTORY DETAILS')
+        ->description('Employee Employment History Information')
         ->icon('heroicon-s-newspaper')
         ->schema([
             Repeater::make('employment_history')
