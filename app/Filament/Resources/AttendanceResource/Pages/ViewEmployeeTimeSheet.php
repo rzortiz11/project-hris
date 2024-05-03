@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AttendanceResource\Pages;
 
 use App\Filament\Resources\AttendanceResource;
+use App\Livewire\EmployeeTimeLogs;
 use App\Livewire\EmployeeTimeSheet;
 use App\Models\TimeSheet;
 use Filament\Actions;
@@ -86,7 +87,7 @@ class ViewEmployeeTimeSheet extends ViewRecord
                     ]),
                     Tab::make('Time Logs')
                     ->schema([
-                        // ...
+                        Livewire::make(EmployeeTimeLogs::class)->data(['record' => $this->record])
                     ]),                    
                 ])
                 ->contained(false)

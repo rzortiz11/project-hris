@@ -12,5 +12,5 @@ class TimeLog extends Model
 
     protected $primaryKey = 'time_log_id';
     
-    protected $fillable = ['employee_id','day','type','time','location', 'latitude', 'longitude'];
+    protected $fillable = ['employee_id','date','day','type','time','location', 'latitude', 'longitude'];
 }
