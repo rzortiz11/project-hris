@@ -97,24 +97,7 @@ class ListEmployees extends ListRecords
                     $employee->family()->create([
                         'relationship' => $type,
                     ]);
-                }
-
-
-                // Create a asynchronos to generate timesheet from current date to end of the month
-                // when done, Notify that timesheet is created for this user. 
-                $currentDate = Carbon::now();
-                $endOfMonth = Carbon::now()->endOfMonth();
-
-                while ($currentDate <= $endOfMonth) {
-
-                    $employee->employee_timesheets()->create([
-                        'date' => $currentDate,
-                    ]);
-
-                    $currentDate->addDay();
-                }
-         
-     
+                }     
 
                 // //delete for continue using
                 // $result = $user->delete();
