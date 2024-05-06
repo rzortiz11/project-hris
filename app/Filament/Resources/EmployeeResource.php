@@ -3,8 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeResource\Pages;
+use App\Livewire\ViewSalaryDetails;
 use App\Models\Employee;
 use App\Models\EmployeeFamilyDetail;
+use App\Models\EmployeeSalaryDetail;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
@@ -25,6 +27,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TimePicker;
@@ -43,7 +46,7 @@ class EmployeeResource extends Resource
 
     public static function form(Form $form): Form
     {
-        // $products = Product::get();
+        $employee = Employee::get();
 
         return $form
             ->schema([
@@ -107,6 +110,8 @@ class EmployeeResource extends Resource
                                     ]),                                      
                             ])
                             ->persistTabInQueryString()
+                            // ->persistTab()
+                            // ->id('basic-details-tab')
                         ]),
                         Grid::make([
                             'default' => 1
@@ -261,7 +266,7 @@ class EmployeeResource extends Resource
                 ->label('Date of Birth')
                 ->suffixIcon('heroicon-o-calendar-days')
                 ->maxDate(now()),
-                Placeholder::make('age')->label("Age")
+                Placeholder::make('age')
                 ->content(function ($record) {
                     return static::getAge(isset($record->birthdate) ? $record->birthdate : "");
                 }),
@@ -650,69 +655,8 @@ class EmployeeResource extends Resource
             'default' => 1
         ])
         ->schema([
-            // Add salary Header
-            Grid::make([
-                'default' => 1
-            ])
-            ->schema([
-                Placeholder::make('')->content('Guaranteed'),
-                Placeholder::make('')->content('Monthly'),
-                Placeholder::make('')->content('Yearly'),
-            ])->columns(3),
-
-            // View Salary Body
-            Repeater::make('salaryView')
-            ->label('')
-            ->relationship()
-            ->schema([
-                Select::make('type')->label('Type')
-                ->options([
-                    'BASIC-SALARY' => 'Basic Salary',
-                    'DE-MINIMIS' => 'De Minimis Allowance',
-                    'MEDICAL' => 'Medical Allowance',
-                    'CLOTHING' => 'Clothing Allowance',
-                    'TRANSPORATION' => 'Transportation Allowance',
-                    '13-MONTH' => '13th Month Pay',
-                    '14-MONTH' => '14th Month Pay',
-                ])
-                ->preload(),
-                TextInput::make('monthly_amount')
-                ->disabled(),
-                TextInput::make('yearly_amount')
-                ->disabled(),
-            ])
-            ->disabled()
-            ->addable(false)
-            ->deletable(false)
-            ->columns(3),
-
-            // View salary Footer
-            Grid::make([
-                'default' => 1
-            ])
-            ->schema([
-                Placeholder::make('')->content(''),
-                TextInput::make('total_month_guaranteed')
-                ->label('Guaranteed Total Montly')
-                ->numeric()
-                ->disabled()
-                ->prefix('₱')
-                // This enables us to display the total month on the edit page load
-                ->afterStateHydrated(function (Get $get, Set $set) {
-                    self::viewTotals($get, $set);
-                }),
-                TextInput::make('total_year_guaranteed')
-                ->label('Guaranteed Total Yearly')
-                ->numeric()
-                ->disabled()
-                ->prefix('₱')
-                // This enables us to display the total yearly on the edit page load
-                ->afterStateHydrated(function (Get $get, Set $set) {
-                    self::viewTotals($get, $set);
-                }),
-            ])->columns(3),
+            // Livewire::make(ViewSalaryDetails::class),    
         ]);
-
     }
 
     public static function getAddSalaryRepeater(): Grid
@@ -769,73 +713,16 @@ class EmployeeResource extends Resource
                 ->placeholder(0),
             ])
             ->live()
-            ->afterStateUpdated(function (Get $get, Set $set){
-                self::updateTotals($get, $set);
-            })
             ->addActionLabel('Add Pay Component')
             ->deleteAction(
                 fn (Action $action) => $action->requiresConfirmation(),
             )
             ->columns(3),
-
-            // Add salary Footer
-            Grid::make([
-                'default' => 1
-            ])
-            ->schema([
-                Placeholder::make('')->content(''),
-                TextInput::make('total_month_guaranteed')
-                ->label('Guaranteed Total Montly')
-                ->numeric()
-                ->disabled()
-                ->prefix('₱')
-                // This enables us to display the total month on the edit page load
-                ->afterStateHydrated(function (Get $get, Set $set) {
-                    self::updateTotals($get, $set);
-                }),
-                TextInput::make('total_year_guaranteed')
-                ->label('Guaranteed Total Yearly')
-                ->numeric()
-                ->disabled()
-                ->prefix('₱')
-                // This enables us to display the total yearly on the edit page load
-                ->afterStateHydrated(function (Get $get, Set $set) {
-                    self::updateTotals($get, $set);
-                }),
-            ])->columns(3),
         ]);
 
         return $salary;
     }
 
-    public static function updateTotals(Get $get, Set $set): void
-    {
-        // Retrieve all selected Salary and remove empty rows
-        $selectedSalary = collect($get('salary'))->filter(function ($item) {
-            return !empty($item['monthly_amount']) && !empty($item['yearly_amount']);
-        });
-        
-        // Sum up all the total_month_guaranteed and total_year_guaranteed values
-        $totalMonthGuaranteed = $selectedSalary->sum('monthly_amount');
-        $totalYearGuaranteed = $selectedSalary->sum('yearly_amount');
-        
-        // Update the state with the new values
-        $set('total_month_guaranteed', $totalMonthGuaranteed);
-        $set('total_year_guaranteed', $totalYearGuaranteed);
-    }
-
-    public static function viewTotals(Get $get, Set $set): void
-    {
-        $selectedSalary = collect($get('salary'))->filter(function ($item) {
-            return !empty($item['monthly_amount']) && !empty($item['yearly_amount']);
-        });
-        
-        $totalMonthGuaranteed = $selectedSalary->sum('monthly_amount');
-        $totalYearGuaranteed = $selectedSalary->sum('yearly_amount');
-        
-        $set('total_month_guaranteed', $totalMonthGuaranteed);
-        $set('total_year_guaranteed', $totalYearGuaranteed);
-    }
 
     public static function parentInformartion() : Section 
     {

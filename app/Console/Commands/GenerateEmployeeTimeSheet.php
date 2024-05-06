@@ -51,7 +51,7 @@ class GenerateEmployeeTimeSheet extends Command
 
                         $employee->employee_timesheets()->create([
                             'date' => $startDayOfMonth,
-                            'schedule' => $schedule
+                            'shift_schedule' => $schedule
                         ]);        
                     }
     
