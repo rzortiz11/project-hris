@@ -126,4 +126,8 @@ class Employee extends Model
     public function employee_timesheets(): HasMany {
         return $this->hasMany(TimeSheet::class, 'employee_id', 'employee_id');
     }
+
+    public function employee_timelogs(): HasMany {
+        return $this->hasMany(TimeLog::class, 'employee_id', 'employee_id');
+    }
 }
