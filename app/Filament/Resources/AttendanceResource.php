@@ -17,6 +17,8 @@ class AttendanceResource extends Resource
 
     protected static ?string $model = Employee::class;
 
+    protected static ?string $modelLabel = "Employee Attendance";
+
     protected static ?string $navigationIcon = 'heroicon-s-calendar-days';
 
     protected static ?string $navigationGroup = 'System Administration';

@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeSelfServiceResource\Pages;
 use App\Filament\Resources\EmployeeSelfServiceResource\RelationManagers;
+use App\Models\Employee;
 use App\Models\EmployeeSelfService;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class EmployeeSelfServiceResource extends Resource
 {
-    protected static ?string $model = EmployeeSelfService::class;
+    protected static ?string $model = Employee::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 

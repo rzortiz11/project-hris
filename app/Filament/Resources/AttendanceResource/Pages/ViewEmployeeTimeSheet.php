@@ -90,6 +90,7 @@ class ViewEmployeeTimeSheet extends ViewRecord
                         Livewire::make(EmployeeTimeLogs::class)->data(['record' => $this->record])
                     ]),                    
                 ])
+                ->persistTabInQueryString()
                 ->contained(false)
                 ->columnSpanFull(),
             ]);

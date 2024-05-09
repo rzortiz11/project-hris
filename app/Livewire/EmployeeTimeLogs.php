@@ -57,7 +57,6 @@ class EmployeeTimeLogs extends Component implements HasForms, HasTable
                 TextColumn::make('longitude')->placeholder('-'),
             ])
             ->defaultSort('created_at', 'desc')
-            ->paginated(false)
             ->filters([
                 // ...
             ])
