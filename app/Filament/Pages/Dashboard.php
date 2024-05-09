@@ -255,6 +255,12 @@ class Dashboard extends Page implements HasForms
                     ->disabled(function () use($timesheet) {
                                 
                         if(isset($timesheet)){
+                            
+                            if($timesheet->time_in == '00:00:00'){
+                                // did not time-in yet
+                                return true;
+                            }
+
                             if($timesheet->time_out != '00:00:00'){
                                 return true;
                             }
