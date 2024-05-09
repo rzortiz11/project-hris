@@ -33,6 +33,7 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Tables\Columns\TextColumn;
 
 class EmployeeResource extends Resource
 {
@@ -135,10 +136,12 @@ class EmployeeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('employee_id')->label('ID'),
-                Tables\Columns\TextColumn::make('employee_reference')->searchable(),
-                Tables\Columns\TextColumn::make('user.name')->label('User')->searchable(['first_name','last_name']),
-                Tables\Columns\TextColumn::make('active')->badge()
+                TextColumn::make('employee_id')->label('ID'),
+                TextColumn::make('employee_reference')->searchable(),
+                TextColumn::make('user.name')->label('User')->searchable(['first_name','last_name']),
+                TextColumn::make('position.job_position')->label('Position'),
+                TextColumn::make('position.reporting_designation')->label('Designation'),
+                TextColumn::make('active')->badge()
                 ->color(fn (string $state): string => match($state) {
                     'active' => 'success',
                     'inactive' => 'danger',
@@ -146,7 +149,7 @@ class EmployeeResource extends Resource
                 ->getStateUsing(function (Employee $record): string {
                     return $record->is_active ? 'active': 'inactive';
                 }),
-                Tables\Columns\TextColumn::make('created_at')->label('Created Date and Time')               
+                TextColumn::make('created_at')->label('Created Date and Time')               
                 ->getStateUsing(function (Employee $employee): string {
 
                     $created_at = Carbon::parse($employee->created_at);
