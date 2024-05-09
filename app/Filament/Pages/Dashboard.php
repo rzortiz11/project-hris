@@ -32,6 +32,7 @@ use Filament\Pages\Page;
 
 class Dashboard extends Page implements HasForms
 {
+    
     protected static ?string $navigationIcon = 'heroicon-o-home';
 
     protected static string $view = 'filament.pages.dashboard';
@@ -202,12 +203,11 @@ class Dashboard extends Page implements HasForms
                                                 'shift_schedule' => $schedule
                                             ]);
                                         }
-
                                         
                                         Notification::make()
                                         ->success()
                                         ->title('Attendace')
-                                        ->body('Time in '.$current_time.' successfully.')
+                                        ->body('Time in '.date('h:i A', strtotime($current_time)).' successfully.')
                                         ->send();
                                     }
                                 }
@@ -294,7 +294,7 @@ class Dashboard extends Page implements HasForms
                                     Notification::make()
                                     ->success()
                                     ->title('Attendace')
-                                    ->body('Time out '.$current_time.' successfully.')
+                                    ->body('Time out '.date('h:i A', strtotime($current_time)).' successfully.')
                                     ->send();
                                 }
                             }
