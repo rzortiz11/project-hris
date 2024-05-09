@@ -20,27 +20,17 @@ class EditEmployee extends EditRecord
 
     protected function afterSave(): void
     {
-           
-        // Create a asynchronos to generate timesheet from current date to end of the month
-        // when done, Notify that timesheet is created for this user. 
-
+        // TO DISABLED THIS IN THE FUTURE AND LET CRON HANDLE THE CREATION OF TIMESHEET OR WHEN TIME IN - 
         $employee = $this->record;
 
-        $time_in = "00:00";
-        $time_out = "00:00";
-
-        if($employee->employment->time_in && $employee->employment->time_out){
-
-            $time_in = Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A');
-            $time_out = Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A');
-        }
-        
+        $time_in = $employee->employment->time_in ? Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A') : "00:00";
+        $time_out = $employee->employment->time_out ? Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A') : "00:00";
         $schedule = $time_in . ' - ' . $time_out;
         
+        $currentDate = Carbon::now();
         $startDayOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
 
-        while ($startDayOfMonth <= $endOfMonth) {
+        while ($startDayOfMonth <= $currentDate) {
 
             // Check if a timesheet already exists for this employee on this day
             if (!$employee->employee_timesheets()->where('date', $startDayOfMonth)->exists()) {

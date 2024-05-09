@@ -20,7 +20,7 @@ class GenerateEmployeeTimeSheet extends Command
      *
      * @var string
      */
-    protected $description = 'Generate employee time sheet';
+    protected $description = 'Generate employee time sheet every day';
 
     /**
      * Execute the console command.
@@ -30,22 +30,18 @@ class GenerateEmployeeTimeSheet extends Command
 
         $employees = Employee::where('is_active',true)->get();
         $count = 0;
-        $endDayOfMonth = Carbon::now()->endOfMonth();
+        $currentDate = Carbon::now();
 
         foreach($employees as $employee){
             
-            $time_in = "00:00";
-            $time_out = "00:00";
-
             if(isset($employee->employment->time_in) && isset($employee->employment->time_out)){
 
-                $time_in = Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A');
-                $time_out = Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A');
-            
+                $time_in = $employee->employment->time_in ? Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A') : "00:00";
+                $time_out = $employee->employment->time_out ? Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A') : "00:00";
                 $schedule = $time_in . ' - ' . $time_out;
                 $startDayOfMonth = Carbon::now()->startOfMonth();
 
-                while ($startDayOfMonth <= $endDayOfMonth) {
+                while ($startDayOfMonth <= $currentDate) {
 
                     if (!$employee->employee_timesheets()->where('date', $startDayOfMonth)->exists()) {
 
@@ -64,6 +60,6 @@ class GenerateEmployeeTimeSheet extends Command
 
         $this->info("Created timesheet for {$count} employees."."\n");
         $this->info('Start of the month: ' . Carbon::now()->startOfMonth()->toDateString());
-        $this->info('End of the month: ' . $endDayOfMonth->endOfMonth()->toDateString());
+        $this->info('End of the month: ' . $currentDate->endOfMonth()->toDateString());
     }
 }

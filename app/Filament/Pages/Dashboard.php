@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\Employee;
 use App\Models\User;
+use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
@@ -61,6 +62,9 @@ class Dashboard extends Page implements HasForms
         $employee = Employee::where('user_id', $user_id)->first();
         $current_date = now()->toDateString();
         $current_time = now()->format('H:i');
+        $timesheet = '';
+
+        $timesheet = isset($employee) ? $employee->employee_timesheets()->where('date', $current_date)->first() : "";
 
         return $form
         ->schema([
@@ -74,8 +78,8 @@ class Dashboard extends Page implements HasForms
                     ])
                     ->schema([
                         Split::make([
-                            static::timeInSection($employee,$current_date,$current_time),
-                            static::timeOutSection($employee,$current_date,$current_time),
+                            static::timeInSection($employee, $current_date, $current_time, $timesheet),
+                            static::timeOutSection($employee, $current_date, $current_time, $timesheet),
                         ])->from('lg'),
                     ]),
                     Grid::make([
@@ -122,9 +126,9 @@ class Dashboard extends Page implements HasForms
     }
 
     
-    public static function timeInSection($employee,$current_date,$current_time): Section
+    public static function timeInSection($employee, $current_date, $current_time, $timesheet): Section
     {
-        return  Section::make()
+        return Section::make()
         ->description()
         ->schema([
             Fieldset::make('Time-In')
@@ -134,10 +138,8 @@ class Dashboard extends Page implements HasForms
                     ->id('Date and Time in')
                     ->schema([
                         Placeholder::make('time')->label('Time')
-                        ->content(function () use($employee ,$current_date) {
+                        ->content(function () use($timesheet) {
 
-                            $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
-            
                             if(isset($timesheet)){
                                 if($timesheet->time_in != '00:00:00'){
                                     return date('h:i A', strtotime($timesheet->time_in));
@@ -157,10 +159,8 @@ class Dashboard extends Page implements HasForms
                                     'WFH' => 'Work From Home',
                                 ])->required(),   
                             ])
-                            ->disabled(function () use($employee ,$current_date) {
+                            ->disabled(function () use($timesheet) {
                                 
-                                $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
-
                                 if(isset($timesheet)){
                                     if($timesheet->time_in != '00:00:00'){
                                         return true;
@@ -169,7 +169,7 @@ class Dashboard extends Page implements HasForms
 
                                 return false;
                             })                                                    
-                            ->action(function (array $data) use ($employee, $current_date ,$current_time) {
+                            ->action(function (array $data) use ($employee, $current_date, $current_time, $timesheet) {
 
                                 $location = $data['location'];
 
@@ -185,19 +185,30 @@ class Dashboard extends Page implements HasForms
 
                                     if($result) {
                                         
-                                        $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
                                         if ($timesheet) {
                                             
                                             $timesheet->time_in = $current_time;
                                             $timesheet->in_location = $location;
                                             $timesheet->save();
+                                        } else {
 
-                                            Notification::make()
-                                            ->success()
-                                            ->title('Attendace')
-                                            ->body('Time in '.$current_time.' successfully.')
-                                            ->send();
+                                            // if no timesheet create for this attendance
+                                            $time_in = $employee->employment->time_in ? Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A') : "00:00";
+                                            $time_out = $employee->employment->time_out ? Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A') : "00:00";
+                                            $schedule = $time_in . ' - ' . $time_out;
+
+                                            $employee->employee_timesheets()->create([
+                                                'date' => $current_date,
+                                                'shift_schedule' => $schedule
+                                            ]);
                                         }
+
+                                        
+                                        Notification::make()
+                                        ->success()
+                                        ->title('Attendace')
+                                        ->body('Time in '.$current_time.' successfully.')
+                                        ->send();
                                     }
                                 }
                             })
@@ -209,7 +220,7 @@ class Dashboard extends Page implements HasForms
         ]);
     } 
 
-    public static function timeOutSection($employee,$current_date,$current_time): Section
+    public static function timeOutSection($employee, $current_date, $current_time, $timesheet): Section
     {
         return Section::make()
         ->schema([
@@ -220,10 +231,8 @@ class Dashboard extends Page implements HasForms
                 ->id('Date and Time out')
                 ->schema([
                     Placeholder::make('time')->label('Time')
-                    ->content(function () use($employee ,$current_date) {
+                    ->content(function () use($timesheet) {
 
-                        $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
-        
                         if(isset($timesheet)){
                             if($timesheet->time_out != '00:00:00'){
                                 return date('h:i A', strtotime($timesheet->time_out));
@@ -243,10 +252,8 @@ class Dashboard extends Page implements HasForms
                             'WFH' => 'Work From Home',
                         ])->required(),   
                     ])
-                    ->disabled(function () use($employee ,$current_date) {
+                    ->disabled(function () use($timesheet) {
                                 
-                        $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
-
                         if(isset($timesheet)){
                             if($timesheet->time_out != '00:00:00'){
                                 return true;
@@ -255,7 +262,7 @@ class Dashboard extends Page implements HasForms
 
                         return false;
                     })  
-                    ->action(function (array $data) use ($employee, $current_date ,$current_time) {
+                    ->action(function (array $data) use ($employee, $current_date ,$current_time, $timesheet) {
 
                         $location = $data['location'];
 
@@ -271,7 +278,6 @@ class Dashboard extends Page implements HasForms
 
                             if($result) {
                                 
-                                $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
                                 if ($timesheet) {
                                     
                                     $timesheet->time_out = $current_time;
