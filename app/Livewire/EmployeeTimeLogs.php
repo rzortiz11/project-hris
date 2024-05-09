@@ -56,7 +56,7 @@ class EmployeeTimeLogs extends Component implements HasForms, HasTable
                 TextColumn::make('latitude')->placeholder('-'),
                 TextColumn::make('longitude')->placeholder('-'),
             ])
-            ->defaultSort('date', 'desc')
+            ->defaultSort('created_at', 'desc')
             ->paginated(false)
             ->filters([
                 // ...

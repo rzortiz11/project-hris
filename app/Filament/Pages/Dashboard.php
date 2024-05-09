@@ -14,6 +14,8 @@ use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -25,13 +27,16 @@ use Filament\Resources\Forms\Components;
 use Filament\Resources\Forms\ResourceForm;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Pages\Page;
 
-class Dashboard extends BaseDashboard implements HasForms
+class Dashboard extends Page implements HasForms
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-home';
 
+    protected static string $view = 'filament.pages.dashboard';
+   
     use InteractsWithForms;
-    // protected static string $view = 'filament.pages.dashboard';
+
     use HasFiltersForm;
 
     protected function getHeaderActions(): array
@@ -49,168 +54,245 @@ class Dashboard extends BaseDashboard implements HasForms
             })
         ];
     }
-
+    
     public function form(Form $form): Form
     {
+        $user_id = auth()->id();
+        $employee = Employee::where('user_id', $user_id)->first();
+        $current_date = now()->toDateString();
+        $current_time = now()->format('H:i');
+
         return $form
+        ->schema([
+
+            Grid::make([
+                'default' => 1])
             ->schema([
-                Section::make()
-                ->schema([
-                    Split::make([
-                        Fieldset::make('Time-In')
-                        ->schema([    
-                            // Actions::make([
-                                // FormAction::make('time_in')
-                                // ->label('Time in')
-                                // // ->icon('heroicon-o-clock')
-                                // ->tooltip('Time in!')
-                                // ->form([
-                                //     Select::make('Location')
-                                //     ->options([
-                                //         'OFFICE' => 'Office',
-                                //         'ONFIELD' => 'Onfield',
-                                //         'WFH' => 'Work From Home',
-                                //     ])->required(),   
-                                // ])
-                                // // ->iconButton()
-                                // ->action(function(array $data) {
-                                //     $user = auth()->id();
-                                //     dd($data);
-                                // }),
-                            // ]),                         
-
-                                Section::make('')
-                                ->icon('heroicon-o-clock')
-                                ->id('Date and Time')
-                                ->schema([
-                                    Placeholder::make('Date and Time')
-                                ])
-                                ->footerActions([
-                                    FormAction::make('Time in')
-                                        ->form([
-                                            Select::make('location')
-                                            ->options([
-                                                'OFFICE' => 'Office',
-                                                'ONFIELD' => 'Onfield',
-                                                'WFH' => 'Work From Home',
-                                            ])->required(),   
-                                        ])
-                                        ->action(function (array $data) {
-
-                                            $user_id = auth()->id();
-                                            $employee = Employee::where('user_id',$user_id)->first();
-
-                                            $current_date = now()->toDateString();
-                                            $current_time = now()->format('H:i');
-                                            $location = $data['location'];
-
-                                            if($employee){
-
-                                                $result = $employee->employee_timelogs()->create([
-                                                        'date' => $current_date,
-                                                        'day' => now()->format('l'),
-                                                        'type' => 'TIMEIN',
-                                                        'time' => $current_time,
-                                                        'location' => $location
-                                                ]);
-
-                                                if($result) {
-                                                    
-                                                    $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
-                                                    if ($timesheet) {
-                                                        
-                                                        $timesheet->time_in = $current_time;
-                                                        $timesheet->in_location = $location;
-                                                        $timesheet->save();
-                                                    }
-                                                }
-                                            }
-                                        })
-                                        ->tooltip('Time in!'),
-                                        // ->successNotification(
-                                        //     Notification::make()
-                                        //          ->success()
-                                        //          ->title('Attendace')
-                                        //          ->body('Time in successfully.'),
-                                        //  )
-                                ])  
-                                ->footerActionsAlignment(Alignment::Center)    
-                        ]),
-                      
-                        Fieldset::make('Time-Out')
+                Split::make([
+                    Grid::make([
+                        'default' => 1
+                    ])
+                    ->schema([
+                        Split::make([
+                            static::timeInSection($employee,$current_date,$current_time),
+                            static::timeOutSection($employee,$current_date,$current_time),
+                        ])->from('lg'),
+                    ]),
+                    Grid::make([
+                        'default' => 1
+                    ])
+                    ->schema([
+                        Section::make('')
                         ->schema([
-                            // Actions::make([
-                            //     FormAction::make('Time out')
-                            //     ->tooltip('Time out!')
-                            //     // ->icon('heroicon-s-clock')
-                            //     // ->iconButton()
-                            //     ->form([
-                            //         Select::make('Location')
-                            //         ->options([
-                            //             'OFFICE' => 'Office',
-                            //             'ONFIELD' => 'Onfield',
-                            //             'WFH' => 'Work From Home',
-                            //         ])->required(),
-                            //     ])
-                            //     ->disabled()
-                            //     ->action(function() {
-        
-                            //     })
-                            // ]),
-                             
-                            Section::make('')
-                            ->icon('heroicon-s-clock')
-                            ->id('Date and Time')
+                            Fieldset::make('Clock')
                             ->schema([
-                                Placeholder::make('Date and Time')
+                                
                             ])
-                            ->footerActions([
-                                FormAction::make('Time out')
-                                ->form([
-                                    Select::make('location')
-                                    ->options([
-                                        'OFFICE' => 'Office',
-                                        'ONFIELD' => 'Onfield',
-                                        'WFH' => 'Work From Home',
-                                    ])->required(),   
-                                ])
-                                ->action(function (array $data) {
+                            ->extraAttributes(['class' => 'text-center'])
+                            ->columns(1)
+                        ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
+                        ->columns(1),
+                        
+                        Section::make('Employee on-leave')
+                        ->schema([
+                            Fieldset::make('Table')
+                            ->schema([
+                                
+                            ])
+                            ->extraAttributes(['class' => 'text-center'])
+                            ->columns(1)
+                        ]),
+                        Section::make('HR Announcement')
+                        ->schema([
+                            Fieldset::make('TABLE')
+                            ->schema([
+                                
+                            ])
+                            ->extraAttributes(['class' => 'text-center'])
+                            ->columns(1)
+                        ])
+                    ])
+                    ->extraAttributes(['class' => 'bg-gray-600'])
+                    ->columns(1)
+                    ->grow(false),                        
+                ])->from('lg'),
+            ])
 
-                                    $user_id = auth()->id();
-                                    $employee = Employee::where('user_id',$user_id)->first();
+        ]);
+    }
 
-                                    $current_date = now()->toDateString();
-                                    $current_time = now()->format('H:i');
-                                    $location = $data['location'];
+    
+    public static function timeInSection($employee,$current_date,$current_time): Section
+    {
+        return  Section::make()
+        ->description()
+        ->schema([
+            Fieldset::make('Time-In')
+            ->schema([    
+                    Section::make('')
+                    ->icon('heroicon-o-clock')
+                    ->id('Date and Time in')
+                    ->schema([
+                        Placeholder::make('time')->label('Time')
+                        ->content(function () use($employee ,$current_date) {
 
-                                    if($employee){
+                            $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
+            
+                            if(isset($timesheet)){
+                                if($timesheet->time_in != '00:00:00'){
+                                    return date('h:i A', strtotime($timesheet->time_in));
+                                }
+                            }
 
-                                        $result = $employee->employee_timelogs()->create([
-                                                'date' => $current_date,
-                                                'day' => now()->format('l'),
-                                                'type' => 'TIMEOUT',
-                                                'time' => $current_time,
-                                                'location' => $location
-                                        ]);
+                            return '-- : --';
+                        })
+                    ])
+                    ->footerActions([
+                        FormAction::make('Time in')
+                            ->form([
+                                Select::make('location')
+                                ->options([
+                                    'OFFICE' => 'Office',
+                                    'ONFIELD' => 'Onfield',
+                                    'WFH' => 'Work From Home',
+                                ])->required(),   
+                            ])
+                            ->disabled(function () use($employee ,$current_date) {
+                                
+                                $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
 
-                                        if($result) {
+                                if(isset($timesheet)){
+                                    if($timesheet->time_in != '00:00:00'){
+                                        return true;
+                                    }
+                                }
+
+                                return false;
+                            })                                                    
+                            ->action(function (array $data) use ($employee, $current_date ,$current_time) {
+
+                                $location = $data['location'];
+
+                                if($employee){
+
+                                    $result = $employee->employee_timelogs()->create([
+                                            'date' => $current_date,
+                                            'day' => now()->format('l'),
+                                            'type' => 'TIMEIN',
+                                            'time' => $current_time,
+                                            'location' => $location
+                                    ]);
+
+                                    if($result) {
+                                        
+                                        $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
+                                        if ($timesheet) {
                                             
-                                            $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
-                                            if ($timesheet) {
-                                                
-                                                $timesheet->time_out = $current_time;
-                                                $timesheet->out_location = $location;
-                                                $timesheet->out_date = $current_date;
-                                                $timesheet->save();
-                                            }
+                                            $timesheet->time_in = $current_time;
+                                            $timesheet->in_location = $location;
+                                            $timesheet->save();
+
+                                            Notification::make()
+                                            ->success()
+                                            ->title('Attendace')
+                                            ->body('Time in '.$current_time.' successfully.')
+                                            ->send();
                                         }
                                     }
-                                })->tooltip('Time out!'),
-                            ])  
-                            ->footerActionsAlignment(Alignment::Center)                          
-                        ])
-                    ])->from('lg')
+                                }
+                            })
+                            ->icon('heroicon-o-clock')
+                            ->tooltip('Time in!'),
+                    ])  
+                    ->footerActionsAlignment(Alignment::Center)    
+            ]),
+        ]);
+    } 
+
+    public static function timeOutSection($employee,$current_date,$current_time): Section
+    {
+        return Section::make()
+        ->schema([
+            Fieldset::make('Time-Out')
+            ->schema([
+                Section::make('')
+                ->icon('heroicon-s-clock')
+                ->id('Date and Time out')
+                ->schema([
+                    Placeholder::make('time')->label('Time')
+                    ->content(function () use($employee ,$current_date) {
+
+                        $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
+        
+                        if(isset($timesheet)){
+                            if($timesheet->time_out != '00:00:00'){
+                                return date('h:i A', strtotime($timesheet->time_out));
+                            }
+                        }
+
+                        return '-- : --';
+                    })
                 ])
-            ]);
+                ->footerActions([
+                    FormAction::make('Time out')
+                    ->form([
+                        Select::make('location')
+                        ->options([
+                            'OFFICE' => 'Office',
+                            'ONFIELD' => 'Onfield',
+                            'WFH' => 'Work From Home',
+                        ])->required(),   
+                    ])
+                    ->disabled(function () use($employee ,$current_date) {
+                                
+                        $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
+
+                        if(isset($timesheet)){
+                            if($timesheet->time_out != '00:00:00'){
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    })  
+                    ->action(function (array $data) use ($employee, $current_date ,$current_time) {
+
+                        $location = $data['location'];
+
+                        if($employee){
+
+                            $result = $employee->employee_timelogs()->create([
+                                    'date' => $current_date,
+                                    'day' => now()->format('l'),
+                                    'type' => 'TIMEOUT',
+                                    'time' => $current_time,
+                                    'location' => $location
+                            ]);
+
+                            if($result) {
+                                
+                                $timesheet = $employee->employee_timesheets()->where('date', $current_date)->first();
+                                if ($timesheet) {
+                                    
+                                    $timesheet->time_out = $current_time;
+                                    $timesheet->out_location = $location;
+                                    $timesheet->out_date = $current_date;
+                                    $timesheet->save();
+
+                                    Notification::make()
+                                    ->success()
+                                    ->title('Attendace')
+                                    ->body('Time out '.$current_time.' successfully.')
+                                    ->send();
+                                }
+                            }
+                        }
+                    })
+                    ->icon('heroicon-s-clock')
+                    ->tooltip('Time out!'),
+                ])  
+                ->footerActionsAlignment(Alignment::Center)                          
+            ])
+        ]);
     }
 }

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('middle_name')->nullable();
             $table->string('suffix', 10)->nullable();
+            $table->string('mobile')->unique()->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('password');
             $table->rememberToken();
