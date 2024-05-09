@@ -295,5 +295,4 @@ class Dashboard extends Page implements HasForms
             ])
         ]);
     }
-    
 }
