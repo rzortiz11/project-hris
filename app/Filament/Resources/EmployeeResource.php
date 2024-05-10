@@ -110,6 +110,8 @@ class EmployeeResource extends Resource
                                         static::documentInformation()
                                     ]),                                      
                             ])
+                            ->contained(false)
+                            ->columnSpanFull()
                             ->persistTabInQueryString()
                             // ->persistTab()
                             // ->id('basic-details-tab')
@@ -1135,7 +1137,7 @@ class EmployeeResource extends Resource
         return Split::make([
             static::healthBenefitFields(),
             static::dpendentFields()
-        ]);
+        ])->from('lg');
     }
 
     public static function healthBenefitFields(): Section

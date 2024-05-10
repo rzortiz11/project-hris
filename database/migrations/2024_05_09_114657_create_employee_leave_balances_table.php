@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('balance')->default(0);
             $table->integer('used_balance')->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

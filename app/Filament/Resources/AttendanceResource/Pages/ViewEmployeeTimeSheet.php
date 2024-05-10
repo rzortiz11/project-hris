@@ -59,21 +59,13 @@ class ViewEmployeeTimeSheet extends ViewRecord
                 ->description('Employee Time Sheet')
                 ->icon('heroicon-s-clock')
                 ->schema([
-                    TextEntry::make('employee_reference')->label('Employee Reference')
-                    ->weight(FontWeight::Bold)
-                    ->size(TextEntry\TextEntrySize::Large),
-                    TextEntry::make('user.name')->label('Employee Name')
-                    ->weight(FontWeight::Bold)
-                    ->size(TextEntry\TextEntrySize::Large),
-                    TextEntry::make('position.job_category')->label('Category')
-                    ->weight(FontWeight::Bold)
-                    ->size(TextEntry\TextEntrySize::Large),
-                    TextEntry::make('position.job_position')->label('Position')
-                    ->weight(FontWeight::Bold)
-                    ->size(TextEntry\TextEntrySize::Large),
-                    TextEntry::make('position.reporting_designation')->label('Department')
-                    ->weight(FontWeight::Bold)
-                    ->size(TextEntry\TextEntrySize::Large),
+                    TextEntry::make('employee_reference')->label('Employee Number'),
+                    TextEntry::make('user.name')->label('Employee Name'),
+                    TextEntry::make('position.job_category')->label('Category'),
+                    TextEntry::make('position.job_position')->label('Position'),
+                    TextEntry::make('position.reporting_designation')->label('Department'),
+                    // ->weight(FontWeight::Bold)
+                    // ->size(TextEntry\TextEntrySize::Large),
                 ])->columns(5),
 
                 // Section::make('Attendance Details')
