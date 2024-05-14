@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EmployeeSalaryDetail extends Model
@@ -15,8 +16,8 @@ class EmployeeSalaryDetail extends Model
     
     protected $fillable = ['employee_id','type','monthly_amount','yearly_amount'];
 
-    public function employee(): BelongsTo
+    public function employee(): BelongsToMany
     {
-        return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
+        return $this->belongsToMany(Employee::class, 'employee_id', 'employee_id');
     }
 }
