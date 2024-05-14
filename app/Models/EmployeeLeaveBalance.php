@@ -12,5 +12,5 @@ class EmployeeLeaveBalance extends Model
 
     protected $primaryKey = 'leave_balance_id';
 
-    protected $fillable = ['employee_id','type','description', 'balance', 'used_balance'];
+    protected $fillable = ['employee_id','type','description', 'balance', 'used_balance', 'remaining_balance', 'is_paid'];
 }

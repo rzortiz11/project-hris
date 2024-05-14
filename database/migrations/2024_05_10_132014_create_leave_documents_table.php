@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employee_leave_balances', function (Blueprint $table) {
-            $table->id('leave_balance_id');
-            $table->unsignedBigInteger('employee_id');
+        Schema::create('leave_documents', function (Blueprint $table) {
+            $table->id('leave_document_id');
+            $table->unsignedBigInteger('leave_id');
+            $table->string('filename')->nullable();
             $table->string('type')->nullable();
-            $table->string('description')->nullable();
-            $table->integer('balance')->default(0);
-            $table->integer('used_balance')->default(0);
+            $table->string('path')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_leave_balances');
+        Schema::dropIfExists('leave_documents');
     }
 };

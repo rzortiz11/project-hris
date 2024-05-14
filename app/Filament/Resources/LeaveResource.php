@@ -12,6 +12,7 @@ use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -85,15 +86,22 @@ class LeaveResource extends Resource
                                     ->preload(),
                                     TextInput::make('balance') 
                                     ->required(),
-                                    TextInput::make('used_balance')
-                                    ->default(0)
-                                    ->readOnly() 
+                                    Radio::make('is_paid')
+                                    ->label('')
+                                    ->options([
+                                        '1' => 'Is paid',
+                                        '0' => 'Is not paid',
+                                    ])
+                                    ->descriptions([
+                                        '1' => 'Leave with pay',
+                                        '0' => 'Leave with out pay',
+                                    ])
                                 ])
                                 ->columns(3),    
                             ])
                             ->itemLabel(function (array $state): ?string {
                                 if ($state['type']) {
-                                    return strtoupper($state['type']) . ' - ' . 'Balance : '.$state['balance'].' Used : '.$state['used_balance'];
+                                    return strtoupper($state['type']) . ' - ' . 'Balance : '.$state['balance'];
                                 } 
                                 return null;
                             })->collapsed()
@@ -109,7 +117,7 @@ class LeaveResource extends Resource
                     Section::make('EMPLOYEE LEAVE HISTORY')
                     ->icon('heroicon-s-document-duplicate')
                     ->schema([
-                        Livewire::make(EmployeeLeaveHistoryTable::class)
+                        Livewire::make(EmployeeLeaveHistoryTable::class)->lazy()
                     ])
                 ]),
             ]);

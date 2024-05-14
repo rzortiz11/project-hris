@@ -660,7 +660,7 @@ class EmployeeResource extends Resource
             'default' => 1
         ])
         ->schema([
-            // Livewire::make(ViewSalaryDetails::class),    
+            Livewire::make(ViewSalaryDetails::class)->lazy(),    
         ]);
     }
 

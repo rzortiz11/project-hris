@@ -24,6 +24,10 @@ class ViewEmployeeTimeSheet extends ViewRecord
 {
     protected static string $resource = AttendanceResource::class;
 
+    protected $listeners = [
+        'reviewSectionRefresh' => '$refresh',
+    ];
+
     protected function getActions(): array
     {
         $actions = [];
@@ -75,11 +79,11 @@ class ViewEmployeeTimeSheet extends ViewRecord
                 ->tabs([
                     Tab::make('Time Sheet')
                     ->schema([
-                        Livewire::make(EmployeeTimeSheet::class)->data(['record' => $this->record])
+                        Livewire::make(EmployeeTimeSheet::class)->data(['record' => $this->record])->lazy()
                     ]),
                     Tab::make('Time Logs')
                     ->schema([
-                        Livewire::make(EmployeeTimeLogs::class)->data(['record' => $this->record])
+                        Livewire::make(EmployeeTimeLogs::class)->data(['record' => $this->record])->lazy()
                     ]),                    
                 ])
                 ->persistTabInQueryString()

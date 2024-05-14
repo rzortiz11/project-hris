@@ -131,6 +131,10 @@ class Employee extends Model
         return $this->hasMany(TimeLog::class, 'employee_id', 'employee_id');
     }
 
+    public function employee_leaves(): HasMany {
+        return $this->hasMany(Leave::class, 'employee_id', 'employee_id');
+    }
+
     public function employee_leave_balances(): HasMany {
         return $this->hasMany(EmployeeLeaveBalance::class, 'employee_id', 'employee_id');
     }
