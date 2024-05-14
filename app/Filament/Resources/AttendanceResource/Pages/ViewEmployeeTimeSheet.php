@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Resources\AttendanceResource;
 use App\Livewire\EmployeeTimeLogs;
 use App\Livewire\EmployeeTimeSheet;
+use App\Models\Employee;
 use App\Models\TimeSheet;
 use Filament\Actions;
 use Filament\Actions\Action;
@@ -22,7 +23,31 @@ use Filament\Tables\Table;
 
 class ViewEmployeeTimeSheet extends ViewRecord
 {
+    
     protected static string $resource = AttendanceResource::class;
+
+    public $isTimeSheetView = false;
+
+    public function mount(int | string $record): void
+    {
+        if($record == 'timesheet'){
+            $user_id = auth()->id();
+            $employee = Employee::where('user_id', $user_id)->first();
+            $record = $employee->employee_id;
+            $this->isTimeSheetView = true;
+        }
+        
+        $this->record = $this->resolveRecord($record);
+        
+        // $this->authorizeAccess();
+    
+        // if (! $this->hasInfolist()) {
+        //     $this->fillForm();
+        // }
+
+        static::authorizeResourceAccess();
+        $this->fillForm();
+    }
 
     protected $listeners = [
         'reviewSectionRefresh' => '$refresh',
@@ -38,26 +63,15 @@ class ViewEmployeeTimeSheet extends ViewRecord
             ->action(function () {
                  //artisan route:list to view the filament route list
                 redirect()->route('filament.admin.resources.attendances.index');
-            });
+            })
+            ->hidden($this->isTimeSheetView);
 
             return $actions;
     }
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->query(TimeSheet::query()->where('employee_id', 19))
-            ->columns([
-     
-            ])
-            ->defaultSort('id', 'desc');
-    }
-
-
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
-            ->record($this->record)
             ->schema([
                 Section::make('Attendance Details')
                 ->description('Employee Time Sheet')

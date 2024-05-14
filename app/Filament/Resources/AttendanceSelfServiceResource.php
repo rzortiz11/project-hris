@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\AttendanceResource\Pages\ViewEmployeeTimeSheet;
 use App\Filament\Resources\AttendanceSelfServiceResource\Pages;
 use App\Filament\Resources\AttendanceSelfServiceResource\RelationManagers;
 use App\Models\Attendance;
@@ -61,9 +62,9 @@ class AttendanceSelfServiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAttendanceSelfServices::route('/'),
-            'create' => Pages\CreateAttendanceSelfService::route('/create'),
-            'edit' => Pages\EditAttendanceSelfService::route('/{record}/edit'),
+            'view' => ViewEmployeeTimeSheet::route('/{record}/view'),
+            'index' => ViewEmployeeTimeSheet::route("/timesheet/view"),
+            //how the hell does this even work :))
         ];
     }
 }

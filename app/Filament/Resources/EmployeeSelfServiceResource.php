@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\EmployeeResource\Pages\EditEmployee;
+use App\Filament\Resources\EmployeeResource\Pages\ListEmployees;
 use App\Filament\Resources\EmployeeSelfServiceResource\Pages;
 use App\Filament\Resources\EmployeeSelfServiceResource\RelationManagers;
 use App\Models\Employee;
@@ -61,9 +63,8 @@ class EmployeeSelfServiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListEmployeeSelfServices::route('/'),
-            'create' => Pages\CreateEmployeeSelfService::route('/create'),
-            'edit' => Pages\EditEmployeeSelfService::route('/{record}/edit'),
+            'edit' => EditEmployee::route('/{record}/edit'),
+            'index' => EditEmployee::route("/employee/edit")
         ];
     }
 }
