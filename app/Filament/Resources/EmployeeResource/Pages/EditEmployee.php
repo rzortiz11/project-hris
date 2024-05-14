@@ -4,6 +4,7 @@ namespace App\Filament\Resources\EmployeeResource\Pages;
 
 use App\Filament\Resources\EmployeeResource;
 use App\Livewire\ViewSalaryDetails;
+use App\Models\Employee;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -11,11 +12,34 @@ use Filament\Resources\Pages\EditRecord;
 class EditEmployee extends EditRecord
 {
     protected static string $resource = EmployeeResource::class;
+    
+    public $isEmployeeView = false;
+
+    public function mount(int | string $record): void
+    {
+        if($record == 'employee'){
+            $user_id = auth()->id();
+            $employee = Employee::where('user_id', $user_id)->first();
+            $record = $employee->employee_id;
+            $this->isEmployeeView = true;
+        }
+        
+        $this->record = $this->resolveRecord($record);
+        static::authorizeResourceAccess();
+        $this->fillForm();
+    }
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()->requiresConfirmation(),
+            Actions\Action::make('return')
+            ->color('info')
+            ->label('Return')
+            ->action(function () {
+                 //artisan route:list to view the filament route list
+                redirect()->route('filament.admin.resources.employees.index');
+            })
+            ->hidden($this->isEmployeeView)
         ];
     }
 

@@ -141,7 +141,7 @@ class Dashboard extends Page implements HasForms
                         Placeholder::make('time')->label('Time')
                         ->content(function () use($timesheet) {
 
-                            if(isset($timesheet)){
+                            if(isset($timesheet->time_in)){
                                 if($timesheet->time_in != '00:00:00'){
                                     return date('h:i A', strtotime($timesheet->time_in));
                                 }
@@ -162,7 +162,7 @@ class Dashboard extends Page implements HasForms
                             ])
                             ->disabled(function () use($timesheet) {
                                 
-                                if(isset($timesheet)){
+                                if(isset($timesheet->time_in)){
                                     if($timesheet->time_in != '00:00:00'){
                                         return true;
                                     }
@@ -233,7 +233,7 @@ class Dashboard extends Page implements HasForms
                     Placeholder::make('time')->label('Time')
                     ->content(function () use($timesheet) {
 
-                        if(isset($timesheet)){
+                        if(isset($timesheet->time_out)){
                             if($timesheet->time_out != '00:00:00'){
                                 return date('h:i A', strtotime($timesheet->time_out));
                             }
@@ -254,7 +254,7 @@ class Dashboard extends Page implements HasForms
                     ])
                     ->disabled(function () use($timesheet) {
                                 
-                        if(isset($timesheet)){
+                        if(isset($timesheet->time_in)){
                             
                             if($timesheet->time_in == '00:00:00'){
                                 // did not time-in yet
