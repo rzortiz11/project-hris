@@ -200,7 +200,9 @@ class Dashboard extends Page implements HasForms
 
                                             $employee->employee_timesheets()->create([
                                                 'date' => $current_date,
-                                                'shift_schedule' => $schedule
+                                                'shift_schedule' => $schedule,
+                                                'time_in' => $current_time,
+                                                'in_location' => $location,
                                             ]);
                                         }
                                         

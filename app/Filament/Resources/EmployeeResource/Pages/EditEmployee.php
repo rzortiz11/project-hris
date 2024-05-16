@@ -18,8 +18,7 @@ class EditEmployee extends EditRecord
     public function mount(int | string $record): void
     {
         if($record == 'employee'){
-            $user_id = auth()->id();
-            $employee = Employee::where('user_id', $user_id)->first();
+            $employee = auth()->user()->employee;
             $record = $employee->employee_id;
             $this->isEmployeeView = true;
         }
