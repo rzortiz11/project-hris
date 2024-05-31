@@ -2,18 +2,12 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AttendanceResource\Pages\ViewEmployeeTimeSheet;
-use App\Filament\Resources\LeaveSelfServiceResource\Pages;
-use App\Filament\Resources\LeaveSelfServiceResource\RelationManagers;
+use App\Filament\Resources\LeaveSelfServiceResource\Pages\EmployeeSelfServiceLeaveView;
 use App\Models\Leave;
-use App\Models\LeaveSelfService;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class LeaveSelfServiceResource extends Resource
 {
@@ -62,8 +56,8 @@ class LeaveSelfServiceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'view' => ViewEmployeeTimeSheet::route('/{record}/view'),
-            'index' => ViewEmployeeTimeSheet::route("/leave/view"),
+            'view' => EmployeeSelfServiceLeaveView::route('/{record}/view'),
+            'index' => EmployeeSelfServiceLeaveView::route("/leave/view"),
         ];
     }
 }

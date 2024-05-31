@@ -30,7 +30,7 @@ class ViewEmployeeTimeSheet extends ViewRecord
 
     public function mount(int | string $record): void
     {
-        if($record == 'timesheet' || $record == 'leave'){
+        if($record == 'timesheet'){
             $employee = auth()->user()->employee;
             $record = $employee->employee_id;
             $this->isTimeSheetView = true;

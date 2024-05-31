@@ -114,7 +114,7 @@ class LeaveResource extends Resource
                         ->schema([
                             
                         ]),
-                        Section::make('EMPLOYEE LEAVE APPROVER')
+                        Section::make("EMPLOYEE LEAVE APPROVER'S")
                         ->description('LEAVE APPROVERS')
                         ->icon('heroicon-o-shield-check')
                         ->schema([
