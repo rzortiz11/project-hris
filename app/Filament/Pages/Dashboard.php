@@ -70,59 +70,63 @@ class Dashboard extends Page implements HasForms
         return $form
         ->schema([
 
-            Grid::make([
-                'default' => 1])
+            Grid::make()
             ->schema([
-                Split::make([
-                    Grid::make([
-                        'default' => 1
-                    ])
-                    ->schema([
-                        Split::make([
-                            static::timeInSection($employee, $current_date, $current_time, $timesheet),
-                            static::timeOutSection($employee, $current_date, $current_time, $timesheet),
-                        ])->from('lg'),
-                    ]),
-                    Grid::make([
-                        'default' => 1
-                    ])
-                    ->schema([
-                        Section::make('')
-                        ->schema([
-                            Fieldset::make('Clock')
-                            ->schema([
-                                
-                            ])
-                            ->extraAttributes(['class' => 'text-center'])
-                            ->columns(1)
-                        ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
-                        ->columns(1),
-                        
-                        Section::make('Employee on-leave')
-                        ->schema([
-                            Fieldset::make('Table')
-                            ->schema([
-                                
-                            ])
-                            ->extraAttributes(['class' => 'text-center'])
-                            ->columns(1)
-                        ]),
-                        Section::make('HR Announcement')
-                        ->schema([
-                            Fieldset::make('TABLE')
-                            ->schema([
-                                
-                            ])
-                            ->extraAttributes(['class' => 'text-center'])
-                            ->columns(1)
+                        Grid::make([
+                            'default' => 1
                         ])
-                    ])
-                    ->extraAttributes(['class' => 'bg-gray-600'])
-                    ->columns(1)
-                    ->grow(false),                        
-                ])->from('lg'),
+                        ->columnSpan(4)
+                        ->schema([
+                            static::timeInSection($employee, $current_date, $current_time, $timesheet),
+                        ]),
+          
+                        Grid::make([
+                            'default' => 1
+                        ])
+                        ->columnSpan(4)
+                        ->schema([
+                            static::timeOutSection($employee, $current_date, $current_time, $timesheet),
+                        ]),
+                        Grid::make([
+                            'default' => 1
+                        ])
+                        ->columnSpan(4)
+                        ->schema([
+                            Section::make('')
+                            ->schema([
+                                Fieldset::make('Clock')
+                                ->schema([
+                                    
+                                ])
+                                ->extraAttributes(['class' => 'text-center'])
+                                ->columns(1)
+                            ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
+                            ->columns(1),
+                            
+                            Section::make('Employee on-leave')
+                            ->schema([
+                                Fieldset::make('Table')
+                                ->schema([
+                                    
+                                ])
+                                ->extraAttributes(['class' => 'text-center'])
+                                ->columns(1)
+                            ]),
+                            Section::make('HR Announcement')
+                            ->schema([
+                                Fieldset::make('TABLE')
+                                ->schema([
+                                    
+                                ])
+                                ->extraAttributes(['class' => 'text-center'])
+                                ->columns(1)
+                            ])
+                        ])
+                        ->extraAttributes(['class' => 'bg-gray-600'])
+                        ->columns(1)
+                        ->grow(false),    
             ])
-
+            ->columns(12),
         ]);
     }
 
@@ -200,7 +204,9 @@ class Dashboard extends Page implements HasForms
 
                                             $employee->employee_timesheets()->create([
                                                 'date' => $current_date,
-                                                'shift_schedule' => $schedule
+                                                'shift_schedule' => $schedule,
+                                                'time_in' => $current_time,
+                                                'in_location' => $location,
                                             ]);
                                         }
                                         

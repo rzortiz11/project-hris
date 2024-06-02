@@ -7,7 +7,7 @@
 
 <div class="p-4 h-full">
     {{-- Success is as dangerous as failure. --}}
-    <div class="text-center" id="currentDateTime">
+    <div class="text-center" id="currentDateTime" style="color: red;">
         <!-- Current date and time will be updated by JavaScript -->
     </div>
 </div>

@@ -8,6 +8,7 @@ use App\Livewire\EmployeeLeaveHistoryTable;
 use App\Livewire\ViewSalaryDetails;
 use App\Models\Employee;
 use App\Models\Leave;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Livewire;
@@ -26,12 +27,13 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\FontWeight;
+use Filament\Forms\Components\Actions\Action;
 
 class LeaveResource extends Resource
 {
     protected static ?string $model = Employee::class;
 
-    protected static ?string $navigationIcon = 'heroicon-c-calendar-days';
+    protected static ?string $navigationIcon = 'heroicon-s-calendar';
 
     protected static ?string $navigationGroup = 'System Administration';
 
@@ -108,9 +110,39 @@ class LeaveResource extends Resource
                         ]),
                         Section::make('WIDGET OR STATISTICS ALLOCATION DETAILS')
                         ->description('LEAVE ALLOCATIONS')
-                        ->icon('heroicon-o-document-duplicate')
+                        ->icon('heroicon-o-chart-pie')
                         ->schema([
                             
+                        ]),
+                        Section::make("EMPLOYEE LEAVE APPROVER'S")
+                        ->description('LEAVE APPROVERS')
+                        ->icon('heroicon-o-shield-check')
+                        ->schema([
+                            Repeater::make('employee_leave_approvers')
+                            ->label('')
+                            ->relationship()
+                            ->simple(
+                                
+                                Select::make('approver_id')
+                                ->options(User::all()->pluck('name', 'user_id')->map(function ($name) {
+                                    return ucwords(strtolower($name));
+                                }))
+                                ->label('Approver')
+                                ->preload()
+                                ->required()
+                                // ->live()
+                                // ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+            
+                                //         $family_id = $state;
+                                //         $family = EmployeeFamilyDetail::where('employee_family_id', $family_id)->first();
+                                //         $set('relationship', $family->relationship);
+                                // })
+                                ->searchable()
+                            )
+                            ->addActionLabel('Add Approver')
+                            ->deleteAction(
+                                fn (Action $action) => $action->requiresConfirmation()
+                            )
                         ]),
                     ])
                     ->from('lg'),
