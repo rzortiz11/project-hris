@@ -8,6 +8,7 @@ use App\Livewire\CreateLeaveForm;
 use App\Livewire\EmployeeLeaveHistoryTable;
 use Filament\Actions;
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Livewire;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -47,36 +48,24 @@ class EmployeeSelfServiceLeaveView extends ViewRecord
                     'default' => 1
                 ])
                 ->schema([
-                    Grid::make()
-                    ->schema([
-                        Section::make("EMPLOYEE LEAVE APPROVER'S")
-                            ->description('LEAVE APPROVERS')
-                            ->icon('heroicon-o-shield-check')
-                            ->columnSpan(6)
+                    Tabs::make()
+                    ->tabs([
+                       Tab::make('Leave History')
                             ->schema([
-                                Livewire::make(CreateLeaveForm::class)->lazy()
-                            ]),
-                        Section::make('EMPLOYE LEAVE DETAILS')
-                            ->description('LEAVE ALLOCATIONS')
-                            ->icon('heroicon-o-document-duplicate')
-                            ->columnSpan(3)
+                                Section::make('EMPLOYEE LEAVE HISTORY')
+                                ->icon('heroicon-s-document-duplicate')
+                                ->schema([
+                                    Livewire::make(EmployeeLeaveHistoryTable::class)->lazy()
+                                ])
+                            ])->columns(2),
+                       Tab::make('Leave Form')
                             ->schema([
-                                // Add your form components here
-                            ]),
-                        Section::make('WIDGET OR STATISTICS ALLOCATION DETAILS')
-                            ->description('LEAVE ALLOCATIONS')
-                            ->icon('heroicon-o-chart-pie')
-                            ->columnSpan(3)
-                            ->schema([
-                                // Add your form components here
-                            ]),
+                                Livewire::make(CreateLeaveForm::class)->lazy()    
+                            ]),     
                     ])
-                    ->columns(12),
-                    Section::make('EMPLOYEE LEAVE HISTORY')
-                    ->icon('heroicon-s-document-duplicate')
-                    ->schema([
-                        Livewire::make(EmployeeLeaveHistoryTable::class)->lazy()
-                    ])
+                    ->contained(false)
+                    ->columnSpanFull()
+                    ->persistTabInQueryString(),
                 ]),
             ]);
     }
