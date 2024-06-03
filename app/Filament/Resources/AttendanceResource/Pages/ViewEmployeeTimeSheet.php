@@ -7,8 +7,10 @@ use App\Livewire\EmployeeTimeLogs;
 use App\Livewire\EmployeeTimeSheet;
 use App\Models\Employee;
 use App\Models\TimeSheet;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Actions\Action;
+use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Livewire;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
@@ -84,6 +86,78 @@ class ViewEmployeeTimeSheet extends ViewRecord
                     // ->weight(FontWeight::Bold)
                     // ->size(TextEntry\TextEntrySize::Large),
                 ])->columns(5),
+                Grid::make()
+                ->schema([
+                    Section::make("Hour's this week")
+                    ->schema([
+                        TextEntry::make('employee_id')->label('')
+                        ->getStateUsing(function (Employee $record): string {
+                            // Get the current week's timesheets for the employee
+                            $startOfWeek = now()->startOfWeek(Carbon::MONDAY);
+                            $endOfWeek = now()->endOfWeek(Carbon::SUNDAY);
+
+                            $timesheets = TimeSheet::where('employee_id', $record->employee_id)
+                                ->whereBetween('date', [$startOfWeek, $endOfWeek])
+                                ->get();
+
+                            return self::calculateHoursFromTimeSheets($timesheets);
+                        })
+                        ->weight(FontWeight::Bold)
+                        ->size(TextEntry\TextEntrySize::Large),
+                    ])->columnSpan(3),
+                    Section::make("Hour's this month")
+                    ->schema([
+                        TextEntry::make('employee_id')->label('')
+                        ->getStateUsing(function (Employee $record): string {
+                            // Get the current month's timesheets for the employee
+                            $startOfMonth = now()->startOfMonth();
+                            $endOfMonth = now()->endOfMonth();
+    
+                            $timesheets = TimeSheet::where('employee_id', $record->employee_id)
+                                ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                                ->get();
+
+                            return  self::calculateHoursFromTimeSheets($timesheets);
+                        })
+                        ->weight(FontWeight::Bold)
+                        ->size(TextEntry\TextEntrySize::Large),
+                    ])->columnSpan(3),
+                    Section::make("Total Late this month")
+                    ->schema([
+                        TextEntry::make('employee_id')->label('')
+                            ->getStateUsing(function (Employee $record): string {
+                                // Get the current month's timesheets for the employee
+                                $startOfMonth = now()->startOfMonth();
+                                $endOfMonth = now()->endOfMonth();
+        
+                                $timesheets = TimeSheet::where('employee_id', $record->employee_id)
+                                    ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                                    ->get();
+        
+                                return self::calculateLateTimeFromTimeSheets($timesheets);
+                            })
+                            ->weight(FontWeight::Bold)
+                            ->size(TextEntry\TextEntrySize::Large),
+                    ])->columnSpan(3),
+                    Section::make("Total Over Time this month")
+                    ->schema([
+                        TextEntry::make('employee_id')->label('')
+                            ->getStateUsing(function (Employee $record): string {
+                                // Get the current month's timesheets for the employee
+                                $startOfMonth = now()->startOfMonth();
+                                $endOfMonth = now()->endOfMonth();
+        
+                                $timesheets = TimeSheet::where('employee_id', $record->employee_id)
+                                    ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                                    ->get();
+        
+                                return self::calculateOverTimeFromTimeSheets($timesheets);
+                            })
+                            ->weight(FontWeight::Bold)
+                            ->size(TextEntry\TextEntrySize::Large),
+                    ])->columnSpan(3),
+                ])->columns(12),
+
 
                 // Section::make('Attendance Details')
                 // ->description('Employee Time Sheet')
@@ -105,4 +179,112 @@ class ViewEmployeeTimeSheet extends ViewRecord
             ]);
     }
 
+    // Define a function to calculate hours from time sheets
+    public function calculateHoursFromTimeSheets($timesheets): string {
+        $totalMinutes = 0;
+
+        foreach ($timesheets as $timesheet) {
+            // Extract and parse timesheet data
+            $timeIn = $timesheet->time_in;
+            $timeOut = $timesheet->time_out;
+            $shiftSchedule = explode(' - ', $timesheet->shift_schedule);
+            $shiftStart = Carbon::parse($shiftSchedule[0]);
+            $shiftEnd = Carbon::parse($shiftSchedule[1]);
+
+            // Skip entries where either time_in or time_out is not available or with 00:00
+            if ($timeIn == '00:00:00' || $timeOut == '00:00:00') {
+                continue;
+            }
+
+            $timeIn = Carbon::parse($timeIn);
+            $timeOut = Carbon::parse($timeOut);
+
+            // Ensure time_in and time_out fall within the shift schedule
+            $actualStart = $timeIn->copy()->max($shiftStart);
+            $actualEnd = $timeOut->copy()->min($shiftEnd);
+
+            // Calculate minutes worked excluding the break
+            $breakStart = Carbon::parse('12:00:00');
+            $breakEnd = Carbon::parse('13:00:00');
+
+            if ($actualStart < $breakStart && $actualEnd > $breakEnd) {
+                // Work period spans the break period
+                $minutesWorked = $actualStart->diffInMinutes($breakStart) + $breakEnd->diffInMinutes($actualEnd);
+            } elseif ($actualStart < $breakStart && $actualEnd > $breakStart) {
+                // Work period starts before break and ends during break
+                $minutesWorked = $actualStart->diffInMinutes($breakStart);
+            } elseif ($actualStart < $breakEnd && $actualEnd > $breakEnd) {
+                // Work period starts during break and ends after break
+                $minutesWorked = $breakEnd->diffInMinutes($actualEnd);
+            } else {
+                // Work period does not intersect with break
+                $minutesWorked = $actualStart->diffInMinutes($actualEnd);
+            }
+
+            $totalMinutes += $minutesWorked;
+        }
+
+        // Convert total minutes to hours and minutes
+        $hours = floor($totalMinutes / 60);
+        $minutes = $totalMinutes % 60;
+
+        // Format the result as HH:MM
+        $formattedHours = str_pad($hours, 2, '0', STR_PAD_LEFT);
+        $formattedMinutes = str_pad($minutes, 2, '0', STR_PAD_LEFT);
+
+        // Return the total hours and minutes worked this week in HH:MM format
+        return "{$formattedHours}:{$formattedMinutes}";
+    }
+
+    function calculateLateTimeFromTimeSheets($timesheets): string {
+        $totalLateMinutes = 0;
+    
+        foreach ($timesheets as $timesheet) {
+            $lateTime = $timesheet->late_time;
+    
+            if ($lateTime == '00:00:00') {
+                continue;
+            }
+    
+            $lateTime = Carbon::parse($lateTime);
+            $totalLateMinutes += $lateTime->hour * 60 + $lateTime->minute;
+        }
+    
+        // Convert total late minutes to hours and minutes
+        $hours = floor($totalLateMinutes / 60);
+        $minutes = $totalLateMinutes % 60;
+    
+        // Format the result as HH:MM
+        $formattedHours = str_pad($hours, 2, '0', STR_PAD_LEFT);
+        $formattedMinutes = str_pad($minutes, 2, '0', STR_PAD_LEFT);
+    
+        // Return the total late time in HH:MM format
+        return "{$formattedHours}:{$formattedMinutes}";
+    }
+
+    function calculateOverTimeFromTimeSheets($timesheets): string {
+        $totalLateMinutes = 0;
+    
+        foreach ($timesheets as $timesheet) {
+            $lateTime = $timesheet->over_time;
+    
+            if ($lateTime == '00:00:00') {
+                continue;
+            }
+    
+            $lateTime = Carbon::parse($lateTime);
+            $totalLateMinutes += $lateTime->hour * 60 + $lateTime->minute;
+        }
+    
+        // Convert total late minutes to hours and minutes
+        $hours = floor($totalLateMinutes / 60);
+        $minutes = $totalLateMinutes % 60;
+    
+        // Format the result as HH:MM
+        $formattedHours = str_pad($hours, 2, '0', STR_PAD_LEFT);
+        $formattedMinutes = str_pad($minutes, 2, '0', STR_PAD_LEFT);
+    
+        // Return the total late time in HH:MM format
+        return "{$formattedHours}:{$formattedMinutes}";
+    }
 }

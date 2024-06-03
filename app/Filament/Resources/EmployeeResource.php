@@ -106,9 +106,9 @@ class EmployeeResource extends Resource
                                     static::bankInformation()
                                 ]),                                                                
                                Tab::make('Document Details')
-                                    ->schema([
-                                        static::documentInformation()
-                                    ]),                                      
+                                ->schema([
+                                    static::documentInformation()
+                                ]),                                      
                             ])
                             ->contained(false)
                             ->columnSpanFull()
@@ -1319,8 +1319,8 @@ class EmployeeResource extends Resource
                     'default' => 1
                 ])
                 ->schema([
-                    TextInput::make('bank_name')->label('Bank Account Name'),
-                    TextInput::make('account_name')->label('Account Number'),
+                    TextInput::make('bank_name')->label('Bank Name'),
+                    TextInput::make('account_name')->label('Account Name'),
                     TextInput::make('account_no')->label('Account Number'),
                 ])->columns(3)
             ]),
