@@ -2,30 +2,30 @@
 
 namespace App\Livewire;
 
+use App\Filament\Resources\EmployeeLeaveServiceResource\Widgets\LeaveSelfServiceAllocationPieChart;
 use App\Models\EmployeeLeaveApprover;
 use App\Models\EmployeeLeaveBalance;
 use App\Models\Leave;
 use App\Models\User;
-use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Split;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
-use Filament\Infolists\Components\TextEntry;
 use Livewire\Component;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Set;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Contracts\View\View;
+use Filament\Notifications\Notification;
 
 class CreateLeaveForm extends Component implements HasForms
 {
@@ -33,18 +33,17 @@ class CreateLeaveForm extends Component implements HasForms
 
     public ?array $data = [];
 
+    public $employee_id = "";
     public function mount(): void
     {
         $employee = auth()->user()->employee;
-        $employee->employee_id;
+        $this->employee_id = $employee->employee_id;
     }
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
-
-                
                 Grid::make()
                 ->schema([
 
@@ -64,9 +63,14 @@ class CreateLeaveForm extends Component implements HasForms
                                 return ucwords(strtolower($type));
                             })->toArray())
                             ->afterStateUpdated(function (Get $get, Set $set) {
-                                $set('balance', 0);
-                                $set('used_balance', 0);
-                                $set('remaining_balance', 0);
+
+                                $leave_balance_id = $get('type');
+                                $this->dispatch('updateAllocationPieChart', $leave_balance_id);
+                                // $Leavebalance = EmployeeLeaveBalance::find($leave_balance_id);
+
+                                // $set('balance', $Leavebalance->balance);
+                                // $set('used_balance', $Leavebalance->used_balance);
+                                // $set('remaining_balance', $Leavebalance->remaining_balance);
                             })
                             ->live(),
                             Grid::make([
@@ -122,14 +126,22 @@ class CreateLeaveForm extends Component implements HasForms
                         ])
                         ->footerActionsAlignment(Alignment::End)
                     ]),
-                    Section::make('WIDGET OR STATISTICS ALLOCATION DETAILS')
+                    Section::make('ALLOCATION DETAILS')
                         ->description('LEAVE ALLOCATIONS')
                         ->icon('heroicon-o-chart-pie')
                         ->columnSpan(4)
                         ->schema([
-                           TextInput::make('balance')->label('Allocated Leave Balance')->readOnly(),
-                           TextInput::make('used_balance')->readOnly(),
-                           TextInput::make('remaining_balance')->readOnly(),
+                           Livewire::make(LeaveSelfServiceAllocationPieChart::class)->lazy(),
+             
+                        //    Grid::make([
+                        //     'default' => 1
+                        //     ])
+                        //     ->schema([
+                        //         TextInput::make('balance')->label('Allocated')->readOnly(),
+                        //         TextInput::make('used_balance')->label('Used')->readOnly(),
+                        //         TextInput::make('remaining_balance')->label('Remaining')->readOnly(),
+                        //     ])
+                        //     ->columns(3),
                         ]),
                 ])
                 ->columns(12),
@@ -148,7 +160,16 @@ class CreateLeaveForm extends Component implements HasForms
         $record = Leave::create($data);
 
         $this->form->model($record)->saveRelationships();
-        return redirect()->to('admin/leave-self-services/leave/view');
+
+        // Reinitialize the form to clear its data.
+        $this->form->fill();
+
+        Notification::make()
+        ->success()
+        ->title('Leave request created successfully')
+        ->send();
+
+        // return redirect()->to('admin/leave-self-services/leave/view');
     }
 
     public function render(): View
