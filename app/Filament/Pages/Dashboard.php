@@ -157,6 +157,7 @@ class Dashboard extends Page implements HasForms
                     ->footerActions([
                         FormAction::make('Time in')
                             ->form([
+                                Placeholder::make('Do you want to time in?'),
                                 Select::make('location')
                                 ->options([
                                     'OFFICE' => 'Office',
@@ -251,6 +252,7 @@ class Dashboard extends Page implements HasForms
                 ->footerActions([
                     FormAction::make('Time out')
                     ->form([
+                        Placeholder::make('are you sure you want to time out?'),
                         Select::make('location')
                         ->options([
                             'OFFICE' => 'Office',
@@ -274,34 +276,56 @@ class Dashboard extends Page implements HasForms
 
                         return false;
                     })  
-                    ->action(function (array $data) use ($employee, $current_date ,$current_time, $timesheet) {
-
+                    ->action(function (array $data) use ($employee, $current_date, $current_time, $timesheet) {
                         $location = $data['location'];
 
-                        if($employee){
-
+                        if ($employee) {
                             $result = $employee->employee_timelogs()->create([
-                                    'date' => $current_date,
-                                    'day' => now()->format('l'),
-                                    'type' => 'TIMEOUT',
-                                    'time' => $current_time,
-                                    'location' => $location
+                                'date' => $current_date,
+                                'day' => now()->format('l'),
+                                'type' => 'TIMEOUT',
+                                'time' => $current_time,
+                                'location' => $location
                             ]);
 
-                            if($result) {
-                                
+                            if ($result) {
                                 if ($timesheet) {
-                                    
                                     $timesheet->time_out = $current_time;
                                     $timesheet->out_location = $location;
                                     $timesheet->out_date = $current_date;
+
+                                    // WILL MOVE THIS TO A JOB OR SCHEDULER
+                                        // ALSO WILL ASKED IF TIME_IN LATE IS IMPORTANT OR TIME_OUT_LATE
+                                        // Calculate late time for time_in and early leave time for time_out
+                                        $shiftSchedule = explode(' - ', $timesheet->shift_schedule);
+                                        $shiftStart = Carbon::parse($shiftSchedule[0]);
+                                        $shiftEnd = Carbon::parse($shiftSchedule[1]);
+
+                                        $timeIn = Carbon::parse($timesheet->time_in);
+                                        $timeOut = Carbon::parse($current_time);
+
+                                        $lateTimeInMinutes = 0;
+                                        if ($timeIn->greaterThan($shiftStart)) {
+                                            $lateTimeInMinutes = $shiftStart->diffInMinutes($timeIn);
+                                        }
+
+                                        $earlyLeaveMinutes = 0;
+                                        if ($timeOut->lessThan($shiftEnd)) {
+                                            $earlyLeaveMinutes = $timeOut->diffInMinutes($shiftEnd);
+                                        }
+
+                                        // Sum late arrival and early leave times
+                                        $totalLateMinutes = $lateTimeInMinutes + $earlyLeaveMinutes;
+                                        $timesheet->late_time = gmdate('H:i:s', $totalLateMinutes * 60);
+                                    // WILL MOVE THIS TO A JOB OR SCHEDULER
+
                                     $timesheet->save();
 
                                     Notification::make()
-                                    ->success()
-                                    ->title('Attendace')
-                                    ->body('Time out '.date('h:i A', strtotime($current_time)).' successfully.')
-                                    ->send();
+                                        ->success()
+                                        ->title('Attendance')
+                                        ->body('Time out ' . date('h:i A', strtotime($current_time)) . ' successfully.')
+                                        ->send();
                                 }
                             }
                         }
