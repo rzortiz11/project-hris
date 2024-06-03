@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\LeaveResource\Pages;
 use App\Filament\Resources\LeaveResource\RelationManagers;
+use App\Filament\Resources\LeaveResource\Widgets\LeaveAllocationPieChart;
 use App\Livewire\EmployeeLeaveHistoryTable;
 use App\Livewire\ViewSalaryDetails;
 use App\Models\Employee;
@@ -43,6 +44,9 @@ class LeaveResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // Access the model
+        $model_record = $form->getRecord();
+
         return $form
             ->schema([
                 Section::make('Employee Leave Details')
@@ -108,11 +112,11 @@ class LeaveResource extends Resource
                                 return null;
                             })->collapsed()
                         ]),
-                        Section::make('WIDGET OR STATISTICS ALLOCATION DETAILS')
+                        Section::make('ALLOCATION DETAILS')
                         ->description('LEAVE ALLOCATIONS')
                         ->icon('heroicon-o-chart-pie')
                         ->schema([
-                            
+                            Livewire::make(LeaveAllocationPieChart::class)->data(['record' => $model_record])->lazy(),
                         ]),
                         Section::make("EMPLOYEE LEAVE APPROVER'S")
                         ->description('LEAVE APPROVERS')
