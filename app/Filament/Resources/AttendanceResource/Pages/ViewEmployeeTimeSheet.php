@@ -171,7 +171,19 @@ class ViewEmployeeTimeSheet extends ViewRecord
                     Tab::make('Time Logs')
                     ->schema([
                         Livewire::make(EmployeeTimeLogs::class)->data(['record' => $this->record])->lazy()
-                    ]),                    
+                    ]),
+                    Tab::make('Time Change')
+                    ->schema([
+                       
+                    ]), 
+                    Tab::make('Over Time')
+                    ->schema([
+                       
+                    ]),      
+                    Tab::make('Shift Change')
+                    ->schema([
+                       
+                    ]),                         
                 ])
                 ->persistTabInQueryString()
                 ->contained(false)

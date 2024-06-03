@@ -58,7 +58,7 @@ class EmployeeSelfServiceLeaveView extends ViewRecord
                                     Livewire::make(EmployeeLeaveHistoryTable::class)->lazy()
                                 ])
                             ])->columns(2),
-                       Tab::make('Leave Form')
+                       Tab::make('File a Leave')
                             ->schema([
                                 Livewire::make(CreateLeaveForm::class)->lazy()    
                             ]),     

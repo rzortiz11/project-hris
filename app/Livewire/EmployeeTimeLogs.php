@@ -7,6 +7,7 @@ use App\Models\TimeSheet;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\Summarizers\Summarizer;
 use Filament\Tables\Columns\TextColumn;
@@ -37,11 +38,20 @@ class EmployeeTimeLogs extends Component implements HasForms, HasTable
         return $table
             ->query(TimeLog::query()->where('employee_id', $employee_id))
             ->columns([
-                TextColumn::make('date_type')->label('')
+                TextColumn::make('date_type')
+                ->label('')
                 ->default('•')
-                ->color(fn (string $state): string => match ($state) {
-                    '•' => 'success',
-                }),
+                ->color(function (TimeSheet $timesheet): string {
+                    $date = Carbon::parse($timesheet->date);
+                    $dayOfWeek = $date->format('l');
+            
+                    // Check if the day is a weekend
+                    $isWeekend = in_array($dayOfWeek, ['Saturday', 'Sunday']);
+            
+                    return $isWeekend ? 'danger' : 'success';
+                })
+                ->weight(FontWeight::Bold)
+                ->size(TextColumn\TextColumnSize::Large),
                 TextColumn::make('date')
                 ->label('Date')->searchable()
                 ->sortable(), 
