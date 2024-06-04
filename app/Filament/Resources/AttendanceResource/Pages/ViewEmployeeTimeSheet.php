@@ -165,22 +165,27 @@ class ViewEmployeeTimeSheet extends ViewRecord
                 Tabs::make('Tabs')
                 ->tabs([
                     Tab::make('Time Sheet')
+                    ->icon('heroicon-o-clock')
                     ->schema([
                         Livewire::make(EmployeeTimeSheet::class)->data(['record' => $this->record])->lazy()
                     ]),
                     Tab::make('Time Logs')
+                    ->icon('heroicon-o-arrow-right-on-rectangle')
                     ->schema([
                         Livewire::make(EmployeeTimeLogs::class)->data(['record' => $this->record])->lazy()
                     ]),
                     Tab::make('Time Change')
+                    ->icon('heroicon-o-inbox-arrow-down')
                     ->schema([
                        
                     ]), 
                     Tab::make('Over Time')
+                    ->icon('heroicon-o-window')
                     ->schema([
                        
                     ]),      
                     Tab::make('Shift Change')
+                    ->icon('heroicon-o-rectangle-group')
                     ->schema([
                        
                     ]),                         

@@ -51,17 +51,19 @@ class EmployeeSelfServiceLeaveView extends ViewRecord
                     Tabs::make()
                     ->tabs([
                        Tab::make('Leave History')
+                        ->icon('heroicon-o-folder-open')
+                        ->schema([
+                            Section::make('EMPLOYEE LEAVE HISTORY')
+                            ->icon('heroicon-s-document-duplicate')
                             ->schema([
-                                Section::make('EMPLOYEE LEAVE HISTORY')
-                                ->icon('heroicon-s-document-duplicate')
-                                ->schema([
-                                    Livewire::make(EmployeeLeaveHistoryTable::class)->lazy()
-                                ])
-                            ])->columns(2),
+                                Livewire::make(EmployeeLeaveHistoryTable::class)->lazy()
+                            ])
+                        ])->columns(2),
                        Tab::make('File a Leave')
-                            ->schema([
-                                Livewire::make(CreateLeaveForm::class)->lazy()    
-                            ]),     
+                        ->icon('heroicon-o-arrow-left-end-on-rectangle')
+                        ->schema([
+                            Livewire::make(CreateLeaveForm::class)->lazy()    
+                        ]),     
                     ])
                     ->contained(false)
                     ->columnSpanFull()

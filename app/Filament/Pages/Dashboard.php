@@ -297,6 +297,10 @@ class Dashboard extends Page implements HasForms
                                     // WILL MOVE THIS TO A JOB OR SCHEDULER
                                         // ALSO WILL ASKED IF TIME_IN LATE IS IMPORTANT OR TIME_OUT_LATE
                                         // Calculate late time for time_in and early leave time for time_out
+                                        
+                                        // ALSO CONSIDER THE SHIFT SCHEDULE 8am to 5pm, 8pm to 5am, 10pm to 8am etc.
+                                        // CONSIDER WHAT WILL HAPPEN IF SHIFT WILL BE UPDATED.
+
                                         $shiftSchedule = explode(' - ', $timesheet->shift_schedule);
                                         $shiftStart = Carbon::parse($shiftSchedule[0]);
                                         $shiftEnd = Carbon::parse($shiftSchedule[1]);
