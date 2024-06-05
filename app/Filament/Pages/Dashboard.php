@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Livewire\AnalogClock;
 use App\Models\Employee;
 use App\Models\User;
 use Carbon\Carbon;
@@ -17,6 +18,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -69,62 +71,61 @@ class Dashboard extends Page implements HasForms
 
         return $form
         ->schema([
-
             Grid::make()
             ->schema([
-                        Grid::make([
-                            'default' => 1
-                        ])
-                        ->columnSpan(4)
+                Grid::make([
+                    'default' => 1
+                ])
+                ->columnSpan(4)
+                ->schema([
+                    static::timeInSection($employee, $current_date, $current_time, $timesheet),
+                ]),
+    
+                Grid::make([
+                    'default' => 1
+                ])
+                ->columnSpan(4)
+                ->schema([
+                    static::timeOutSection($employee, $current_date, $current_time, $timesheet),
+                ]),
+                Grid::make([
+                    'default' => 1
+                ])
+                ->columnSpan(4)
+                ->schema([
+                    Section::make('')
+                    ->schema([
+                        Fieldset::make('Clock')
                         ->schema([
-                            static::timeInSection($employee, $current_date, $current_time, $timesheet),
-                        ]),
-          
-                        Grid::make([
-                            'default' => 1
+                            // Livewire::make(AnalogClock::class)
                         ])
-                        ->columnSpan(4)
-                        ->schema([
-                            static::timeOutSection($employee, $current_date, $current_time, $timesheet),
-                        ]),
-                        Grid::make([
-                            'default' => 1
-                        ])
-                        ->columnSpan(4)
-                        ->schema([
-                            Section::make('')
-                            ->schema([
-                                Fieldset::make('Clock')
-                                ->schema([
-                                    
-                                ])
-                                ->extraAttributes(['class' => 'text-center'])
-                                ->columns(1)
-                            ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
-                            ->columns(1),
-                            
-                            Section::make('Employee on-leave')
-                            ->schema([
-                                Fieldset::make('Table')
-                                ->schema([
-                                    
-                                ])
-                                ->extraAttributes(['class' => 'text-center'])
-                                ->columns(1)
-                            ]),
-                            Section::make('HR Announcement')
-                            ->schema([
-                                Fieldset::make('TABLE')
-                                ->schema([
-                                    
-                                ])
-                                ->extraAttributes(['class' => 'text-center'])
-                                ->columns(1)
-                            ])
-                        ])
-                        ->extraAttributes(['class' => 'bg-gray-600'])
+                        ->extraAttributes(['class' => 'text-center'])
                         ->columns(1)
-                        ->grow(false),    
+                    ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
+                    ->columns(1),
+                    
+                    Section::make('Employee on-leave')
+                    ->schema([
+                        Fieldset::make('Table')
+                        ->schema([
+                            
+                        ])
+                        ->extraAttributes(['class' => 'text-center'])
+                        ->columns(1)
+                    ]),
+                    Section::make('HR Announcement')
+                    ->schema([
+                        Fieldset::make('TABLE')
+                        ->schema([
+                            
+                        ])
+                        ->extraAttributes(['class' => 'text-center'])
+                        ->columns(1)
+                    ])
+                ])
+                ->extraAttributes(['class' => 'bg-gray-600'])
+                ->columns(1)
+                ->grow(false),    
             ])
             ->columns(12),
         ]);
@@ -297,6 +298,10 @@ class Dashboard extends Page implements HasForms
                                     // WILL MOVE THIS TO A JOB OR SCHEDULER
                                         // ALSO WILL ASKED IF TIME_IN LATE IS IMPORTANT OR TIME_OUT_LATE
                                         // Calculate late time for time_in and early leave time for time_out
+                                        
+                                        // ALSO CONSIDER THE SHIFT SCHEDULE 8am to 5pm, 8pm to 5am, 10pm to 8am etc.
+                                        // CONSIDER WHAT WILL HAPPEN IF SHIFT WILL BE UPDATED.
+
                                         $shiftSchedule = explode(' - ', $timesheet->shift_schedule);
                                         $shiftStart = Carbon::parse($shiftSchedule[0]);
                                         $shiftEnd = Carbon::parse($shiftSchedule[1]);

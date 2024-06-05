@@ -37,3 +37,4 @@ public/js/filament/support/support.js
 public/js/filament/tables/components/table.js
 public/js/filament/widgets/components/chart.js
 public/js/filament/widgets/components/stats-overview/stat/chart.js
+package-lock.json
