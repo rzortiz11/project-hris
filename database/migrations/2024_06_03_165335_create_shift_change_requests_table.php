@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('shift_change_requests', function (Blueprint $table) {
             $table->id('shift_change_id');
             $table->unsignedBigInteger('employee_id');
-            $table->date('date_filling')->nullable();
             $table->time('old_time_in')->nullable();
             $table->time('old_time_out')->nullable();
             $table->time('new_time_in')->nullable();

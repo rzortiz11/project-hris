@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('approver_id');
             $table->date('action_date')->nullable();
             $table->text('disapproved_reason')->nullable();
+            $table->enum('status', ['pending', 'approved', 'denied', 'void'])->nullable()->default('pending');
             $table->timestamps();
             $table->softDeletes();
         });

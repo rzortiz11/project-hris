@@ -681,6 +681,7 @@ class EmployeeResource extends Resource
             ])->columns(3),
 
             // Add salary Body repeater
+            // added this package composer require icetalker/filament-table-repeater to make the repeater not spacious
             Repeater::make('salary')
             ->label('')
             ->relationship()

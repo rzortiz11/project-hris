@@ -107,18 +107,20 @@ class EmployeeTimeSheet extends Component implements HasForms, HasTable
                 TextColumn::make('out_location')->label('Out Location')->placeholder('-'),
                 TextColumn::make('out_date')->label('Out Date')->placeholder('-'),
                 TextColumn::make('time_in_2')
+                ->toggleable(isToggledHiddenByDefault:true)               
                 ->getStateUsing(function (TimeSheet $timesheet): string {
 
                     $date = Carbon::parse($timesheet->time_in_2);
                     return $date->format('H:i');
                 })->sortable(),
                 TextColumn::make('time_out_2')
+                ->toggleable(isToggledHiddenByDefault:true)               
                 ->getStateUsing(function (TimeSheet $timesheet): string {
 
                     $date = Carbon::parse($timesheet->time_out_2);
                     return $date->format('H:i');
                 })->sortable(),
-                TextColumn::make('late_time')               
+                TextColumn::make('late_time')
                 ->getStateUsing(function (TimeSheet $timesheet): string {
 
                     $date = Carbon::parse($timesheet->late_time);
@@ -130,7 +132,7 @@ class EmployeeTimeSheet extends Component implements HasForms, HasTable
                     return $query->selectRaw("TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(late_time))), '%H:%i') AS late_time")->value('late_time');
                 }))
                 ->sortable(),
-                TextColumn::make('over_time')               
+                TextColumn::make('over_time')     
                 ->getStateUsing(function (TimeSheet $timesheet): string {
 
                     $date = Carbon::parse($timesheet->over_time);

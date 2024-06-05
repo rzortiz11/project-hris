@@ -5,6 +5,9 @@ namespace App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Resources\AttendanceResource;
 use App\Livewire\EmployeeTimeLogs;
 use App\Livewire\EmployeeTimeSheet;
+use App\Livewire\OverTimeRequestTable;
+use App\Livewire\ShiftChangeRequestTable;
+use App\Livewire\TimeChangeRequestTable;
 use App\Models\Employee;
 use App\Models\TimeSheet;
 use Carbon\Carbon;
@@ -177,17 +180,17 @@ class ViewEmployeeTimeSheet extends ViewRecord
                     Tab::make('Time Change')
                     ->icon('heroicon-o-inbox-arrow-down')
                     ->schema([
-                       
+                        Livewire::make(TimeChangeRequestTable::class)->data(['record' => $this->record])->lazy()
                     ]), 
                     Tab::make('Over Time')
                     ->icon('heroicon-o-window')
                     ->schema([
-                       
+                        Livewire::make(OverTimeRequestTable::class)->data(['record' => $this->record])->lazy()
                     ]),      
                     Tab::make('Shift Change')
                     ->icon('heroicon-o-rectangle-group')
                     ->schema([
-                       
+                        Livewire::make(ShiftChangeRequestTable::class)->data(['record' => $this->record])->lazy()
                     ]),                         
                 ])
                 ->persistTabInQueryString()

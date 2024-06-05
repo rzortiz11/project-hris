@@ -58,9 +58,8 @@ class EmployeeTimeLogs extends Component implements HasForms, HasTable
                 TextColumn::make('day')->searchable(),
                 TextColumn::make('type')->searchable(),
                 TextColumn::make('time')
-                ->getStateUsing(function (TimeLog $time_log): string {
-                    $date = Carbon::parse($time_log->time);
-                    return $date->format('H:i A');
+                ->getStateUsing(function ($record) {
+                    return $record->time ? Carbon::parse($record->time)->format('h:i A') : '00:00';
                 })->sortable(),
                 TextColumn::make('location')->label('Location')->placeholder('-'),
                 TextColumn::make('latitude')->placeholder('-'),
@@ -75,7 +74,8 @@ class EmployeeTimeLogs extends Component implements HasForms, HasTable
             ])
             ->bulkActions([
                 // ...
-            ]);
+            ])
+            ->defaultPaginationPageOption(5);
     }
 
     public function render()

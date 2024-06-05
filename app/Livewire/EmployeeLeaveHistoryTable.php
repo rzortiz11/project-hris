@@ -58,6 +58,18 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                 ->label('Leave to'),
                 TextColumn::make('hours')
                 ->label('Hours'),
+                TextColumn::make('remarks')
+                ->limit(10)
+                ->tooltip(function (TextColumn $column): ?string {
+                    $state = $column->getState();
+             
+                    if (strlen($state) <= $column->getCharacterLimit()) {
+                        return null;
+                    }
+             
+                    // Only render the tooltip if the column content exceeds the length limit.
+                    return $state;
+                }),
                 TextColumn::make('approver_id')
                 ->label('Approver')
                 ->getStateUsing(function (Leave $data): string {
