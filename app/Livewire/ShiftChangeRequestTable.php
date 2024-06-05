@@ -105,6 +105,7 @@ class ShiftChangeRequestTable extends Component implements HasForms, HasTable
                 TextColumn::make('created_at')->searchable(),
             ])
             ->defaultSort('created_at', 'desc')
+            ->defaultPaginationPageOption(5)
             ->filters([
                 //
             ])

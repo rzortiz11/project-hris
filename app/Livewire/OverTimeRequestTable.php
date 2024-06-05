@@ -98,6 +98,7 @@ class OverTimeRequestTable extends Component implements HasForms, HasTable
                 ->sortable()
                 ->label('Status'),
             ])
+            ->defaultPaginationPageOption(5)
             ->defaultSort('created_at', 'desc')
             ->filters([
                 //

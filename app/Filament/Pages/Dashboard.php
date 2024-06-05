@@ -120,7 +120,7 @@ class Dashboard extends Page implements HasForms
                         ->schema([
                             
                         ])
-                        ->extraAttributes(['class' => 'text-center',])
+                        ->extraAttributes(['class' => 'text-center'])
                         ->columns(1)
                     ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                     Section::make('Employees with Upcoming Leaves This Week')
@@ -131,7 +131,8 @@ class Dashboard extends Page implements HasForms
                         ])
                         ->extraAttributes(['class' => 'text-center',])
                         ->columns(1)
-                    ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'])
+                    ])
+                    ->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'])
                 ]),
             ])
             ->columns(12),
