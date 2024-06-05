@@ -52,7 +52,8 @@ class EmployeeResource extends Resource
         return $form
             ->schema([
                 Grid::make([
-                    'default' => 1])
+                    'default' => 1
+                ])
                 ->schema([
                     Split::make([
                         Grid::make([

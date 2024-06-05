@@ -17,14 +17,15 @@
                 <span-clock class="h9-clock">9</span-clock>
                 <span-clock class="h12-clock">12</span-clock>
             </div>
-            <template x-for="i in 60">
-                <div class="diallines-clock" :style="{ transform: `rotate(${6 * i}deg)` }"></div>
+            <template x-for="(i, index) in 60">
+                <div class="diallines-clock" :style="{ transform: `rotate(${6 * index}deg)` }"></div>
             </template>
+            
         </div>
     </div>
 
     <style>
-       
+  
         .clock {
             background: #ececec;
             width: 250px;
@@ -55,7 +56,7 @@
             position: absolute;
             z-index: 5;
             width: 4px;
-            height: 33px;
+            height: 42px;
             background: #333;
             top: 79px;
             transform-origin: 50% 100%; /* Corrected */
@@ -69,7 +70,7 @@
             position: absolute;
             z-index: 6;
             width: 4px;
-            height: 65px;
+            height: 75px;
             background: #666;
             top: 46px;
             left: 50%;
@@ -83,8 +84,8 @@
             position: absolute;
             z-index: 7;
             width: 2px;
-            height: 85px;
-            background: gold;
+            height: 95px;
+            background: #007fff;
             top: 26px;
             left: 50%;
             margin-left: -1px;
@@ -109,8 +110,8 @@
             margin-left: -9px;
         }
         .h3-clock {
-            top: 100px;
-            right: 30px;
+            top: 103px;
+            right: 26px;
         }
         .h6-clock {
             bottom: 20px;
@@ -118,8 +119,8 @@
             margin-left: -5px;
         }
         .h9-clock {
-            left: 30px;
-            top: 100px;
+            left: 27px;
+            top: 103px;
         }
 
         .diallines-clock {
@@ -161,10 +162,10 @@
             left: 50%;
         }
         .date-clock {
-            top: 50px;
+            top: 60px;
         }
         .day-clock {
-            top: 150px;
+            top: 160px;
         }
     </style>
 </div>
