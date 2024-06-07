@@ -95,9 +95,16 @@ class OverTimeRequestTable extends Component implements HasForms, HasTable
                 TextColumn::make('action_date')
                 ->label('Action Date'),
                 TextColumn::make('status')
+                ->color(fn (string $state): string => match($state) {
+                    'pending' => 'warning',
+                    'approved' => 'success',
+                    'denied' => 'danger',
+                    'void' => 'danger',
+                })
                 ->sortable()
                 ->label('Status'),
             ])
+            ->defaultPaginationPageOption(5)
             ->defaultSort('created_at', 'desc')
             ->filters([
                 //

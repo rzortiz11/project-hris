@@ -41,7 +41,7 @@ class EmployeeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-user-group';
 
-    protected static ?string $navigationGroup = 'System Administration';
+    protected static ?string $navigationGroup = 'Human Resource Management';
 
     protected static ?string $navigationLabel = 'Employee Management';
 
@@ -52,7 +52,8 @@ class EmployeeResource extends Resource
         return $form
             ->schema([
                 Grid::make([
-                    'default' => 1])
+                    'default' => 1
+                ])
                 ->schema([
                     Split::make([
                         Grid::make([
