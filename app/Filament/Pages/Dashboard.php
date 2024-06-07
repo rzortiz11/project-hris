@@ -3,6 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Livewire\AnalogClock;
+use App\Livewire\EmployeeOnLeaveTable;
+use App\Livewire\EmployeeUpcomingLeaveTable;
 use App\Models\Employee;
 use App\Models\User;
 use Carbon\Carbon;
@@ -21,6 +23,8 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -80,59 +84,48 @@ class Dashboard extends Page implements HasForms
                 ->schema([
                     Section::make('')
                     ->schema([
-                        // Fieldset::make('Clock')
-                        // ->schema([
-                            Livewire::make(AnalogClock::class)
-                        // ])
-                        // ->extraAttributes(['class' => 'text-center'])
-                        // ->columns(1)
-                    ])->extraAttributes(['class' => 'flex justify-center items-center text-center','style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'])
+                        Livewire::make(AnalogClock::class)
+                    ])
+                    ->extraAttributes([
+                        'class' => 'flex justify-center items-center text-center',
+                        'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);margin-top: 75px;'
+                    ])
                     ->columns(1),
                     static::timeInSection($employee, $current_date, $current_time, $timesheet),
                     static::timeOutSection($employee, $current_date, $current_time, $timesheet),
                 ])
-                ->extraAttributes(['class' => 'bg-gray-600'])
-                ->columns(1)
-                ->grow(false),    
+                ->extraAttributes(['class' => 'bg-gray-600']),    
                 Grid::make([
                     'default' => 1
                 ])
-                ->columnSpan(6)
+                ->columnSpan(9)
                 ->schema([
-                    Section::make('HR Announcement')
-                    ->schema([
-                        Fieldset::make('TABLE')
+                    Tabs::make('Tabs')
+                    ->tabs([
+                        Tab::make('Company News & Announcement')
+                        ->icon('heroicon-o-megaphone')
                         ->schema([
-                            
-                        ])
-                        ->extraAttributes(['class' => 'text-center'])
-                        ->columns(1)
-                    ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'])
-                ]),
-                Grid::make([
-                    'default' => 1
-                ])
-                ->columnSpan(3)
-                ->schema([
-                    Section::make('Employees on Leave Today')
-                    ->schema([
-                        Fieldset::make('Table')
+                            Livewire::make(EmployeeOnLeaveTable::class)
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                        Tab::make('On Leave Today')
+                        ->icon('heroicon-o-users')
                         ->schema([
-                            
-                        ])
-                        ->extraAttributes(['class' => 'text-center'])
-                        ->columns(1)
-                    ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
-                    Section::make('Employees with Upcoming Leaves This Week')
-                    ->schema([
-                        Fieldset::make('Table')
+                            // Livewire::make(EmployeeOnLeaveTable::class)
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                        Tab::make('Upcoming Leaves This Week')
+                        ->icon('heroicon-o-user-group')
                         ->schema([
-                            
-                        ])
-                        ->extraAttributes(['class' => 'text-center',])
-                        ->columns(1)
+                            // Livewire::make(EmployeeUpcomingLeaveTable::class)
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                        Tab::make('Events & Holiday Calendar')
+                        ->icon('heroicon-o-calendar-days')
+                        ->schema([
+                            // Livewire::make(EmployeeUpcomingLeaveTable::class)
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                     ])
-                    ->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'])
+                    ->columnSpanFull()
+                    ->persistTabInQueryString()
+                    ->contained(false),
                 ]),
             ])
             ->columns(12),

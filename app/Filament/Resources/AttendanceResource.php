@@ -22,7 +22,7 @@ class AttendanceResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-calendar-days';
 
-    protected static ?string $navigationGroup = 'System Administration';
+    protected static ?string $navigationGroup = 'Human Resource Management';
 
     protected static ?string $navigationLabel = 'Attendance Management';
 

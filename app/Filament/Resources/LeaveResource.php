@@ -36,7 +36,7 @@ class LeaveResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-calendar';
 
-    protected static ?string $navigationGroup = 'System Administration';
+    protected static ?string $navigationGroup = 'Human Resource Management';
 
     protected static ?string $navigationLabel = 'Leave Management';
 

@@ -41,7 +41,7 @@ class EmployeeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-s-user-group';
 
-    protected static ?string $navigationGroup = 'System Administration';
+    protected static ?string $navigationGroup = 'Human Resource Management';
 
     protected static ?string $navigationLabel = 'Employee Management';
 
