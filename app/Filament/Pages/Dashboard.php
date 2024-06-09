@@ -82,15 +82,15 @@ class Dashboard extends Page implements HasForms
                 ])
                 ->columnSpan(3)
                 ->schema([
-                    Section::make('')
-                    ->schema([
-                        Livewire::make(AnalogClock::class)
-                    ])
-                    ->extraAttributes([
-                        'class' => 'flex justify-center items-center text-center',
-                        'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);margin-top: 75px;'
-                    ])
-                    ->columns(1),
+                    // Section::make('')
+                    // ->schema([
+                    //     Livewire::make(AnalogClock::class)
+                    // ])
+                    // ->extraAttributes([
+                    //     'class' => 'flex justify-center items-center text-center',
+                    //     'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);margin-top: 75px;'
+                    // ])
+                    // ->columns(1),
                     static::timeInSection($employee, $current_date, $current_time, $timesheet),
                     static::timeOutSection($employee, $current_date, $current_time, $timesheet),
                 ])
@@ -108,14 +108,10 @@ class Dashboard extends Page implements HasForms
                             Livewire::make(EmployeeOnLeaveTable::class)
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('On Leave Today')
-                        ->icon('heroicon-o-users')
-                        ->schema([
-                            // Livewire::make(EmployeeOnLeaveTable::class)
-                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
-                        Tab::make('Upcoming Leaves This Week')
                         ->icon('heroicon-o-user-group')
                         ->schema([
-                            // Livewire::make(EmployeeUpcomingLeaveTable::class)
+                            // Livewire::make(EmployeeOnLeaveTable::class)
+                            // will convert this to filament full calendar package set default to today with week and months.
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('Events & Holiday Calendar')
                         ->icon('heroicon-o-calendar-days')
