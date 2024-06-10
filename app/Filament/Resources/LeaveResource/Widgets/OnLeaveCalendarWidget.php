@@ -19,7 +19,6 @@ class OnLeaveCalendarWidget extends FullCalendarWidget
         return [
             // 'firstDay' => 1,
             'displayEventTime' => false,
-            'initialView' => 'dayGridMonth',
             'headerToolbar' => [
                 'left' => 'dayGridMonth,dayGridWeek,listWeek,dayGridDay',
                 'center' => 'title',

@@ -2,10 +2,14 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\EmployeeResource\Pages\TodayBirthdayView;
+use App\Filament\Resources\LeaveResource\Widgets\OnLeaveCalendarWidget;
+use App\Filament\Resources\LeaveResource\Widgets\OnLeaveTodayCalendarWidget;
 use App\Livewire\AnalogClock;
 use App\Livewire\EmployeeOnLeaveTable;
 use App\Livewire\EmployeeUpcomingLeaveTable;
 use App\Models\Employee;
+use App\Models\Leave;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -80,7 +84,7 @@ class Dashboard extends Page implements HasForms
                 Grid::make([
                     'default' => 1
                 ])
-                ->columnSpan(3)
+                ->columnSpan(4)
                 ->schema([
                     // Section::make('')
                     // ->schema([
@@ -91,27 +95,68 @@ class Dashboard extends Page implements HasForms
                     //     'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);margin-top: 75px;'
                     // ])
                     // ->columns(1),
-                    static::timeInSection($employee, $current_date, $current_time, $timesheet),
-                    static::timeOutSection($employee, $current_date, $current_time, $timesheet),
-                ])
-                ->extraAttributes(['class' => 'bg-gray-600']),    
+                    Tabs::make('Tabs')
+                    ->tabs([
+                        // Tab::make('On Leave Today')
+                        // ->badge(function () {
+                        //     return Leave::query()
+                        //     // add on leave today
+                        //     ->where('status', 'approved')
+                        //     ->count();
+                        // })
+                        // ->icon('heroicon-o-megaphone')
+                        // ->schema([
+                        //     Livewire::make(OnLeaveTodayCalendarWidget::class)
+                        // ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                        Tab::make("Celebrating Birthday's")
+                        ->badge(function () {
+                            return Employee::query()
+                            // add on birth today and query with birthday
+                            // ->where('status', 'approved')
+                            ->count();
+                        })
+                        ->icon('heroicon-o-cake')
+                        ->schema([
+                            Livewire::make(TodayBirthdayView::class)
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                        Tab::make("Time In/Out")
+                        ->icon('heroicon-o-clock')
+                        ->schema([
+                            static::timeInSection($employee, $current_date, $current_time, $timesheet),
+                            static::timeOutSection($employee, $current_date, $current_time, $timesheet),
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                    ])
+                    ->columnSpanFull()
+                    ->persistTabInQueryString()
+                    ->contained(false),
+                    Section::make('Notice Board')
+                    ->schema([
+                    ])->extraAttributes([
+                        'class' => ' justify-center items-center text-center',
+                        'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8)'
+                    ])->columns(1),
+                    // Split::make([
+                    //     // static::timeInSection($employee, $current_date, $current_time, $timesheet),
+                    //     // static::timeOutSection($employee, $current_date, $current_time, $timesheet),
+                    // ])->from('lg'),
+                ]),    
                 Grid::make([
                     'default' => 1
                 ])
-                ->columnSpan(9)
+                ->columnSpan(8)
                 ->schema([
                     Tabs::make('Tabs')
                     ->tabs([
+                        Tab::make('On Leave')
+                        ->icon('heroicon-o-user-group')
+                        ->schema([
+                            Livewire::make(OnLeaveCalendarWidget::class)
+                            // will convert this to filament full calendar package set default to today with week and months.
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('Company News & Announcement')
                         ->icon('heroicon-o-megaphone')
                         ->schema([
-                            Livewire::make(EmployeeOnLeaveTable::class)
-                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
-                        Tab::make('On Leave Today')
-                        ->icon('heroicon-o-user-group')
-                        ->schema([
-                            // Livewire::make(EmployeeOnLeaveTable::class)
-                            // will convert this to filament full calendar package set default to today with week and months.
+                            Livewire::make(EmployeeUpcomingLeaveTable::class)
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('Events & Holiday Calendar')
                         ->icon('heroicon-o-calendar-days')
