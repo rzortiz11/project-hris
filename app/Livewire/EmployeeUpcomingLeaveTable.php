@@ -44,7 +44,7 @@ class EmployeeUpcomingLeaveTable extends Component implements HasForms, HasTable
                 ->getStateUsing(function (Leave $data): string {
                     $employee = Employee::find($data->employee_id);
                     
-                    return $employee ? $employee->position->reporting_designation : '';
+                    return isset($employee->position->reporting_designation) ? $employee->position->reporting_designation : '';
                 }),
                 TextColumn::make('from'),
                 TextColumn::make('to'),

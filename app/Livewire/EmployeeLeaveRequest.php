@@ -133,6 +133,7 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                     'denied' => 'danger',
                     'void' => 'danger',
                 })
+                ->sortable()
                 ->alignCenter(),
                 ]),
             ])
