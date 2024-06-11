@@ -6,6 +6,7 @@ use App\Filament\Resources\EmployeeResource\Pages\TodayBirthdayView;
 use App\Filament\Resources\LeaveResource\Widgets\OnLeaveCalendarWidget;
 use App\Filament\Resources\LeaveResource\Widgets\OnLeaveTodayCalendarWidget;
 use App\Livewire\AnalogClock;
+use App\Livewire\AnnouncementDashboardTable;
 use App\Livewire\EmployeeOnLeaveTable;
 use App\Livewire\EmployeeUpcomingLeaveTable;
 use App\Models\Announcement;
@@ -167,7 +168,7 @@ class Dashboard extends Page implements HasForms
                         })
                         ->icon('heroicon-o-megaphone')
                         ->schema([
-                            Livewire::make(EmployeeUpcomingLeaveTable::class)->key(self::generateUuid())
+                            Livewire::make(AnnouncementDashboardTable::class)->key(self::generateUuid())
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('Events & Holiday Calendar')
                         ->icon('heroicon-o-calendar-days')

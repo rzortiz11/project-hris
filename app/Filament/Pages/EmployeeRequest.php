@@ -6,10 +6,12 @@ use App\Livewire\EmployeeLeaveRequest;
 use App\Livewire\EmployeeOverTimeRequest;
 use App\Livewire\EmployeeShiftChangeRequest;
 use App\Livewire\EmployeeTimeChangeRequest;
+use App\Livewire\EmployeeUnderTimeRequest;
 use App\Models\Leave;
 use App\Models\OverTimeRequest;
 use App\Models\ShiftChangeRequest;
 use App\Models\TimeChangeRequest;
+use App\Models\UnderTimeRequest;
 use Filament\Infolists\Components\Livewire;
 use Filament\Infolists\Components\Tabs;
 use Filament\Infolists\Components\Tabs\Tab;
@@ -40,7 +42,7 @@ class EmployeeRequest extends Page
         $this->record = $record;
     }
 
-    public function getPendingLeaveRequestsCount($request, $approverId)
+    public function getPendingRequestsCount($request, $approverId)
     {
         if($request == "leave"){
             return Leave::query()
@@ -58,6 +60,13 @@ class EmployeeRequest extends Page
 
         if($request == "over_time"){
             return OverTimeRequest::query()
+            ->where('approver_id', $approverId)
+            ->where('status', 'pending')
+            ->count();
+        }
+
+        if($request == "under_time"){
+            return UnderTimeRequest::query()
             ->where('approver_id', $approverId)
             ->where('status', 'pending')
             ->count();
@@ -90,35 +99,43 @@ class EmployeeRequest extends Page
                 // ]),
                 Tab::make('leave Request')
                 ->badge(function ($record) {
-                    return $record ? $this->getPendingLeaveRequestsCount('leave',$record->user_id) : "0";
+                    return $record ? $this->getPendingRequestsCount('leave',$record->user_id) : "0";
                 })
                 ->icon('heroicon-o-folder-open')
                 ->schema([
-                    Livewire::make(EmployeeLeaveRequest::class)->key(self::generateUuid())
+                    Livewire::make(EmployeeLeaveRequest::class)->key(self::generateUuid())->lazy()
                 ]),
                 Tab::make('Time Change Request')
                 ->badge(function ($record) {
-                    return $record ? $this->getPendingLeaveRequestsCount('time_change',$record->user_id) : "0";
+                    return $record ? $this->getPendingRequestsCount('time_change',$record->user_id) : "0";
                 })
                 ->icon('heroicon-o-inbox-arrow-down')
                 ->schema([
-                    Livewire::make(EmployeeTimeChangeRequest::class)->key(self::generateUuid())
+                    Livewire::make(EmployeeTimeChangeRequest::class)->key(self::generateUuid())->lazy()
                 ]),
                 Tab::make('Over Time Request')
                 ->badge(function ($record) {
-                    return $record ? $this->getPendingLeaveRequestsCount('over_time',$record->user_id) : "0";
+                    return $record ? $this->getPendingRequestsCount('over_time',$record->user_id) : "0";
                 })
                 ->icon('heroicon-o-window')
                 ->schema([
-                    Livewire::make(EmployeeOverTimeRequest::class)->key(self::generateUuid())
+                    Livewire::make(EmployeeOverTimeRequest::class)->key(self::generateUuid())->lazy()
+                ]),
+                Tab::make('Under Time Request')
+                ->badge(function ($record) {
+                    return $record ? $this->getPendingRequestsCount('under_time',$record->user_id) : "0";
+                })
+                ->icon('heroicon-m-arrow-uturn-down')
+                ->schema([
+                    Livewire::make(EmployeeUnderTimeRequest::class)->key(self::generateUuid())->lazy()
                 ]),
                 Tab::make('Shift Change Request')
                 ->badge(function ($record) {
-                    return $record ? $this->getPendingLeaveRequestsCount('shift_change',$record->user_id) : "0";
+                    return $record ? $this->getPendingRequestsCount('shift_change',$record->user_id) : "0";
                 })
                 ->icon('heroicon-o-rectangle-group')
                 ->schema([
-                    Livewire::make(EmployeeShiftChangeRequest::class)->key(self::generateUuid())
+                    Livewire::make(EmployeeShiftChangeRequest::class)->key(self::generateUuid())->lazy()
                 ]),
             ])
             ->columnSpanFull()
