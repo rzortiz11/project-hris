@@ -6,6 +6,8 @@ use App\Models\TimeSheet;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Pages\Page;
+use Filament\Resources\Components\Tab;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\Summarizers\Summarizer;
@@ -17,11 +19,23 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
 use Livewire\Component;
 use PhpParser\Node\Stmt\Label;
+use Filament\Resources\Concerns\HasTabs;
+use Illuminate\Database\Eloquent\Builder as QueryBuilder;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 
-class EmployeeTimeSheet extends Component implements HasForms, HasTable
+class EmployeeTimeSheet extends Page implements HasForms, HasTable
 {
     use InteractsWithTable;
     use InteractsWithForms;
+    use HasTabs;
+
+    use InteractsWithTable {
+        makeTable as makeBaseTable;
+    }
+
+    protected ?String $heading = '';
         
     public $record;
 
@@ -30,13 +44,67 @@ class EmployeeTimeSheet extends Component implements HasForms, HasTable
         $this->record = $record;
     }
 
+    protected function getTableQuery(): QueryBuilder
+    {
+        $employee_id = $this->record->employee_id;
+
+        return TimeSheet::query()->where('employee_id', $employee_id);
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'January' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 1);
+            }),
+            'February' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 2);
+            }),
+            'March' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 3);
+            }),
+            'April' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 4);
+            }),
+            'May' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 5);
+            }),
+            'June' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 6);
+            }),
+            'July' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 7);
+            }),
+            'August' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 8);
+            }),
+            'September' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 9);
+            }),
+            'October' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 10);
+            }),
+            'November' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 11);
+            }),
+            'December' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query->whereMonth('date', 12);
+            }),
+        ];
+    }
+
+    
+    public function getDefaultActiveTab(): string | int | null
+    {
+        // not working - will have query of the current month here
+        return 'June';
+    }
+
     public function table(Table $table): Table
     {
-
-        $employee_id = $this->record->employee_id;
-    
         return $table
-            ->query(TimeSheet::query()->where('employee_id', $employee_id))
+            ->query($this->getTableQuery())
+            ->modifyQueryUsing($this->modifyQueryWithActiveTab(...))
             ->columns([
                 TextColumn::make('date_type')
                 ->label('')
@@ -145,10 +213,22 @@ class EmployeeTimeSheet extends Component implements HasForms, HasTable
                 }))
             ])
             ->defaultSort('date', 'desc')
-            ->paginated(false)
+            ->paginated([31, 'all'])
             ->filters([
-                // ...
-            ])
+                SelectFilter::make('year')
+                ->label('Year')
+                ->options($this->generateYearOptions())
+                ->default(date('Y'))
+                ->query(function ($query, array $data) {
+
+                    if (isset($data['value'])) {
+                        $query->whereYear('date', $data['value']);
+                    }
+
+                    $query->where('employee_id', $this->record->employee_id);
+                }),
+            ], layout: FiltersLayout::AboveContentCollapsible)
+            // ], layout: FiltersLayout::AboveContent)
             ->actions([
                 // ...
             ])
@@ -163,7 +243,75 @@ class EmployeeTimeSheet extends Component implements HasForms, HasTable
             });
     }
 
+    // I dont understand how this work yet as a whole - this is in regards for the tabs in timesheet component to work
+    // https://github.com/filamentphp/filament/discussions/10127 - link of the discussion
+    protected function makeTable(): Table
+    {
+        return $this->makeBaseTable()
+            ->query(fn (): QueryBuilder => $this->getTableQuery())
+            ->modifyQueryUsing($this->modifyQueryWithActiveTab(...))
+            //->modelLabel($this->getModelLabel() ?? static::getResource()::getModelLabel())
+            //->pluralModelLabel($this->getPluralModelLabel() ?? static::getResource()::getPluralModelLabel())
+            ->recordAction(function (Model $record, Table $table): ?string {
+                foreach (['view', 'edit'] as $action) {
+                    $action = $table->getAction($action);
     
+                    if (! $action) {
+                        continue;
+                    }
+    
+                    $action->record($record);
+    
+                    if ($action->isHidden()) {
+                        continue;
+                    }
+    
+                    if ($action->getUrl()) {
+                        continue;
+                    }
+    
+                    return $action->getName();
+                }
+    
+                return null;
+            })
+            //->recordTitle(fn (Model $record): string => static::getResource()::getRecordTitle($record))
+            ->recordUrl($this->getTableRecordUrlUsing() ?? function (Model $record, Table $table): ?string {
+                foreach (['view', 'edit'] as $action) {
+                    $action = $table->getAction($action);
+    
+                    if (! $action) {
+                        continue;
+                    }
+    
+                    $action->record($record);
+    
+                    if ($action->isHidden()) {
+                        continue;
+                    }
+    
+                    $url = $action->getUrl();
+    
+                    if (! $url) {
+                        continue;
+                    }
+    
+                    return $url;
+                }
+                return null;
+            });
+    
+    }
+
+    protected function generateYearOptions(): array
+    {
+        $currentYear = date('Y');
+        $years = range(2000, $currentYear);
+        
+        // Format the array for the select filter options
+        return array_combine($years, $years);
+    }
+
     public function render() : View
     {
         return view('livewire.employee-time-sheets');

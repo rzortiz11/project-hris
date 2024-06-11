@@ -1,3 +1,5 @@
-<div>
+<x-filament-panels::page>
+    <x-filament-panels::resources.tabs />
     {{$this->table}}
-</div>
+</x-filament-panels::page>
+

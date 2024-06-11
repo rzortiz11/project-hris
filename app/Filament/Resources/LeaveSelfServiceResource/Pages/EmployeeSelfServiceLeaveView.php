@@ -22,7 +22,7 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Infolist;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Table;
-
+use Illuminate\Support\Str;
 
 class EmployeeSelfServiceLeaveView extends ViewRecord
 {
@@ -40,6 +40,12 @@ class EmployeeSelfServiceLeaveView extends ViewRecord
         $this->fillForm();
     }
 
+    public static function generateUuid()
+    {
+        return (string) Str::uuid();
+    }
+
+
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
@@ -56,13 +62,13 @@ class EmployeeSelfServiceLeaveView extends ViewRecord
                             Section::make('EMPLOYEE LEAVE HISTORY')
                             ->icon('heroicon-s-document-duplicate')
                             ->schema([
-                                Livewire::make(EmployeeLeaveHistoryTable::class)->lazy()
+                                Livewire::make(EmployeeLeaveHistoryTable::class)->key(self::generateUuid())
                             ])
                         ])->columns(2),
                        Tab::make('File a Leave')
                         ->icon('heroicon-o-arrow-left-end-on-rectangle')
                         ->schema([
-                            Livewire::make(CreateLeaveForm::class)->lazy()    
+                            Livewire::make(CreateLeaveForm::class)->key(self::generateUuid())    
                         ]),     
                     ])
                     ->contained(false)

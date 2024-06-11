@@ -24,6 +24,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Illuminate\View\View;
+use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -68,6 +69,16 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->spa()
             ->plugin(FilamentSpatieRolesPermissionsPlugin::make())
+            ->plugin(
+                FilamentFullCalendarPlugin::make()
+                    // ->schedulerLicenseKey()
+                    ->selectable()
+                    ->editable()
+                    // ->timezone()    
+                    // ->locale()
+                    // ->plugins()
+                    // ->config()
+            )
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
             ->topNavigation()

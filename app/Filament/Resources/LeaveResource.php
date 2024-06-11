@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\FontWeight;
 use Filament\Forms\Components\Actions\Action;
+use Illuminate\Support\Str;
 
 class LeaveResource extends Resource
 {
@@ -116,7 +117,9 @@ class LeaveResource extends Resource
                         ->description('LEAVE ALLOCATIONS')
                         ->icon('heroicon-o-chart-pie')
                         ->schema([
-                            Livewire::make(LeaveAllocationPieChart::class)->data(['record' => $model_record])->lazy(),
+                            Livewire::make(LeaveAllocationPieChart::class)
+                            ->data(['record' => $model_record])
+                            ->key(self::generateUuid()),
                         ]),
                         Section::make("EMPLOYEE LEAVE APPROVER'S")
                         ->description('LEAVE APPROVERS')
@@ -153,7 +156,9 @@ class LeaveResource extends Resource
                     Section::make('EMPLOYEE LEAVE HISTORY')
                     ->icon('heroicon-s-document-duplicate')
                     ->schema([
-                        Livewire::make(EmployeeLeaveHistoryTable::class)->lazy()
+                        Livewire::make(EmployeeLeaveHistoryTable::class)                            
+                        ->key(self::generateUuid())
+
                     ])
                 ]),
             ]);
@@ -188,6 +193,11 @@ class LeaveResource extends Resource
            
             ]);
             // ->poll('10s');
+    }
+
+    public static function generateUuid()
+    {
+        return (string) Str::uuid();
     }
 
     public static function getRelations(): array

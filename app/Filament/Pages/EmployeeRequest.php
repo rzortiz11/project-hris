@@ -16,6 +16,7 @@ use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Pages\Page;
 use Filament\Infolists\Infolist;
+use Illuminate\Support\Str;
 
 class EmployeeRequest extends Page
 {
@@ -72,6 +73,10 @@ class EmployeeRequest extends Page
         return 0;
     }
 
+    public static function generateUuid()
+    {
+        return (string) Str::uuid();
+    }
 
     public function infolist(Infolist $infolist): Infolist
     {
@@ -89,7 +94,7 @@ class EmployeeRequest extends Page
                 })
                 ->icon('heroicon-o-folder-open')
                 ->schema([
-                    Livewire::make(EmployeeLeaveRequest::class)
+                    Livewire::make(EmployeeLeaveRequest::class)->key(self::generateUuid())
                 ]),
                 Tab::make('Time Change Request')
                 ->badge(function ($record) {
@@ -97,7 +102,7 @@ class EmployeeRequest extends Page
                 })
                 ->icon('heroicon-o-inbox-arrow-down')
                 ->schema([
-                    Livewire::make(EmployeeTimeChangeRequest::class)
+                    Livewire::make(EmployeeTimeChangeRequest::class)->key(self::generateUuid())
                 ]),
                 Tab::make('Over Time Request')
                 ->badge(function ($record) {
@@ -105,7 +110,7 @@ class EmployeeRequest extends Page
                 })
                 ->icon('heroicon-o-window')
                 ->schema([
-                    Livewire::make(EmployeeOverTimeRequest::class)
+                    Livewire::make(EmployeeOverTimeRequest::class)->key(self::generateUuid())
                 ]),
                 Tab::make('Shift Change Request')
                 ->badge(function ($record) {
@@ -113,7 +118,7 @@ class EmployeeRequest extends Page
                 })
                 ->icon('heroicon-o-rectangle-group')
                 ->schema([
-                    Livewire::make(EmployeeShiftChangeRequest::class)
+                    Livewire::make(EmployeeShiftChangeRequest::class)->key(self::generateUuid())
                 ]),
             ])
             ->columnSpanFull()
