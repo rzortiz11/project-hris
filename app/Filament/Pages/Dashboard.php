@@ -8,6 +8,7 @@ use App\Filament\Resources\LeaveResource\Widgets\OnLeaveTodayCalendarWidget;
 use App\Livewire\AnalogClock;
 use App\Livewire\EmployeeOnLeaveTable;
 use App\Livewire\EmployeeUpcomingLeaveTable;
+use App\Models\Announcement;
 use App\Models\Employee;
 use App\Models\Leave;
 use App\Models\User;
@@ -39,6 +40,7 @@ use Filament\Resources\Forms\ResourceForm;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
+use Illuminate\Support\Str;
 
 class Dashboard extends Page implements HasForms
 {
@@ -117,28 +119,24 @@ class Dashboard extends Page implements HasForms
                         })
                         ->icon('heroicon-o-cake')
                         ->schema([
-                            Livewire::make(TodayBirthdayView::class)
-                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
-                        Tab::make("Time In/Out")
-                        ->icon('heroicon-o-clock')
-                        ->schema([
-                            static::timeInSection($employee, $current_date, $current_time, $timesheet),
-                            static::timeOutSection($employee, $current_date, $current_time, $timesheet),
-                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                            // If you are rendering multiple of the same Livewire component, please make sure to pass a unique key() to each:
+                            Livewire::make(TodayBirthdayView::class)->key(self::generateUuid())
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'])
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString()
                     ->contained(false),
+                    Split::make([
+                        static::timeInSection($employee, $current_date, $current_time, $timesheet),
+                        static::timeOutSection($employee, $current_date, $current_time, $timesheet),
+                    ])->from('lg'),
                     Section::make('Notice Board')
                     ->schema([
                     ])->extraAttributes([
                         'class' => ' justify-center items-center text-center',
                         'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8)'
                     ])->columns(1),
-                    // Split::make([
-                    //     // static::timeInSection($employee, $current_date, $current_time, $timesheet),
-                    //     // static::timeOutSection($employee, $current_date, $current_time, $timesheet),
-                    // ])->from('lg'),
+
                 ]),    
                 Grid::make([
                     'default' => 1
@@ -148,15 +146,28 @@ class Dashboard extends Page implements HasForms
                     Tabs::make('Tabs')
                     ->tabs([
                         Tab::make('On Leave')
+                        ->badge(function () {
+                            return Leave::query()
+                            // add on leave today and where status is approved
+                            ->where('status', 'approved')
+                            ->count();
+                        })
                         ->icon('heroicon-o-user-group')
                         ->schema([
-                            Livewire::make(OnLeaveCalendarWidget::class)
+                            // having multiple Livewire error on uncaugth snapshot
+                            // try every Livewire to be on a form or Component.
+                            Livewire::make(OnLeaveCalendarWidget::class)->key(self::generateUuid())
                             // will convert this to filament full calendar package set default to today with week and months.
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('Company News & Announcement')
+                        ->badge(function () {
+                            return Announcement::query()
+                            // add on leave today and where status is approved
+                            ->count();
+                        })
                         ->icon('heroicon-o-megaphone')
                         ->schema([
-                            Livewire::make(EmployeeUpcomingLeaveTable::class)
+                            Livewire::make(EmployeeUpcomingLeaveTable::class)->key(self::generateUuid())
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('Events & Holiday Calendar')
                         ->icon('heroicon-o-calendar-days')
@@ -173,13 +184,15 @@ class Dashboard extends Page implements HasForms
         ]);
     }
 
+    public static function generateUuid()
+    {
+        return (string) Str::uuid();
+    }
+
     
     public static function timeInSection($employee, $current_date, $current_time, $timesheet): Section
     {
-        return Section::make()
-        ->description()
-        ->schema([
-            Section::make('Time in')
+        return Section::make('Time in')
             ->icon('heroicon-o-clock')
             ->id('Date and Time in')
             ->schema([
@@ -263,15 +276,15 @@ class Dashboard extends Page implements HasForms
                     ->icon('heroicon-o-clock')
                     ->tooltip('Do you want to Time in!'),
             ])  
-            ->footerActionsAlignment(Alignment::Center)    
-        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']);
+            ->footerActionsAlignment(Alignment::Center) 
+            ->extraAttributes([
+                'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'
+            ]);   
     } 
 
     public static function timeOutSection($employee, $current_date, $current_time, $timesheet): Section
     {
-        return Section::make()
-        ->schema([
-            Section::make('Time out')
+        return Section::make('Time out')
             ->icon('heroicon-s-clock')
             ->id('Date and Time out')
             ->schema([
@@ -375,8 +388,8 @@ class Dashboard extends Page implements HasForms
                 ->icon('heroicon-s-clock')
                 ->tooltip('Do you want to Time out!'),
             ])  
-            ->footerActionsAlignment(Alignment::Center)                          
-        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']);
+            ->footerActionsAlignment(Alignment::Center)                 
+            ->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']);         
     }
     
 }
