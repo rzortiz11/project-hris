@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AnnouncementResource\Pages;
 use App\Filament\Resources\AnnouncementResource\RelationManagers;
 use App\Models\Announcement;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
@@ -59,7 +60,10 @@ class AnnouncementResource extends Resource
                                 Checkbox::make('visible'),
                                 
                             ]),
+                            // image in announcement dashboard is set to 300 width and 250 height please crop the image
                             FileUpload::make('attachments')
+                            ->image()
+                            ->imageEditor()
                             ->disk('public')
                             ->visibility('private')
                             ->directory('company/announcements')
@@ -94,6 +98,12 @@ class AnnouncementResource extends Resource
                 ImageColumn::make('attachments')
                 ->circular()
                 ->stacked(),
+                TextColumn::make('created_by')        
+                ->getStateUsing(function (Announcement $record): string {
+
+                    $user = User::find($record->created_by);
+                    return $user ? ucwords(strtolower($user->name)) : '';
+                }),
             ])
             ->filters([
                 //

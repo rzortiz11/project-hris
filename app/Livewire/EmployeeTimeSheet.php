@@ -188,7 +188,45 @@ class EmployeeTimeSheet extends Page implements HasForms, HasTable
                     $date = Carbon::parse($timesheet->time_out_2);
                     return $date->format('H:i');
                 })->sortable(),
+                TextColumn::make('late_arrival')
+                ->label('Late Arrival')
+                ->getStateUsing(function (TimeSheet $timesheet): string {
+
+                    $shiftSchedule = explode(' - ', $timesheet->shift_schedule);
+                    $shiftStart = Carbon::parse($shiftSchedule[0]);
+                    $timeIn = Carbon::parse($timesheet->time_in);
+                    $lateTimeInMinutes = 0;
+                    if ($timeIn->greaterThan($shiftStart)) {
+                        $lateTimeInMinutes = $shiftStart->diffInMinutes($timeIn);
+                    }
+
+                    $formated_late = gmdate('H:i', $lateTimeInMinutes * 60);
+                    return $formated_late;
+                }),
+                TextColumn::make('early_departure')
+                ->label('Early Departure')
+                ->toggleable(isToggledHiddenByDefault:true)               
+                ->getStateUsing(function (TimeSheet $timesheet): string {
+
+                    $shiftSchedule = explode(' - ', $timesheet->shift_schedule);
+                    $shiftEnd = Carbon::parse($shiftSchedule[1]);
+
+                    if ($timesheet->time_out  == '00:00:00') {
+                        // No time_out recorded, return default value or handle it as you want
+                        return "00:00";
+                    }
+
+                    $timeOut = Carbon::parse($timesheet->time_out);
+                    $earlyLeaveMinutes = 0;
+                    if ($timeOut->lessThan($shiftEnd)) {
+                        $earlyLeaveMinutes = $timeOut->diffInMinutes($shiftEnd);
+                    }
+
+                    $formated_late = gmdate('H:i', $earlyLeaveMinutes * 60);
+                    return $formated_late;
+                }),
                 TextColumn::make('late_time')
+                ->toggleable(isToggledHiddenByDefault:true)               
                 ->getStateUsing(function (TimeSheet $timesheet): string {
 
                     $date = Carbon::parse($timesheet->late_time);

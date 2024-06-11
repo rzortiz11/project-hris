@@ -3,8 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Employee;
-use App\Models\Leave;
-use App\Models\User;
+use App\Models\UnderTimeRequest;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -22,7 +21,7 @@ use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
-class EmployeeLeaveRequest extends Component implements HasForms, HasTable
+class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
 {
     use InteractsWithForms;
     use InteractsWithTable;
@@ -37,7 +36,7 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Leave::query()->where('approver_id', $this->record->user_id))
+            ->query(UnderTimeRequest::query()->where('approver_id', $this->record->user_id))
             ->columns([
                 Split::make([
                     TextColumn::make('date_filling')
@@ -48,7 +47,7 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                     ->sortable(),
                     ImageColumn::make('avatar')
                     ->grow(false)
-                    ->getStateUsing(function (Leave $data): string {
+                    ->getStateUsing(function (UnderTimeRequest $data): string {
     
                         $employee = Employee::find($data->employee_id);
                         return isset($employee) ? $employee->picture : '';
@@ -56,14 +55,14 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                     ->circular(),
                     Stack::make([
                         TextColumn::make('employee_reference')
-                        ->getStateUsing(function (Leave $data): string {
+                        ->getStateUsing(function (UnderTimeRequest $data): string {
         
                             $employee = Employee::find($data->employee_id);
                             return isset($employee) ? $employee->employee_reference : '';
                         }), 
                         TextColumn::make('employee_id')
                         ->weight(FontWeight::Bold)
-                        ->getStateUsing(function (Leave $data): string {
+                        ->getStateUsing(function (UnderTimeRequest $data): string {
         
                             $employee = Employee::find($data->employee_id);
                             return isset($employee->user->name) ? $employee->user->name : '';
@@ -71,36 +70,40 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                     ]),
                     Stack::make([
                         Split::make([
-                            TextColumn::make('from')
+                            TextColumn::make('date')
                             ->formatStateUsing(function ($state) {
-                                return 'From :';
+                                return 'Date :';
                             })
                             ->grow(false)
                             ->weight(FontWeight::Bold),
-                            TextColumn::make('from')
+                            TextColumn::make('date')
                             ->formatStateUsing(function ($state) {
                                 return Carbon::parse($state)->format('F d, Y');
                             })
                             ->grow(false),
-                            TextColumn::make('to')
+                            TextColumn::make('time_out')
                             ->formatStateUsing(function ($state) {
-                                return 'To :';
+                                return 'Time Out :';
                             })
                             ->grow(false)
                             ->weight(FontWeight::Bold),
-                            TextColumn::make('to')
-                            ->formatStateUsing(function ($state) {
-                                return Carbon::parse($state)->format('F d, Y');
-                            })->grow(false),
+                            TextColumn::make('time_out')
+                            ->getStateUsing(function ($record) {
+                                return $record->time_out ? Carbon::parse($record->time_out)->format('h:i A') : '00:00';
+                            })
+                            ->grow(false),
                         ]),
                         Split::make([
-                            TextColumn::make('hours')
-                            ->formatStateUsing(function ($state) {
-                                return 'Hours :';
+                            TextColumn::make('type')
+                            ->getStateUsing(function ($record) {
+                                return $record->type ? "Type :": "Type :";
                             })
                             ->grow(false)
                             ->weight(FontWeight::Bold),
-                            TextColumn::make('hours')
+                            TextColumn::make('type')
+                            ->getStateUsing(function ($record) {
+                                return $record->type ? $record->type : "";
+                            })
                             ->grow(false),
                         ]),
                         Split::make([
@@ -133,7 +136,6 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                     'denied' => 'danger',
                     'void' => 'danger',
                 })
-                ->sortable()
                 ->alignCenter(),
                 ]),
             ])
@@ -142,23 +144,19 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                ->badge()
                 ->color('primary'),
                 Tables\Actions\Action::make('Approved')
-                ->badge()
                 ->color('success')
                 ->icon('heroicon-s-check-circle')
-                ->action(function (Leave $record, array $data) {
+                ->action(function (UnderTimeRequest $record, array $data) {
                     
                     // $record['status'] = 'void';
                     // $record->save();
                 })->requiresConfirmation(),
                 Tables\Actions\Action::make('Disapproved')
-                ->badge()
-
                 ->color('danger')
                 ->icon('heroicon-s-x-circle')
-                ->action(function (Leave $record, array $data) {
+                ->action(function (UnderTimeRequest $record, array $data) {
                     
                     // $record['status'] = 'void';
                     // $record->save();
@@ -174,6 +172,6 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
 
     public function render(): View
     {
-        return view('livewire.employee-leave-request');
+        return view('livewire.employee-under-time-request');
     }
 }

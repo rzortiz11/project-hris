@@ -8,6 +8,7 @@ use App\Livewire\EmployeeTimeSheet;
 use App\Livewire\OverTimeRequestTable;
 use App\Livewire\ShiftChangeRequestTable;
 use App\Livewire\TimeChangeRequestTable;
+use App\Livewire\UnderTimeRequestTable;
 use App\Models\Employee;
 use App\Models\TimeSheet;
 use Carbon\Carbon;
@@ -189,6 +190,11 @@ class ViewEmployeeTimeSheet extends ViewRecord
                     ->schema([
                         Livewire::make(OverTimeRequestTable::class)->data(['record' => $this->record])->key(self::generateUuid())->lazy()
                     ]),      
+                    Tab::make('Under Time')
+                    ->icon('heroicon-m-arrow-uturn-down')
+                    ->schema([
+                        Livewire::make(UnderTimeRequestTable::class)->data(['record' => $this->record])->key(self::generateUuid())->lazy()
+                    ]),  
                     Tab::make('Shift Change')
                     ->icon('heroicon-o-rectangle-group')
                     ->schema([
