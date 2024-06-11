@@ -127,6 +127,7 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                 ->alignment(Alignment::Start)
                 ->grow(false),
                 TextColumn::make('status')
+                ->badge()
                 ->color(fn (string $state): string => match($state) {
                     'pending' => 'warning',
                     'approved' => 'success',
@@ -142,10 +143,8 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                ->badge()
                 ->color('primary'),
                 Tables\Actions\Action::make('Approved')
-                ->badge()
                 ->color('success')
                 ->icon('heroicon-s-check-circle')
                 ->action(function (Leave $record, array $data) {
@@ -154,8 +153,6 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                     // $record->save();
                 })->requiresConfirmation(),
                 Tables\Actions\Action::make('Disapproved')
-                ->badge()
-
                 ->color('danger')
                 ->icon('heroicon-s-x-circle')
                 ->action(function (Leave $record, array $data) {
