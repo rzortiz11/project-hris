@@ -142,6 +142,7 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
                 ->alignCenter(),
                 ]),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
@@ -159,7 +160,7 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
                     $result = $record->save();
 
                     if($result){
-                        self::approvedUnderTimeRequestNotification($employee->user);
+                        self::approvedRequestNotification($employee->user);
                     }
                 })
                 ->disabled(fn (UnderTimeRequest $record) => self::isActionAvailable($record))
@@ -175,7 +176,7 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
                     $result = $record->save();
 
                     if($result){
-                        self::deniedUnderTimeRequestNotification($employee->user);
+                        self::deniedRequestNotification($employee->user);
                     }
                 })
                 ->disabled(fn (UnderTimeRequest $record) => self::isActionAvailable($record))
@@ -189,7 +190,13 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
             ->defaultPaginationPageOption(5);
     }
 
-    public static function approvedUnderTimeRequestNotification($recipient){
+    public static function approvedRequestNotification($recipient){
+
+        Notification::make()
+        ->success()
+        ->title('Under Time Request Approved')
+        ->body('Approved Successfully.')
+        ->send();
 
         Notification::make()
             ->title('Under Time Request Approved')
@@ -207,7 +214,13 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
         ->broadcast($recipient);
     }
 
-    public static function deniedUnderTimeRequestNotification($recipient){
+    public static function deniedRequestNotification($recipient){
+
+        Notification::make()
+        ->success()
+        ->title('Under Time Request Denied')
+        ->body('Denied Successfully.')
+        ->send();
 
         Notification::make()
             ->title('Under Time Request Denied')

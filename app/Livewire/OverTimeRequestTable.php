@@ -30,7 +30,9 @@ use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-
+use Filament\Notifications\Events\DatabaseNotificationsSent;
+use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action;
 class OverTimeRequestTable extends Component implements HasForms, HasTable
 {
     use InteractsWithForms;
@@ -121,14 +123,20 @@ class OverTimeRequestTable extends Component implements HasForms, HasTable
                 ->form([
                     self::timeChangeForm($employee_id)
                 ])
+                ->after(function ($record) {
+
+                    $recipient = User::find($record['approver_id']);
+
+                    self::sendRequestNotification($recipient);
+                })
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
                 ->form([
                     self::timeChangeForm($employee_id)
                 ])
-                ->visible(fn (OverTimeRequest $record) => self::isActionAvailable($record)),
-                Tables\Actions\ViewAction::make(),
+                ->disabled(fn (OverTimeRequest $record) => self::isActionAvailable($record)),
                 Tables\Actions\Action::make('Void')
                 ->color('danger')
                 ->icon('heroicon-o-archive-box-x-mark')
@@ -137,7 +145,7 @@ class OverTimeRequestTable extends Component implements HasForms, HasTable
                     $record['status'] = 'void';
                     $record->save();
                 })->requiresConfirmation()
-                ->visible(fn (OverTimeRequest $record) => self::isActionAvailable($record))
+                ->disabled(fn (OverTimeRequest $record) => self::isActionAvailable($record))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -260,15 +268,6 @@ class OverTimeRequestTable extends Component implements HasForms, HasTable
         ]);
     }
 
-    public static function isActionAvailable(OverTimeRequest $record): bool {
-
-        if ($record->status == "void") {
-            return false;
-        }
-    
-        return true;
-    }
-
     public static function calculateHours($get,$set) {
 
         $date_from = $get('date_from');
@@ -282,6 +281,47 @@ class OverTimeRequestTable extends Component implements HasForms, HasTable
             $hours = $datetime_from->diffInHours($datetime_to);
             $set('hours', $hours);
         }
+    }
+
+    public static function sendRequestNotification($recipient){
+
+        Notification::make()
+            ->title('Over Time Request')
+            ->body('Employee '.$recipient->name. ' applied for Over Time request')
+            ->icon('heroicon-o-window')
+            ->info()
+            ->actions([
+                Action::make('view')
+                    ->button()
+                    ->color('success')
+                    ->url(route('filament.admin.pages.employee-request','tab=-over-time-request-tab'), shouldOpenInNewTab: true)
+            ])
+            ->sendToDatabase($recipient);
+        
+        event(new DatabaseNotificationsSent($recipient));
+
+        Notification::make()
+        ->title('Over Time Request')
+        ->icon('heroicon-o-window')
+        ->body('Employee '.$recipient->name. ' applied for Over Time request')
+        ->seconds(5)
+        ->actions([
+            Action::make('view')
+                ->button()
+                ->color('success')
+                ->url(route('filament.admin.pages.employee-request','tab=-over-time-request-tab'), shouldOpenInNewTab: true)
+        ])
+        ->info()
+        ->broadcast($recipient);
+    }
+
+    public static function isActionAvailable(OverTimeRequest $record): bool {
+
+        if ($record->status == "void" || $record->status == "denied" || $record->status == "approved") {
+            return true;
+        }
+    
+        return false;
     }
 
     public function render(): View

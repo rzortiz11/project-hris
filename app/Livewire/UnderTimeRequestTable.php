@@ -90,7 +90,6 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
                     'denied' => 'danger',
                     'void' => 'danger',
                 })
-                ->sortable()
                 ->label('Status'),
             ])
             ->defaultPaginationPageOption(5)
@@ -115,7 +114,7 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
 
                     $recipient = User::find($record['approver_id']);
 
-                    self::sendUnderTimeRequestNotification($recipient);
+                    self::sendRequestNotification($recipient);
                 })
             ])
             ->actions([
@@ -154,14 +153,15 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
             ])->checkIfRecordIsSelectableUsing(fn (UnderTimeRequest $record) => self::isActionAvailable($record));
     }
 
-    public static function sendUnderTimeRequestNotification($recipient){
+    public static function sendRequestNotification($recipient){
 
         // notifications for database
         // https://www.answeroverflow.com/m/1148529787564982313
         // need to run the sail artisan queue:work for this to work if you already have jobs table
         Notification::make()
             ->title('Under Time Request')
-            ->body('Employee '.$recipient->name. 'applied for under time request')
+            ->body('Employee '.$recipient->name. ' applied for under time request')
+            ->icon('heroicon-m-arrow-uturn-down')
             ->info()
             ->actions([
                 Action::make('view')
@@ -176,6 +176,7 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
         // notifications for broadcasting a real time popup
         Notification::make()
         ->title('Under Time Request')
+        ->icon('heroicon-m-arrow-uturn-down')
         ->body('Employee '.$recipient->name. ' applied for under time request')
         ->seconds(5)
         ->actions([
