@@ -19,7 +19,9 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Livewire\Component;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Notifications\Events\DatabaseNotificationsSent;
+use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action;
 
 class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
 {
@@ -143,6 +145,7 @@ class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
                     ->alignment(Alignment::Start)
                     ->grow(false),
                     TextColumn::make('status')
+                    ->badge()
                     ->color(fn (string $state): string => match($state) {
                         'pending' => 'warning',
                         'approved' => 'success',
@@ -152,6 +155,7 @@ class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
                 ->alignCenter(),
                 ]),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
@@ -163,17 +167,33 @@ class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
                 ->icon('heroicon-s-check-circle')
                 ->action(function (ShiftChangeRequest $record, array $data) {
                     
-                    // $record['status'] = 'void';
-                    // $record->save();
-                })->requiresConfirmation(),
+                    $employee = Employee::find($record['employee_id']);
+            
+                    $record['status'] = 'approved';
+                    $result = $record->save();
+
+                    if($result){
+                        self::approvedRequestNotification($employee->user);
+                    }
+                })
+                ->disabled(fn (ShiftChangeRequest $record) => self::isActionAvailable($record))
+                ->requiresConfirmation(),
                 Tables\Actions\Action::make('Disapproved')
                 ->color('danger')
                 ->icon('heroicon-s-x-circle')
                 ->action(function (ShiftChangeRequest $record, array $data) {
                     
-                    // $record['status'] = 'void';
-                    // $record->save();
-                })->requiresConfirmation()
+                    $employee = Employee::find($record['employee_id']);
+
+                    $record['status'] = 'denied';
+                    $result = $record->save();
+
+                    if($result){
+                        self::deniedRequestNotification($employee->user);
+                    }
+                })
+                ->disabled(fn (ShiftChangeRequest $record) => self::isActionAvailable($record))
+                ->requiresConfirmation()
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -181,6 +201,63 @@ class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
                 ]),
             ])
             ->defaultPaginationPageOption(5);
+    }
+
+    public static function approvedRequestNotification($recipient){
+
+        Notification::make()
+        ->success()
+        ->title('Shift Change Request Approved')
+        ->body('Approved Successfully.')
+        ->send();
+
+        Notification::make()
+            ->title('Shift Change Request Approved')
+            ->body('Your request has been approved.')
+            ->success()
+            ->sendToDatabase($recipient);
+        
+        event(new DatabaseNotificationsSent($recipient));
+
+        Notification::make()
+        ->title('Shift Change Request Approved')
+        ->body('Your request has been approved.')
+        ->seconds(5)
+        ->success()
+        ->broadcast($recipient);
+    }
+
+    public static function deniedRequestNotification($recipient){
+
+        Notification::make()
+        ->success()
+        ->title('Shift Change Request Denied')
+        ->body('Denied Successfully.')
+        ->send();
+
+        Notification::make()
+            ->title('Shift Change Request Denied')
+            ->body('Your request has been denied.')
+            ->danger()
+            ->sendToDatabase($recipient);
+        
+        event(new DatabaseNotificationsSent($recipient));
+
+        Notification::make()
+        ->title('Shift Change Request Denied')
+        ->body('Your request has been denied.')
+        ->seconds(5)
+        ->danger()
+        ->broadcast($recipient);
+    }
+
+    public static function isActionAvailable(ShiftChangeRequest $record): bool {
+
+        if ($record->status == "void" || $record->status == "denied" || $record->status == "approved") {
+            return true;
+        }
+    
+        return false;
     }
 
     public function render(): View

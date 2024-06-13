@@ -32,6 +32,9 @@ use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Events\DatabaseNotificationsSent;
+use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action;
 
 class ShiftChangeRequestTable extends Component implements HasForms, HasTable
 {
@@ -127,14 +130,20 @@ class ShiftChangeRequestTable extends Component implements HasForms, HasTable
                 ->form([
                     self::shiftChangeForm($employee_id)
                 ])
+                ->after(function ($record) {
+
+                    $recipient = User::find($record['approver_id']);
+
+                    self::sendRequestNotification($recipient);
+                })
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
                 ->form([
                     self::shiftChangeForm($employee_id)
                 ])
-                ->visible(fn (ShiftChangeRequest $record) => self::isActionAvailable($record)),
-                Tables\Actions\ViewAction::make(),
+                ->disabled(fn (ShiftChangeRequest $record) => self::isActionAvailable($record)),
                 Tables\Actions\Action::make('Void')
                 ->color('danger')
                 ->icon('heroicon-o-archive-box-x-mark')
@@ -143,7 +152,7 @@ class ShiftChangeRequestTable extends Component implements HasForms, HasTable
                     $record['status'] = 'void';
                     $record->save();
                 })->requiresConfirmation()
-                ->visible(fn (ShiftChangeRequest $record) => self::isActionAvailable($record))
+                ->disabled(fn (ShiftChangeRequest $record) => self::isActionAvailable($record))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -223,13 +232,45 @@ class ShiftChangeRequestTable extends Component implements HasForms, HasTable
         ]);
     }
 
+    public static function sendRequestNotification($recipient){
+
+        Notification::make()
+            ->title('Shift Change Request')
+            ->body('Employee '.$recipient->name. ' applied for Shift Change request')
+            ->icon('heroicon-o-rectangle-group')
+            ->info()
+            ->actions([
+                Action::make('view')
+                    ->button()
+                    ->color('success')
+                    ->url(route('filament.admin.pages.employee-request','tab=-shift-change-request-tab'), shouldOpenInNewTab: true)
+            ])
+            ->sendToDatabase($recipient);
+        
+        event(new DatabaseNotificationsSent($recipient));
+
+        Notification::make()
+        ->title('Shift Change Request')
+        ->icon('heroicon-o-rectangle-group')
+        ->body('Employee '.$recipient->name. ' applied for Shift Change request')
+        ->seconds(5)
+        ->actions([
+            Action::make('view')
+                ->button()
+                ->color('success')
+                ->url(route('filament.admin.pages.employee-request','tab=-shift-change-request-tab'), shouldOpenInNewTab: true)
+        ])
+        ->info()
+        ->broadcast($recipient);
+    }
+
     public static function isActionAvailable(ShiftChangeRequest $record): bool {
 
-        if ($record->status == "void") {
-            return false;
+        if ($record->status == "void" || $record->status == "denied" || $record->status == "approved") {
+            return true;
         }
     
-        return true;
+        return false;
     }
 
     public function render(): View

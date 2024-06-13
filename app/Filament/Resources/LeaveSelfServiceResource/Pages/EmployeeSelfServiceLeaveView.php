@@ -65,11 +65,11 @@ class EmployeeSelfServiceLeaveView extends ViewRecord
                                 Livewire::make(EmployeeLeaveHistoryTable::class)->key(self::generateUuid())
                             ])
                         ])->columns(2),
-                       Tab::make('File a Leave')
-                        ->icon('heroicon-o-arrow-left-end-on-rectangle')
-                        ->schema([
-                            Livewire::make(CreateLeaveForm::class)->key(self::generateUuid())    
-                        ]),     
+                    //    Tab::make('Request a Leave')
+                    //     ->icon('heroicon-o-arrow-left-end-on-rectangle')
+                    //     ->schema([
+                    //         Livewire::make(CreateLeaveForm::class)->key(self::generateUuid())    
+                    //     ]),     
                     ])
                     ->contained(false)
                     ->columnSpanFull()
