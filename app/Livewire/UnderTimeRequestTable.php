@@ -27,6 +27,9 @@ use Livewire\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Events\DatabaseNotificationsSent;
+use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action;
 
 class UnderTimeRequestTable extends Component implements HasForms, HasTable
 {
@@ -98,23 +101,33 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
             ->headerActions([
                 CreateAction::make()
                 ->mutateFormDataUsing(function (array $data) use ($employee_id): array {
+                    
                     $data['employee_id'] = $employee_id;
              
                     return $data;
                 })
-                ->label('Request Over Time')
+                ->label('Request Under Time')
                 ->model(UnderTimeRequest::class)
                 ->form([
                     self::underTimeForm($employee_id)
                 ])
+                ->after(function ($record) {
+
+                    $recipient = User::find($record['approver_id']);
+
+                    self::sendUnderTimeRequestNotification($recipient);
+                })
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
                 ->form([
                     self::underTimeForm($employee_id)
                 ])
-                ->visible(fn (UnderTimeRequest $record) => self::isActionAvailable($record)),
-                Tables\Actions\ViewAction::make(),
+                ->after(function ($data) {
+                
+                })
+                ->disabled(fn (UnderTimeRequest $record) => self::isActionAvailable($record)),
                 Tables\Actions\Action::make('Void')
                 ->color('danger')
                 ->icon('heroicon-o-archive-box-x-mark')
@@ -123,7 +136,7 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
                     $record['status'] = 'void';
                     $record->save();
                 })->requiresConfirmation()
-                ->visible(fn (UnderTimeRequest $record) => self::isActionAvailable($record))
+                ->disabled(fn (UnderTimeRequest $record) => self::isActionAvailable($record))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -139,6 +152,41 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
                     })->requiresConfirmation(),
                 ]),
             ])->checkIfRecordIsSelectableUsing(fn (UnderTimeRequest $record) => self::isActionAvailable($record));
+    }
+
+    public static function sendUnderTimeRequestNotification($recipient){
+
+        // notifications for database
+        // https://www.answeroverflow.com/m/1148529787564982313
+        // need to run the sail artisan queue:work for this to work if you already have jobs table
+        Notification::make()
+            ->title('Under Time Request')
+            ->body('Employee '.$recipient->name. 'applied for under time request')
+            ->info()
+            ->actions([
+                Action::make('view')
+                    ->button()
+                    ->color('success')
+                    ->url(route('filament.admin.pages.employee-request','tab=-under-time-request-tab'), shouldOpenInNewTab: true)
+            ])
+            ->sendToDatabase($recipient);
+        
+        event(new DatabaseNotificationsSent($recipient));
+
+        // notifications for broadcasting a real time popup
+        Notification::make()
+        ->title('Under Time Request')
+        ->body('Employee '.$recipient->name. ' applied for under time request')
+        ->seconds(5)
+        ->actions([
+            Action::make('view')
+                ->button()
+                ->color('success')
+                ->url(route('filament.admin.pages.employee-request','tab=-under-time-request-tab'), shouldOpenInNewTab: true)
+        ])
+        // ->persistent() require the user to close them manually
+        ->info()
+        ->broadcast($recipient);
     }
 
     public static function underTimeForm($employee_id): Grid
@@ -192,11 +240,11 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
 
     public static function isActionAvailable(UnderTimeRequest $record): bool {
 
-        if ($record->status == "void") {
-            return false;
+        if ($record->status == "void" || $record->status == "denied" || $record->status == "approved") {
+            return true;
         }
     
-        return true;
+        return false;
     }
 
     public function render(): View
