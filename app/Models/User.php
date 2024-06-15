@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -45,6 +46,13 @@ class User extends Authenticatable implements FilamentUser, HasName
         'remember_token',
     ];
     
+    // public function getFilamentAvatarUrl(): ?string
+    // {
+        // implements this ,HasAvatar
+    //     $employee = auth()->user()->employee;
+        
+    //     return isset($employee->picture) ? asset('storage/' . $employee->picture) : '';
+    // }
 
     public function getFilamentName(): string
     {

@@ -96,7 +96,7 @@ class AnnouncementResource extends Resource
                     return $record->active ? 'active': 'inactive';
                 }),
                 ImageColumn::make('attachments')
-                ->circular()
+                ->square()
                 ->stacked(),
                 TextColumn::make('created_by')        
                 ->getStateUsing(function (Announcement $record): string {

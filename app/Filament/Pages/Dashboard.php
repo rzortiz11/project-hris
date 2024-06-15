@@ -26,6 +26,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
@@ -84,10 +85,7 @@ class Dashboard extends Page implements HasForms
         ->schema([
             Grid::make()
             ->schema([
-                Grid::make([
-                    'default' => 1
-                ])
-                ->columnSpan(4)
+                Group::make()
                 ->schema([
                     // Section::make('')
                     // ->schema([
@@ -138,15 +136,13 @@ class Dashboard extends Page implements HasForms
                         'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8)'
                     ])->columns(1),
 
-                ]),    
-                Grid::make([
-                    'default' => 1
-                ])
-                ->columnSpan(8)
+                ])  
+                ->columnSpan(1),    
+                Group::make()
                 ->schema([
                     Tabs::make('Tabs')
                     ->tabs([
-                        Tab::make('On Leave')
+                        Tab::make('On Leave Calendar')
                         ->badge(function () {
                             return Leave::query()
                             // add on leave today and where status is approved
@@ -170,18 +166,21 @@ class Dashboard extends Page implements HasForms
                         ->schema([
                             Livewire::make(AnnouncementDashboardTable::class)->key(self::generateUuid())
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
-                        Tab::make('Events & Holiday Calendar')
-                        ->icon('heroicon-o-calendar-days')
-                        ->schema([
-                            // Livewire::make(EmployeeUpcomingLeaveTable::class)
-                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString()
                     ->contained(false),
+                ])
+                ->columnSpan([
+                    'default' => 1,
+                    'sm' => 1,
+                    'md' => 1,
+                    'lg' => 2,
+                    'xl' => 2,
+                    '2xl' => 2,
                 ]),
             ])
-            ->columns(12),
+            ->columns(3),
         ]);
     }
 
