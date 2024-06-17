@@ -19,7 +19,7 @@ return new class extends Migration
             $table->boolean('visible')->default(FALSE);
             $table->boolean('active')->nullable();
             $table->json('attachments')->nullable();
-            $table->json('users_id')->nullable();
+            $table->json('employees_id')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();
             $table->softDeletes();
             $table->timestamps();

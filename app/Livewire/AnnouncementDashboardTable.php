@@ -95,15 +95,23 @@ class AnnouncementDashboardTable extends Component implements HasForms, HasTable
                     ->grow(false),
                 ])->from('lg'),
             ])
+            ->contentGrid([
+                'default' => 1,
+                'sm' =>1,
+                'md' =>1,
+                'lg' =>1,
+                'xl' =>1,
+                '2xl' =>1,
+            ])
             ->defaultPaginationPageOption(5)
             ->filters([
 
             ])
             ->actions([
-                // Tables\Actions\ViewAction::make()
-                // ->label('Read More...')
-                // ->badge()
-                // ->color('primary'),
+                Tables\Actions\ViewAction::make()
+                ->label('Read')
+                ->icon('heroicon-o-eye')
+                ->color('primary'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\NoticeBoardResource\Pages;
+use App\Models\Employee;
 use App\Models\NoticeBoard;
 use App\Models\User;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -38,9 +38,9 @@ class NoticeBoardResource extends Resource
 
     public static function form(Form $form): Form
     {
-        $users = User::whereHas('roles', function ($query) {
+        $employees = Employee::whereHas('user.roles', function ($query) {
             $query->where('name', 'Employee');
-        })->get();
+        })->with('user')->get();
 
         return $form
         ->schema([
@@ -60,23 +60,22 @@ class NoticeBoardResource extends Resource
                     ]),
                     Grid::make([])
                     ->schema([
-                        Select::make('users_id')->label("Select Employee's")
+                        Select::make('employees_id')->label("Select Employee's")
                         ->placeholder("Employee List")
                         ->required()
                         ->multiple()
                         ->searchable()
-                        ->options($users
-                        ->pluck('name', 'user_id')
-                        ->map(function ($name) {
-                            return ucwords(strtolower($name));
-                        })
-                        ->toArray()),
+                        ->options(
+                            $employees->pluck('user.name', 'user.employee.employee_id')
+                                ->map(function ($name) {
+                                    return ucwords(strtolower($name));
+                                })
+                                ->toArray()
+                        ),
                         FileUpload::make('attachments')
-                        ->image()
-                        ->imageEditor()
                         ->disk('public')
                         ->visibility('private')
-                        ->directory('company/announcements')
+                        ->directory('company/notice-board')
                         ->multiple(),
                     ])
                 ])->from('lg'),

@@ -4,27 +4,18 @@ namespace App\Filament\Pages;
 
 use App\Filament\Resources\EmployeeResource\Pages\TodayBirthdayView;
 use App\Filament\Resources\LeaveResource\Widgets\OnLeaveCalendarWidget;
-use App\Filament\Resources\LeaveResource\Widgets\OnLeaveTodayCalendarWidget;
-use App\Livewire\AnalogClock;
 use App\Livewire\AnnouncementDashboardTable;
-use App\Livewire\EmployeeOnLeaveTable;
-use App\Livewire\EmployeeUpcomingLeaveTable;
+use App\Livewire\EmployeeNoticeBoardTable;
 use App\Models\Announcement;
 use App\Models\Employee;
 use App\Models\Leave;
-use App\Models\User;
 use Carbon\Carbon;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Split;
 use Filament\Forms\Form;
-use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Livewire;
@@ -32,13 +23,9 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Support\Enums\ActionSize;
 use Filament\Support\Enums\Alignment;
-use Filament\Resources\Forms\Components;
-use Filament\Resources\Forms\ResourceForm;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
@@ -87,15 +74,6 @@ class Dashboard extends Page implements HasForms
             ->schema([
                 Group::make()
                 ->schema([
-                    // Section::make('')
-                    // ->schema([
-                    //     Livewire::make(AnalogClock::class)
-                    // ])
-                    // ->extraAttributes([
-                    //     'class' => 'flex justify-center items-center text-center',
-                    //     'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);margin-top: 75px;'
-                    // ])
-                    // ->columns(1),
                     Tabs::make('Tabs')
                     ->tabs([
                         // Tab::make('On Leave Today')
@@ -131,8 +109,9 @@ class Dashboard extends Page implements HasForms
                     ])->from('lg'),
                     Section::make('Notice Board')
                     ->schema([
+                        Livewire::make(EmployeeNoticeBoardTable ::class)->key(self::generateUuid())
                     ])->extraAttributes([
-                        'class' => ' justify-center items-center text-center',
+                        'class' => ' justify-center items-center text-center', 
                         'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8)'
                     ])->columns(1),
 
@@ -154,7 +133,6 @@ class Dashboard extends Page implements HasForms
                             // having multiple Livewire error on uncaugth snapshot
                             // try every Livewire to be on a form or Component.
                             Livewire::make(OnLeaveCalendarWidget::class)->key(self::generateUuid())
-                            // will convert this to filament full calendar package set default to today with week and months.
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('Company News & Announcement')
                         ->badge(function () {

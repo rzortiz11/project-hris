@@ -14,11 +14,16 @@ class NoticeEmployee extends Model
 
     protected $primaryKey = 'notice_employee_id';
 
-    protected $fillable = ['notice_board_id','user_id'];
+    protected $fillable = ['notice_board_id','employee_id'];
 
     
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class, 'employee_id', 'user_id');
+    }
+
+    public function notice_board(): BelongsTo
+    {
+        return $this->belongsTo(NoticeBoard::class, 'notice_board_id', 'notice_board_id');
     }
 }

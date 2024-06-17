@@ -27,20 +27,19 @@ class CreateNoticeBoard extends CreateRecord
     protected function afterCreate() : void
     {   
         $record = $this->record;
+        if($record->employees_id){
+            foreach($record->employees_id as $employee_id){
 
-        if($record->users_id){
-            foreach($record->users_id as $user_id){
+                $employee = Employee::find($employee_id);
 
-                $user = User::find($user_id);
-
-                if(isset($user)) {
+                if(isset($employee)) {
 
                     NoticeEmployee::create([
                         'notice_board_id' => $record->notice_board_id,
-                        'user_id' => $user->user_id,
+                        'employee_id' => $employee->employee_id,
                     ]);
            
-                    self::sendNotification($user);
+                    self::sendNotification($employee->user);
                 }
             }
         }

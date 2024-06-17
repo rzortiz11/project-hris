@@ -14,11 +14,11 @@ class NoticeBoard extends Model
 
     protected $primaryKey = 'notice_board_id';
 
-    protected $fillable = ['title','description','publish_at','visible','active','attachments', 'created_by','users_id'];
+    protected $fillable = ['title','description','publish_at','visible','active','attachments', 'created_by','employees_id'];
 
     protected $casts = [
         'attachments' => 'array',
-        'users_id' => 'array',
+        'employees_id' => 'array',
     ];
 
     public function user(): BelongsTo
@@ -26,8 +26,8 @@ class NoticeBoard extends Model
         return $this->belongsTo(User::class, 'created_by', 'user_id');
     }
 
-    public function NoticeEmployee(): BelongsTo
+    public function noticeEmployee(): HasMany
     {
-        return $this->belongsTo(NoticeEmployee::class, 'notice_board_id', 'notice_board_id');
+        return $this->hasMany(NoticeEmployee::class, 'notice_board_id', 'notice_board_id');
     }
 }

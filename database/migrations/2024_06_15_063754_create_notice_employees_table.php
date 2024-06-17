@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('notice_employees', function (Blueprint $table) {
             $table->id('notice_employee_id');
             $table->unsignedBigInteger('notice_board_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('employee_id');
             $table->timestamps();
             $table->softDeletes();
         });

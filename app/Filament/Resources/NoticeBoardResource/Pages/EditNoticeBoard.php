@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\NoticeBoardResource\Pages;
 
 use App\Filament\Resources\NoticeBoardResource;
+use App\Models\Employee;
 use App\Models\NoticeEmployee;
 use App\Models\User;
 use Filament\Actions;
@@ -18,7 +19,13 @@ class EditNoticeBoard extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+            ->requiresConfirmation()
+            ->after(function ($record)  {
+                $record->employees_id = [];
+                $record->save();
+                NoticeEmployee::where('notice_board_id', $record->notice_board_id)->delete();
+            }),
         ];
     }
 
@@ -26,37 +33,37 @@ class EditNoticeBoard extends EditRecord
     {
         $record = $this->record;
     
-        if ($record->users_id) {
-            $currentUserIds = NoticeEmployee::where('notice_board_id', $record->notice_board_id)
-                ->pluck('user_id')
+        if ($record->employees_id) {
+            $currentEmployeeIds = NoticeEmployee::where('notice_board_id', $record->notice_board_id)
+                ->pluck('employee_id')
                 ->toArray();
     
-            $newUserIds = $record->users_id;
+            $newEmployeeIds = $record->employees_id;
     
-            // Users to be removed
-            $usersToRemove = array_diff($currentUserIds, $newUserIds);
+            // Employees to be removed
+            $employeesToRemove = array_diff($currentEmployeeIds, $newEmployeeIds);
     
-            // Remove users that are no longer associated
-            if (!empty($usersToRemove)) {
+            // Remove employees that are no longer associated
+            if (!empty($employeesToRemove)) {
                 NoticeEmployee::where('notice_board_id', $record->notice_board_id)
-                    ->whereIn('user_id', $usersToRemove)
+                    ->whereIn('employee_id', $employeesToRemove)
                     ->delete();
             }
     
-            // Users to be added
-            $usersToAdd = array_diff($newUserIds, $currentUserIds);
+            // Employees to be added
+            $employeesToAdd = array_diff($newEmployeeIds, $currentEmployeeIds);
     
-            // Add new users and send notifications
-            foreach ($usersToAdd as $user_id) {
-                $user = User::find($user_id);
+            // Add new employees and send notifications
+            foreach ($employeesToAdd as $employee_id) {
+                $employee = Employee::find($employee_id);
     
-                if (isset($user)) {
+                if (isset($employee)) {
                     NoticeEmployee::create([
                         'notice_board_id' => $record->notice_board_id,
-                        'user_id' => $user->user_id,
+                        'employee_id' => $employee->employee_id,
                     ]);
     
-                    self::sendNotification($user);
+                    self::sendNotification($employee->user);
                 }
             }
         }
