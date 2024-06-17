@@ -73,6 +73,8 @@ class NoticeBoardResource extends Resource
                                 ->toArray()
                         ),
                         FileUpload::make('attachments')
+                        ->downloadable()
+                        ->openable()
                         ->disk('public')
                         ->visibility('private')
                         ->directory('company/notice-board')
@@ -105,9 +107,6 @@ class NoticeBoardResource extends Resource
                 ->getStateUsing(function (NoticeBoard $record): string {
                     return $record->active ? 'active': 'inactive';
                 }),
-                ImageColumn::make('attachments')
-                ->square()
-                ->stacked(),
                 TextColumn::make('created_by')        
                 ->getStateUsing(function (NoticeBoard $record): string {
 
@@ -123,7 +122,8 @@ class NoticeBoardResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->requiresConfirmation(),
                 ]),
             ]);
     }

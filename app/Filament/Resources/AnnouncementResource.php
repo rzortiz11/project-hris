@@ -62,6 +62,8 @@ class AnnouncementResource extends Resource
                             ]),
                             // image in announcement dashboard is set to 300 width and 250 height please crop the image
                             FileUpload::make('attachments')
+                            ->downloadable()
+                            ->openable()
                             ->image()
                             ->imageEditor()
                             ->disk('public')
@@ -113,7 +115,8 @@ class AnnouncementResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->requiresConfirmation(),
                 ]),
             ]);
     }

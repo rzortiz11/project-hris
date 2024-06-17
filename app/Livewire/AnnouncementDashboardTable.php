@@ -4,6 +4,10 @@ namespace App\Livewire;
 
 use App\Models\Announcement;
 use Carbon\Carbon;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Support\Enums\Alignment;
@@ -71,18 +75,18 @@ class AnnouncementDashboardTable extends Component implements HasForms, HasTable
                                 return $record ? ucwords(strtolower($record->user->name)) : '';
                             })
                             ->grow(false),
-                            TextColumn::make('created_at')
+                            TextColumn::make('publish_at')
                             ->grow(false)
                             ->formatStateUsing(function ($state) {
                                 return ':';
                             }),
-                            TextColumn::make('created_at')   
+                            TextColumn::make('publish_at')   
                             ->grow(false)
                             ->size(TextColumn\TextColumnSize::ExtraSmall)
                             ->getStateUsing(function (Announcement $record): string {
 
-                                $created_at = Carbon::parse($record->created_at);
-                                return $created_at->format('Y-m-d');
+                                $publish_at = Carbon::parse($record->publish_at);
+                                return $publish_at->format('Y-m-d');
                             })  
                         ])
                         ->extraAttributes([
@@ -108,10 +112,28 @@ class AnnouncementDashboardTable extends Component implements HasForms, HasTable
 
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
-                ->label('Read')
-                ->icon('heroicon-o-eye')
-                ->color('primary'),
+                    Tables\Actions\ViewAction::make()
+                    ->label('Read')
+                    ->icon('heroicon-o-eye')
+                    ->color('primary')
+                    ->form([
+            
+                        TextInput::make('title'),
+                        RichEditor::make('description'),
+                        TextInput::make('publish_at')
+                        ->formatStateUsing(function ($state) {
+                            $publish_at = Carbon::parse($state);
+                            return $publish_at->format('Y-m-d H:i');
+                        }),
+                        FileUpload::make('attachments')
+                        ->downloadable()
+                        ->openable()
+                        ->deletable(false)
+                        ->disk('public')
+                        ->visibility('private')
+                        ->directory('company/notice-board')
+                        ->multiple(),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

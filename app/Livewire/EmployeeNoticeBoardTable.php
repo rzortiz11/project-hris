@@ -3,6 +3,12 @@
 namespace App\Livewire;
 
 use App\Models\NoticeEmployee;
+use Carbon\Carbon;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Support\Enums\FontWeight;
@@ -55,8 +61,8 @@ class EmployeeNoticeBoardTable extends Component implements HasForms, HasTable
                         ->markdown()
                         ->size(TextColumn\TextColumnSize::Small)
                         ->grow(false),
-                        TextColumn::make('notice_board.attachments')
-                        ->icon('heroicon-o-document-text'),
+                        // TextColumn::make('notice_board.attachments')
+                        // ->icon('heroicon-o-document-text'),
                     ])
                 ])->collapsed(true)
             ])
@@ -76,7 +82,38 @@ class EmployeeNoticeBoardTable extends Component implements HasForms, HasTable
                 Tables\Actions\ViewAction::make()
                 ->label('Read')
                 ->icon('heroicon-o-eye')
-                ->color('primary'),
+                ->color('primary')
+                ->form([
+                    Grid::make([
+                        'default' => 1
+                    ])
+                    ->relationship('notice_board')
+                    ->schema([
+                        TextInput::make('title'),
+                        // Textarea::make('description')
+                        // ->formatStateUsing(function ($state) {
+                        //     return strip_tags($state);
+                        // })
+                        // ->cols(10)
+                        // ->autosize(),
+                        RichEditor::make('description')
+                        ->extraAttributes(['class' => 'flex justify-start items-center text-start']),
+                        TextInput::make('created_at')
+                        ->formatStateUsing(function ($state) {
+                            $created_at = Carbon::parse($state);
+                            return $created_at->format('Y-m-d');
+                        }),
+                        FileUpload::make('attachments')
+                        ->previewable(false)
+                        ->deletable(false)
+                        ->downloadable()
+                        ->openable()
+                        ->disk('public')
+                        ->visibility('private')
+                        ->directory('company/notice-board')
+                        ->multiple(),
+                    ]),
+                ]),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
