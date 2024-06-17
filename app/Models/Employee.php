@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Livewire\EmployeeNoticeBoardTable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -141,5 +142,9 @@ class Employee extends Model
 
     public function employee_leave_approvers(): HasMany {
         return $this->hasMany(EmployeeLeaveApprover::class, 'employee_id', 'employee_id');
+    }
+
+    public function employee_notice_board(): HasMany {
+        return $this->hasMany(NoticeEmployee::class, 'employee_id', 'employee_id');
     }
 }

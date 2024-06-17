@@ -16,7 +16,7 @@
                     <img src="{{ asset('/images/cupcake.png') }}" alt="Birthday Sticker" class="w-20 h-20 ml-2"> <!-- Updated -->
                 </div>
                 
-                <p class="text-gray-500" x-text="currentRecord.name + ' celebrates ' + (currentRecord.gender === 'M' ? 'his' : 'her') + ' birthday today'"></p>
+                <p class="text-gray-500" x-text="currentRecord.name + ' celebrates ' + (currentRecord.gender === 'M' ? 'his' : 'her') + ' birthday today...'"></p>
             </div>
         </template>
         <template x-if="records.length === 0">
@@ -24,7 +24,7 @@
         </template>
     
         <!-- Adjusted button container positioning -->
-        <div class="absolute top-1/2 transform -translate-y-1/2 flex justify-between w-full px-4 z-50">
+        <div class="absolute top-1/2 transform -translate-y-1/2 flex justify-between w-full px-4 z-3">
             <button @click="previousRecord" class="text-primary-600 bg-secondary-600 p-4 rounded-full hover:bg-primary-dark">&lt;</button>
             <button @click="nextRecord" class="text-primary-600 bg-secondary-600 p-4 rounded-full hover:bg-primary-dark">&gt;</button>
         </div>
@@ -57,7 +57,6 @@
             }
         }
     }
-
     function initializeBirthdayComponent() {
         Alpine.data('birthdayComponent', birthdayComponent);
         // Alpine.initTree(document.body);
