@@ -164,20 +164,20 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
                                 return $state;
                             }), 
                         ]),
-
+                    ])
+                    ->alignment(Alignment::Start)
+                    ->grow(false),
+                    TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match($state) {
+                        'pending' => 'warning',
+                        'approved' => 'success',
+                        'denied' => 'danger',
+                        'void' => 'danger',
+                    })
+                    ->alignCenter(),
                 ])
-                ->alignment(Alignment::Start)
-                ->grow(false),
-                TextColumn::make('status')
-                ->badge()
-                ->color(fn (string $state): string => match($state) {
-                    'pending' => 'warning',
-                    'approved' => 'success',
-                    'denied' => 'danger',
-                    'void' => 'danger',
-                })
-                ->alignCenter(),
-                ]),
+                ->from('lg'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

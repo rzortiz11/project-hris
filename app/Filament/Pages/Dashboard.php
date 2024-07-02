@@ -126,7 +126,7 @@ class Dashboard extends Page implements HasForms
                             return Leave::query()
                             // add on leave today and where status is approved
                             ->where('status', 'approved')
-                            ->count();
+                            ->count() . ' Today';
                         })
                         ->icon('heroicon-o-user-group')
                         ->schema([
