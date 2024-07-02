@@ -5,9 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Resources\AttendanceResource\Pages\ViewEmployeeTimeSheet;
 use App\Models\Employee;
+use App\Models\TimeSheet;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -37,6 +40,7 @@ class AttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+
             ->columns([
                 TextColumn::make('employee_id')->label('ID'),
                 TextColumn::make('employee_reference')->searchable(),

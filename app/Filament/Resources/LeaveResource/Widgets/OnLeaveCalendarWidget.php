@@ -59,10 +59,11 @@ class OnLeaveCalendarWidget extends FullCalendarWidget
                       ->where('to', '>=', $today); // Event ends today or later
             })
             ->orWhere('from', '>', $today) // Event starts in the future
-            ->where(function ($query) {
-                $query->where('status', '!=', 'CANCELLED')
-                      ->orWhereNull('status');
-            })
+            // ->where(function ($query) {
+            //     $query->where('status', '!=', 'CANCELLED')
+            //           ->orWhereNull('status');
+            // })
+            ->where('status', 'approved')
             ->get()
             ->map(function (Leave $event) use ($today) {
                 // Adjust start date if it's in the past

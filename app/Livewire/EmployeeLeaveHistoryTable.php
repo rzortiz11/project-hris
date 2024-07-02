@@ -120,6 +120,7 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                 CreateAction::make()
                 ->mutateFormDataUsing(function (array $data) use ($employee_id): array {
                     $data['employee_id'] = $employee_id;
+                    $data['date_filling'] = now();
              
                     return $data;
                 })

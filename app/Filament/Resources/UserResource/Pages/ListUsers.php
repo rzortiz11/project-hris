@@ -18,14 +18,14 @@ class ListUsers extends ListRecords
         ];
     }
 
-    public function getTabs(): array
-    {
-        return [
-            'All' => Tab::make(),
-            'Active' => Tab::make()->modifyQueryUsing(function ($query){
-                $query->where('status','ACTIVE');
-            }),
-            'Inactive' => Tab::make(),
-        ];
-    }
+    // public function getTabs(): array
+    // {
+    //     return [
+    //         'All' => Tab::make(),
+    //         'Active' => Tab::make()->modifyQueryUsing(function ($query){
+    //             $query->where('status','ACTIVE');
+    //         }),
+    //         'Inactive' => Tab::make(),
+    //     ];
+    // }
 }
