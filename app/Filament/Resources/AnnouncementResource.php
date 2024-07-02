@@ -89,14 +89,14 @@ class AnnouncementResource extends Resource
                     return $publish_at->format('Y-m-d');
                 }),
                 ToggleColumn::make('visible'),
-                TextColumn::make('active')->badge()
-                ->color(fn (string $state): string => match($state) {
-                    'active' => 'success',
-                    'inactive' => 'danger',
-                })
-                ->getStateUsing(function (Announcement $record): string {
-                    return $record->active ? 'active': 'inactive';
-                }),
+                // TextColumn::make('active')->badge()
+                // ->color(fn (string $state): string => match($state) {
+                //     'active' => 'success',
+                //     'inactive' => 'danger',
+                // })
+                // ->getStateUsing(function (Announcement $record): string {
+                //     return $record->active ? 'active': 'inactive';
+                // }),
                 ImageColumn::make('attachments')
                 ->square()
                 ->stacked(),

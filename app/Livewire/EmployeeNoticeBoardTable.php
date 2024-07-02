@@ -37,6 +37,9 @@ class EmployeeNoticeBoardTable extends Component implements HasForms, HasTable
         return $table
             ->query(NoticeEmployee::query()
             ->where('employee_id', isset($employee) ? $employee->employee_id : "")
+            ->whereHas('notice_board', function ($query) {
+                $query->where('visible', true);
+            })
             ->with(['notice_board']))
             ->columns([
                 TextColumn::make('notice_board.title')

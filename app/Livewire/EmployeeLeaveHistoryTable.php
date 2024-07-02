@@ -47,6 +47,7 @@ use Filament\Forms\Get;
 use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action as NotificationAction;
+use Illuminate\Support\Str;
 
 class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
 {
@@ -224,7 +225,7 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                         ->description('LEAVE ALLOCATIONS')
                         ->icon('heroicon-o-chart-pie')
                         ->schema([
-                        Livewire::make(LeaveSelfServiceAllocationPieChart::class)->lazy(),
+                        Livewire::make(LeaveSelfServiceAllocationPieChart::class)->key(self::generateUuid())->lazy()
                     ]),
                 ])
             ])
@@ -232,6 +233,11 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
             ->from('lg'),
         ]);
     }    
+
+    public static function generateUuid()
+    {
+        return (string) Str::uuid();
+    }
 
     public static function infolist(Infolist $infolist): Infolist
     {

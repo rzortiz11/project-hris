@@ -27,6 +27,7 @@ use Filament\Forms\Set;
 use Filament\Support\Enums\Alignment;
 use Illuminate\Contracts\View\View;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class CreateLeaveForm extends Component implements HasForms
 {
@@ -136,7 +137,7 @@ class CreateLeaveForm extends Component implements HasForms
                             ->description('LEAVE ALLOCATIONS')
                             ->icon('heroicon-o-chart-pie')
                             ->schema([
-                            Livewire::make(LeaveSelfServiceAllocationPieChart::class)->lazy(),
+                            Livewire::make(LeaveSelfServiceAllocationPieChart::class)->key(self::generateUuid())->lazy()
                 
                             //    Grid::make([
                             //     'default' => 1
@@ -156,6 +157,11 @@ class CreateLeaveForm extends Component implements HasForms
             ])
             ->statePath('data')
             ->model(Leave::class);
+    }
+
+    public static function generateUuid()
+    {
+        return (string) Str::uuid();
     }
 
     public function create()
