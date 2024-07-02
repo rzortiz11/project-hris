@@ -153,7 +153,8 @@ class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
                         'void' => 'danger',
                     })
                 ->alignCenter(),
-                ]),
+                ])
+                ->from('lg'),
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([

@@ -54,6 +54,9 @@ class EmployeeTimeSheet extends Page implements HasForms, HasTable
     public function getTabs(): array
     {
         return [
+            'All' => Tab::make()->modifyQueryUsing(function ($query) {
+                $query;
+            }),
             'January' => Tab::make()->modifyQueryUsing(function ($query) {
                 $query->whereMonth('date', 1);
             }),
@@ -98,6 +101,25 @@ class EmployeeTimeSheet extends Page implements HasForms, HasTable
     {
         // not working - will have query of the current month here
         return 'June';
+    }
+
+    protected function modifyQueryWithActiveTab(QueryBuilder $query): QueryBuilder
+    {
+        if (blank(filled($this->activeTab))) {
+            return $query;
+        }
+
+        if(empty($this->activeTab)){
+            $this->activeTab = now()->format('F');  // Set the current month as the active tab
+        }
+
+        $tabs = $this->getCachedTabs();
+
+        if (! array_key_exists($this->activeTab, $tabs)) {
+            return $query;
+        }
+
+        return $tabs[$this->activeTab]->modifyQuery($query);
     }
 
     public function table(Table $table): Table
