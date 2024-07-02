@@ -33,7 +33,8 @@ class AnnouncementDashboardTable extends Component implements HasForms, HasTable
     public function table(Table $table): Table
     {
         return $table
-            ->query(Announcement::query())
+            ->query(Announcement::query()
+            ->where('visible', true))
             ->columns([
                 Split::make([
                     ImageColumn::make('attachments')
