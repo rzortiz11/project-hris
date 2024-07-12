@@ -92,7 +92,8 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Settings')
-                    ->url(fn (): string => "settings/".auth()->id()."/url.com")
+                    
+                    ->url(fn (): string => route('filament.admin.resources.users.edit', ['record' => auth()->id()]))
                     ->icon('heroicon-o-cog-6-tooth'),
             ])
             ->brandLogo(fn () => view('vendor.filament.components.brand'))

@@ -140,6 +140,15 @@ class EmployeeTimeSheet extends Page implements HasForms, HasTable
             
                     return $isWeekend ? 'danger' : 'success';
                 })
+                ->tooltip(function (TimeSheet $timesheet): string{
+                    $date = Carbon::parse($timesheet->date);
+                    $dayOfWeek = $date->format('l');
+            
+                    // Check if the day is a weekend
+                    $isWeekend = in_array($dayOfWeek, ['Saturday', 'Sunday']);
+                    
+                    return $isWeekend ? 'Rest Day' : 'Working Day';
+                })
                 ->weight(FontWeight::Bold)
                 ->size(TextColumn\TextColumnSize::Large),
                 TextColumn::make('Day')
@@ -158,6 +167,12 @@ class EmployeeTimeSheet extends Page implements HasForms, HasTable
                     ];
                     
                     return $dayShortcuts[$dayOfWeek];
+                })
+                ->tooltip(function (TimeSheet $timesheet): string{
+                    $date = Carbon::parse($timesheet->date);
+                    $dayOfWeek = $date->format('l');
+            
+                    return $dayOfWeek;
                 })
                 ->sortable(),
                 TextColumn::make('date')
@@ -272,6 +287,7 @@ class EmployeeTimeSheet extends Page implements HasForms, HasTable
                     return $query->selectRaw("TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(over_time))), '%H:%i') AS over_time")->value('over_time');
                 }))
             ])
+            ->striped()
             ->defaultSort('date', 'desc')
             ->paginated([31, 'all'])
             ->filters([

@@ -124,7 +124,7 @@ class Dashboard extends Page implements HasForms
                         Tab::make('On Leave Calendar')
                         ->badge(function () {
                             return Leave::query()
-                            // add on leave today and where status is approved
+                            // add additional where clause to get current on leave today.
                             ->where('status', 'approved')
                             ->count() . ' Today';
                         })

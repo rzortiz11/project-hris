@@ -59,10 +59,11 @@ class OnLeaveCalendarWidget extends FullCalendarWidget
                       ->where('to', '>=', $today); // Event ends today or later
             })
             ->orWhere('from', '>', $today) // Event starts in the future
-            ->where(function ($query) {
-                $query->where('status', '!=', 'CANCELLED')
-                      ->orWhereNull('status');
-            })
+            // ->where(function ($query) {
+            //     $query->where('status', '!=', 'CANCELLED')
+            //           ->orWhereNull('status');
+            // })
+            ->where('status', 'approved')
             ->get()
             ->map(function (Leave $event) use ($today) {
                 // Adjust start date if it's in the past
@@ -75,10 +76,12 @@ class OnLeaveCalendarWidget extends FullCalendarWidget
                 $employee = Employee::find($event->employee_id);
                 $employee_name = $employee ? ucwords(strtolower($employee->user->name)) : '';
                 $designation = isset($employee->position->reporting_designation) ? $employee->position->reporting_designation : "N/A";
-    
+                $title = $employee_name . ' - ' . $designation . ' : ';
+                $title .=  $start->isSameDay($today) ? ' on '.$event->type.' today' : $event->type;
+            
                 return [
                     'id' => $event->leave_id,
-                    'title' => $employee_name . ' - ' . $designation . ' : ' . $event->type,
+                    'title' => $title,
                     'start' => $start->format('Y-m-d H:i:s'),
                     'end' => Carbon::parse($event->to)->endOfDay()->format('Y-m-d H:i:s'),
                     'holiday' => false,

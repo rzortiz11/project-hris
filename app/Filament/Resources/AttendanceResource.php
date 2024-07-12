@@ -2,12 +2,18 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\TimeSheetExporter;
+use App\Filament\Imports\TimeSheetImporter;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Resources\AttendanceResource\Pages\ViewEmployeeTimeSheet;
 use App\Models\Employee;
+use App\Models\TimeSheet;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\IconPosition;
 use Filament\Tables;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -37,6 +43,20 @@ class AttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                // ImportAction::make()
+                //     ->importer(TimeSheetImporter::class)
+                //     ->label('Import Time Logs')
+                //     ->color('primary')
+                //     ->icon('heroicon-o-arrow-up-tray'),
+                // ExportAction::make()
+                // ->columnMapping(false)
+                // ->exporter(TimeSheetExporter::class)
+                // ->label('Export Time sheet')
+                // ->color('warning')
+                // ->icon('heroicon-o-arrow-down-tray')
+                // ->iconPosition(IconPosition::After)
+            ])
             ->columns([
                 TextColumn::make('employee_id')->label('ID'),
                 TextColumn::make('employee_reference')->searchable(),

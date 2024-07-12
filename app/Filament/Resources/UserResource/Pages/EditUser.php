@@ -13,8 +13,8 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()
-            ->requiresConfirmation(),
+            // Actions\DeleteAction::make()
+            // ->requiresConfirmation(),
         ];
     }
 }
