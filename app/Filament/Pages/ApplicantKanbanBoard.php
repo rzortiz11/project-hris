@@ -1,5 +1,6 @@
 <?php
 
+/*
 namespace App\Filament\Pages;
 
 use App\ApplicationStatusTypeEnum;
@@ -66,20 +67,16 @@ class ApplicantKanbanBoard extends KanbanBoard
                         ->columns(4),
                     Wizard\Step::make('Employment History')
                         ->schema([
-                            // ...
                         ]),
                     Wizard\Step::make('Job Details')
                     ->schema([
-                        // ...
                     ]),
                     Wizard\Step::make('Salary Expectation')
                         ->schema([
-                            // ...
                         ]),
                     Wizard\Step::make('Remarks')
                     ->label('Remarks')
                     ->schema([
-                        // ...
                     ]),                        
                 ])   
             ])->modalWidth('6xl'),
@@ -113,19 +110,15 @@ class ApplicantKanbanBoard extends KanbanBoard
                     ->columns(4),
                 Wizard\Step::make('Employment History')
                     ->schema([
-                        // ...
                     ]),
                 Wizard\Step::make('Job Details')
                 ->schema([
-                    // ...
                 ]),
                 Wizard\Step::make('Salary Expectation')
                     ->schema([
-                        // ...
                     ]),
                 Wizard\Step::make('Remarks')
                 ->schema([
-                    // ...
                 ])
             ])->skippable(),          
       
@@ -137,19 +130,7 @@ class ApplicantKanbanBoard extends KanbanBoard
         $applicant = Applicant::find($recordId);
         $applicant->status = $status;
         $applicant->save();
-
-        // $actions[] =  Action::make('cancel')
-        //                     ->color('danger')
-        //                     ->label('Disapprove Application')
-        //                     ->requiresConfirmation()
-        //                     ->modalIcon('heroicon-s-shield-check')
-        //                     ->form([
-        //                         Forms\Components\Textarea::make('remarks')->required()
-        //                     ])
-        //                     ->icon('heroicon-s-x-circle')
-        //                     ->action(function (array $data) { 
-                                
-        //                     });
-
     }
 }
+*/
+?>

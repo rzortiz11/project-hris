@@ -124,8 +124,11 @@ class Dashboard extends Page implements HasForms
                         Tab::make('On Leave Calendar')
                         ->badge(function () {
                             return Leave::query()
-                            // add additional where clause to get current on leave today.
                             ->where('status', 'approved')
+                            ->where(function ($query) {
+                                $query->whereDate('from', '<=', now()->format('Y-m-d'))
+                                    ->whereDate('to', '>=', now()->format('Y-m-d'));
+                            })
                             ->count() . ' Today';
                         })
                         ->icon('heroicon-o-user-group')
@@ -137,7 +140,6 @@ class Dashboard extends Page implements HasForms
                         Tab::make('Company News & Announcement')
                         ->badge(function () {
                             return Announcement::query()
-                            // add on leave today and where status is approved
                             ->count();
                         })
                         ->icon('heroicon-o-megaphone')

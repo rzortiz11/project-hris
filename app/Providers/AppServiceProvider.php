@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Filament::serving(function () {
             Filament::registerNavigationGroups([
-                'Recruitment Management',
+                // 'Recruitment Management',
                 'Human Resource Management',
                 'Employee Self Service',
             ]);
