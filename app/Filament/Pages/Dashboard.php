@@ -305,6 +305,10 @@ class Dashboard extends Page implements HasForms
                         }
                     }
 
+                    if(!isset($timesheet->time_in)){
+                        return true;
+                    }
+
                     return false;
                 })  
                 ->action(function (array $data) use ($employee, $current_date, $current_time, $timesheet) {

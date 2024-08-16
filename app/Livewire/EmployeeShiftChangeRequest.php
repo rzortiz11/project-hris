@@ -53,7 +53,7 @@ class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
                         
                         // enchangement declare the relationship on model and just call it employee.picture
                         $employee = Employee::find($data->employee_id);
-                        return isset($employee) ? $employee->picture : '';
+                        return isset($employee->picture) ? $employee->picture : '';
                     })
                     ->circular(),
                     Stack::make([
