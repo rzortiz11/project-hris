@@ -244,7 +244,8 @@ class TimeChangeRequestTable extends Component implements HasForms, HasTable
                 ])->columns(),
             ])->from('lg'),
             Select::make('type')->options([
-                '1' => 'Time Correction'
+                '1' => 'Time Correction',
+                '2' => 'Official Business'
             ]),
             Textarea::make('remarks')->label('Remarks')
             ->required()

@@ -82,7 +82,7 @@ class AttendanceResource extends Resource
                 //
             ])
             ->actions([
-                //
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
            

@@ -20,6 +20,8 @@ use Illuminate\Database\Query\Builder;
 use Livewire\Component;
 use PhpParser\Node\Stmt\Label;
 use Filament\Resources\Concerns\HasTabs;
+use Filament\Support\Enums\Alignment;
+use Filament\Tables\Columns\ColumnGroup;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Tables\Enums\FiltersLayout;
@@ -185,30 +187,34 @@ class EmployeeTimeSheet extends Page implements HasForms, HasTable
                 ->sortable(), 
                 TextColumn::make('shift_schedule'),
                 TextColumn::make('in_location')->label('In Location')->placeholder('-'),
-                TextColumn::make('time_in')
-                ->getStateUsing(function (TimeSheet $timesheet): string {
-
-                    $date = Carbon::parse($timesheet->time_in);
-                    return $date->format('H:i');
-                })->sortable(),
-                TextColumn::make('break_time_out')
-                ->getStateUsing(function (TimeSheet $timesheet): string {
-
-                    $date = Carbon::parse($timesheet->break_time_out);
-                    return $date->format('H:i');
-                })->sortable(),
-                TextColumn::make('break_time_in')
-                ->getStateUsing(function (TimeSheet $timesheet): string {
-
-                    $date = Carbon::parse($timesheet->break_time_in);
-                    return $date->format('H:i');
-                })->sortable(),
-                TextColumn::make('time_out')
-                ->getStateUsing(function (TimeSheet $timesheet): string {
-
-                    $date = Carbon::parse($timesheet->time_out);
-                    return $date->format('H:i');
-                })->sortable(),
+                ColumnGroup::make('Time Logs', [
+                    TextColumn::make('time_in')
+                    ->getStateUsing(function (TimeSheet $timesheet): string {
+    
+                        $date = Carbon::parse($timesheet->time_in);
+                        return $date->format('H:i');
+                    })->sortable(),
+                    TextColumn::make('break_time_out')
+                    ->getStateUsing(function (TimeSheet $timesheet): string {
+    
+                        $date = Carbon::parse($timesheet->break_time_out);
+                        return $date->format('H:i');
+                    })->sortable(),
+                    TextColumn::make('break_time_in')
+                    ->getStateUsing(function (TimeSheet $timesheet): string {
+    
+                        $date = Carbon::parse($timesheet->break_time_in);
+                        return $date->format('H:i');
+                    })->sortable(),
+                    TextColumn::make('time_out')
+                    ->getStateUsing(function (TimeSheet $timesheet): string {
+    
+                        $date = Carbon::parse($timesheet->time_out);
+                        return $date->format('H:i');
+                    })->sortable(),
+                ])
+                ->alignment(Alignment::Center)
+                ->wrapHeader(),
                 TextColumn::make('out_location')->label('Out Location')->placeholder('-'),
                 TextColumn::make('out_date')->label('Out Date')->placeholder('-'),
                 TextColumn::make('time_in_2')
