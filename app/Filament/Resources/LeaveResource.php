@@ -156,9 +156,7 @@ class LeaveResource extends Resource
                     Section::make('EMPLOYEE LEAVE HISTORY')
                     ->icon('heroicon-s-document-duplicate')
                     ->schema([
-                        Livewire::make(EmployeeLeaveHistoryTable::class)                            
-                        ->key(self::generateUuid())
-
+                        Livewire::make(EmployeeLeaveHistoryTable::class)->key(self::generateUuid())->lazy() // do not remove the lazy this will cause for the button to not load
                     ])
                 ]),
             ]);

@@ -53,7 +53,7 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
                     ->getStateUsing(function (OverTimeRequest $data): string {
     
                         $employee = Employee::find($data->employee_id);
-                        return isset($employee) ? $employee->picture : '';
+                        return isset($employee->picture) ? $employee->picture : '';
                     })
                     ->circular(),
                     Stack::make([

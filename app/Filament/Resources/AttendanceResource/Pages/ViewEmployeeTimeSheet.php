@@ -95,6 +95,7 @@ class ViewEmployeeTimeSheet extends ViewRecord
                 Grid::make()
                 ->schema([
                     Section::make("Hour's this week")
+                    ->icon('heroicon-o-clock')
                     ->schema([
                         TextEntry::make('employee_id')->label('')
                         ->getStateUsing(function (Employee $record): string {
@@ -110,7 +111,8 @@ class ViewEmployeeTimeSheet extends ViewRecord
                         })
                         ->weight(FontWeight::Bold)
                         ->size(TextEntry\TextEntrySize::Large),
-                    ])->columnSpan(3),
+                    ])->columnSpan(3)
+                    ->extraAttributes(['style' => 'background-color:#007BFF']),
                     Section::make("Hour's this month")
                     ->schema([
                         TextEntry::make('employee_id')->label('')
@@ -127,7 +129,8 @@ class ViewEmployeeTimeSheet extends ViewRecord
                         })
                         ->weight(FontWeight::Bold)
                         ->size(TextEntry\TextEntrySize::Large),
-                    ])->columnSpan(3),
+                    ])->columnSpan(3)
+                    ->extraAttributes(['style' => 'background-color:#28A745']),
                     Section::make("Total Late this month")
                     ->schema([
                         TextEntry::make('employee_id')->label('')
@@ -144,7 +147,8 @@ class ViewEmployeeTimeSheet extends ViewRecord
                             })
                             ->weight(FontWeight::Bold)
                             ->size(TextEntry\TextEntrySize::Large),
-                    ])->columnSpan(3),
+                    ])->columnSpan(3)
+                    ->extraAttributes(['style' => 'background-color:#FFC107']),
                     Section::make("Total Over Time this month")
                     ->schema([
                         TextEntry::make('employee_id')->label('')
@@ -161,7 +165,8 @@ class ViewEmployeeTimeSheet extends ViewRecord
                             })
                             ->weight(FontWeight::Bold)
                             ->size(TextEntry\TextEntrySize::Large),
-                    ])->columnSpan(3),
+                    ])->columnSpan(3)
+                    ->extraAttributes(['style' => 'background-color:#DC3545']),
                 ])->columns(12),
 
 

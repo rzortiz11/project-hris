@@ -14,8 +14,10 @@ return new class extends Migration
         Schema::create('employee_salary_details', function (Blueprint $table) {
             $table->id('employee_salary_id');
             $table->unsignedBigInteger('employee_id');
-            $table->string('type')->comment('basic salary,transportation allowance, de minimis,13 month');
-            // $table->integer('daily_amount')->default(0);
+            $table->string('name');
+            $table->string('type')->comment('basic-salary,allowance,13 month,14thmonth');
+            $table->decimal('daily_amount', 10, 2)->default(0.00);
+            $table->decimal('bi_weekly_amount', 10, 2)->default(0.00);
             $table->decimal('monthly_amount', 10, 2)->default(0.00);
             $table->decimal('yearly_amount', 10, 2)->default(0.00);
             $table->timestamps();

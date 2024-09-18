@@ -53,7 +53,7 @@ class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
                     ->getStateUsing(function (TimeChangeRequest $data): string {
     
                         $employee = Employee::find($data->employee_id);
-                        return isset($employee) ? $employee->picture : '';
+                        return isset($employee->picture) ? $employee->picture : '';
                     })
                     ->circular(),
                     Stack::make([
