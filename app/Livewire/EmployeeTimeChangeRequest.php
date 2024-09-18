@@ -57,18 +57,18 @@ class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
                     })
                     ->circular(),
                     Stack::make([
-                        TextColumn::make('employee_reference')
-                        ->getStateUsing(function (TimeChangeRequest $data): string {
-        
-                            $employee = Employee::find($data->employee_id);
-                            return isset($employee) ? $employee->employee_reference : '';
-                        }), 
                         TextColumn::make('employee_id')
                         ->weight(FontWeight::Bold)
                         ->getStateUsing(function (TimeChangeRequest $data): string {
         
                             $employee = Employee::find($data->employee_id);
                             return isset($employee->user->name) ? $employee->user->name : '';
+                        }), 
+                        TextColumn::make('employee_reference')
+                        ->getStateUsing(function (TimeChangeRequest $data): string {
+        
+                            $employee = Employee::find($data->employee_id);
+                            return isset($employee) ? $employee->employee_reference : '';
                         }), 
                     ]),
                     Stack::make([

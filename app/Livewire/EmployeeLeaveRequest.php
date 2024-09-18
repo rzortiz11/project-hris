@@ -57,18 +57,18 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                     })
                     ->circular(),
                     Stack::make([
-                        TextColumn::make('employee_reference')
-                        ->getStateUsing(function (Leave $data): string {
-        
-                            $employee = Employee::find($data->employee_id);
-                            return isset($employee) ? $employee->employee_reference : '';
-                        }), 
                         TextColumn::make('employee_id')
                         ->weight(FontWeight::Bold)
                         ->getStateUsing(function (Leave $data): string {
         
                             $employee = Employee::find($data->employee_id);
                             return isset($employee->user->name) ? $employee->user->name : '';
+                        }), 
+                        TextColumn::make('employee_reference')
+                        ->getStateUsing(function (Leave $data): string {
+        
+                            $employee = Employee::find($data->employee_id);
+                            return isset($employee) ? $employee->employee_reference : '';
                         }), 
                     ]),
                     Stack::make([

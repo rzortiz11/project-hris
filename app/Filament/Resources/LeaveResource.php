@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Support\Enums\FontWeight;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Tables\Columns\ImageColumn;
 use Illuminate\Support\Str;
 
 class LeaveResource extends Resource
@@ -167,6 +168,13 @@ class LeaveResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('employee_id')->label('ID'),
+                ImageColumn::make('avatar')
+                ->grow(false)
+                ->getStateUsing(function (Employee $data): string {
+
+                    return isset($data->picture) ? $data->picture : '';
+                })
+                ->circular(),
                 TextColumn::make('employee_reference')->searchable(),
                 TextColumn::make('user.name')->label('User')->searchable(['first_name','last_name']),
                 TextColumn::make('user.name')->label('User')->searchable(['first_name','last_name']),

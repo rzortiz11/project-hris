@@ -14,6 +14,7 @@ use Filament\Support\Enums\IconPosition;
 use Filament\Tables;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Actions\ImportAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -59,6 +60,13 @@ class AttendanceResource extends Resource
             ])
             ->columns([
                 TextColumn::make('employee_id')->label('ID'),
+                ImageColumn::make('avatar')
+                ->grow(false)
+                ->getStateUsing(function (Employee $data): string {
+
+                    return isset($data->picture) ? $data->picture : '';
+                })
+                ->circular(),
                 TextColumn::make('employee_reference')->searchable(),
                 TextColumn::make('user.name')->label('User')->searchable(['first_name','last_name']),
                 TextColumn::make('position.job_position')->label('Position'),
