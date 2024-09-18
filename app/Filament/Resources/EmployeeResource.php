@@ -34,6 +34,7 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 
 class EmployeeResource extends Resource
@@ -141,6 +142,13 @@ class EmployeeResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('employee_id')->label('ID'),
+                ImageColumn::make('avatar')
+                ->grow(false)
+                ->getStateUsing(function (Employee $data): string {
+
+                    return isset($data->picture) ? $data->picture : '';
+                })
+                ->circular(),
                 TextColumn::make('employee_reference')->searchable(),
                 TextColumn::make('user.name')->label('User')->searchable(['first_name','last_name']),
                 TextColumn::make('position.job_position')->label('Position'),
