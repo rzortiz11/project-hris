@@ -147,4 +147,8 @@ class Employee extends Model
     public function employee_notice_board(): HasMany {
         return $this->hasMany(NoticeEmployee::class, 'employee_id', 'employee_id');
     }
+    
+    public function employee_payroll(): HasMany {
+        return $this->hasMany(Payroll::class, 'employee_id', 'employee_id');
+    }
 }

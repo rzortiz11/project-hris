@@ -27,6 +27,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Tabs\Tab;
@@ -459,27 +460,38 @@ class EmployeeResource extends Resource
                         ->required()
                         ->preload(),
                     ])->columns(4),
-                    Select::make('payment_structure')
-                    ->options([
-                        'COMPANY' => 'Company',
-                    ])
-                    ->required()
-                    ->searchable(),                                                    
-                    Select::make('payroll_cycle')->options([
-                        'BI-MONTHLY' => 'Bi-montly',
-                        'MONTHLY' => 'Monthly'
-                    ])->preload()
-                    ->required(),
-                    DatePicker::make('employement_date')
-                    ->suffixIcon('heroicon-o-calendar-days')
-                    ->required(),
-                    DatePicker::make('probation_end_date')
-                    ->suffixIcon('heroicon-o-calendar-days'),
-                    DatePicker::make('termination_date')
-                    ->suffixIcon('heroicon-o-calendar-days'),
-                    DatePicker::make('seperation_date')
-                    ->suffixIcon('heroicon-o-calendar-days')
-                ])->columns(3),
+                    Group::make([
+                        Select::make('company')
+                        ->required()
+                        ->options([
+                            'companya' => 'Company A',
+                            'companyb' => 'Company B',
+                        ]),
+                        Select::make('payment_structure')
+                        ->options([
+                            'COMPANY' => 'Company',
+                        ])
+                        ->required()
+                        ->searchable(),                                                    
+                        Select::make('payroll_cycle')->options([
+                            'BI-MONTHLY' => 'Bi-montly',
+                            'MONTHLY' => 'Monthly'
+                        ])->preload()
+                        ->required(),
+                    ])->columns(3),
+                    Group::make([
+                        DatePicker::make('employement_date')
+                        ->suffixIcon('heroicon-o-calendar-days')
+                        ->required(),
+                        DatePicker::make('probation_end_date')
+                        ->suffixIcon('heroicon-o-calendar-days'),
+                        DatePicker::make('termination_date')
+                        ->suffixIcon('heroicon-o-calendar-days'),
+                        DatePicker::make('seperation_date')
+                        ->suffixIcon('heroicon-o-calendar-days')
+                    ])->columns(4),
+   
+                ])->columns(1),
                 Grid::make([
                     'default' => 1
                 ])
@@ -687,7 +699,7 @@ class EmployeeResource extends Resource
             ->label('')
             ->relationship()
             ->schema([
-                Select::make('type')->label('Pay Type')
+                Select::make('name')->label('Name')
                 ->options([
                     'BASIC-SALARY' => 'Basic Salary',
                     'DE-MINIMIS' => 'De Minimis Allowance',
@@ -696,6 +708,16 @@ class EmployeeResource extends Resource
                     'TRANSPORATION' => 'Transportation Allowance',
                     '13-MONTH' => '13th Month Pay',
                     '14-MONTH' => '14th Month Pay',
+                ])
+                ->preload()
+                ->required()
+                ->searchable(),
+                Select::make('type')->label('Type')
+                ->options([
+                    'BASIC-SALARY' => 'Basic-Salary',
+                    'ALLOWANCE' => 'Allowance',
+                    '13_MONTH' => '13th-Month',
+                    '14_MONTH' => '14th-Month',
                 ])
                 ->preload()
                 ->required()
@@ -724,7 +746,7 @@ class EmployeeResource extends Resource
             ->deleteAction(
                 fn (Action $action) => $action->requiresConfirmation(),
             )
-            ->columns(3),
+            ->columns(4),
         ]);
 
         return $salary;
