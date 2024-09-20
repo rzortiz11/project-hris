@@ -78,9 +78,21 @@ class ViewEmployeeTimeSheet extends ViewRecord
 
     public function infolist(Infolist $infolist): Infolist
     {
+
+        $isSectionHidden = false;
+        $info_employee = $infolist->getRecord();
+        $logged_user = isset(auth()->user()->employee) ? auth()->user()->employee : false;
+        
+        if(isset($info_employee->employee_id) && isset($logged_user)){
+            if($info_employee->employee_id == $logged_user->employee_id){
+                $isSectionHidden = true;
+            }
+        }
+
         return $infolist
             ->schema([
                 Section::make('Attendance Details')
+                ->hidden($isSectionHidden)
                 ->description('Employee Time Sheet')
                 ->icon('heroicon-s-clock')
                 ->schema([
@@ -111,8 +123,8 @@ class ViewEmployeeTimeSheet extends ViewRecord
                         })
                         ->weight(FontWeight::Bold)
                         ->size(TextEntry\TextEntrySize::Large),
-                    ])->columnSpan(3)
-                    ->extraAttributes(['style' => 'background-color:#007BFF']),
+                    ])->columnSpan(3),
+                    // ->extraAttributes(['style' => 'background-color:#007BFF']),
                     Section::make("Hour's this month")
                     ->schema([
                         TextEntry::make('employee_id')->label('')
@@ -129,8 +141,8 @@ class ViewEmployeeTimeSheet extends ViewRecord
                         })
                         ->weight(FontWeight::Bold)
                         ->size(TextEntry\TextEntrySize::Large),
-                    ])->columnSpan(3)
-                    ->extraAttributes(['style' => 'background-color:#28A745']),
+                    ])->columnSpan(3),
+                    // ->extraAttributes(['style' => 'background-color:#28A745']),
                     Section::make("Total Late this month")
                     ->schema([
                         TextEntry::make('employee_id')->label('')
@@ -147,8 +159,8 @@ class ViewEmployeeTimeSheet extends ViewRecord
                             })
                             ->weight(FontWeight::Bold)
                             ->size(TextEntry\TextEntrySize::Large),
-                    ])->columnSpan(3)
-                    ->extraAttributes(['style' => 'background-color:#FFC107']),
+                    ])->columnSpan(3),
+                    // ->extraAttributes(['style' => 'background-color:#FFC107']),
                     Section::make("Total Over Time this month")
                     ->schema([
                         TextEntry::make('employee_id')->label('')
@@ -165,8 +177,8 @@ class ViewEmployeeTimeSheet extends ViewRecord
                             })
                             ->weight(FontWeight::Bold)
                             ->size(TextEntry\TextEntrySize::Large),
-                    ])->columnSpan(3)
-                    ->extraAttributes(['style' => 'background-color:#DC3545']),
+                    ])->columnSpan(3),
+                    // ->extraAttributes(['style' => 'background-color:#DC3545']),
                 ])->columns(12),
 
 

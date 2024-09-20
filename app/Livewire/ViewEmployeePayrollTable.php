@@ -119,12 +119,13 @@ class ViewEmployeePayrollTable extends Component implements HasForms, HasTable
                 ->color('danger')
                 ->icon('heroicon-s-document-arrow-down')
                 ->action(function (Payroll $record, array $data) {
-                    $record->status = "approved";
-                    $record->save();
-                })->requiresConfirmation(),
+
+                    redirect()->route('download.payslip.pdf', ['payroll_id' => $record->payroll_id]);
+                }),
+                // ->requiresConfirmation(),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
+                    // Tables\Actions\EditAction::make(), payslip should not be editable either create or delete only
                     Tables\Actions\DeleteAction::make(),
                 ]),
          
