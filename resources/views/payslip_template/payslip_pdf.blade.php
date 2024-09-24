@@ -213,40 +213,40 @@
             <div class="left">
                 <div class="section-title">Employee Details</div>
                 <table>
-                    <tr><td>Employee Name</td><td>{{ $payroll_data->fullname }}</td></tr>
-                    <tr><td>Employee ID</td><td>220064</td></tr>
-                    <tr><td>Gender</td><td>Male</td></tr>
-                    <tr><td>Company Name</td><td>More Power</td></tr>
-                    <tr><td>Position</td><td>Software Engineer II</td></tr>
-                    <tr><td>Rank</td><td>4</td></tr>
-                    <tr><td>Payroll Cycle</td><td>semi-monthly</td></tr>
-                    <tr><td>TIN</td><td>397-102-533</td></tr>
-                    <tr><td>SSS</td><td>34-9844946-1</td></tr>
-                    <tr><td>HDMF</td><td>1213-1224-7806</td></tr>
-                    <tr><td>Philhealth</td><td>11-253934120-3</td></tr>
+                    <tr><td>Employee Name</td><td class="amount">{{ $payroll_data->fullname }}</td></tr>
+                    <tr><td>Employee ID</td><td class="amount">220064</td></tr>
+                    <tr><td>Gender</td><td class="amount">Male</td></tr>
+                    <tr><td>Company Name</td><td class="amount">More Power</td></tr>
+                    <tr><td>Position</td><td class="amount">Software Engineer II</td></tr>
+                    <tr><td>Rank</td><td class="amount">4</td></tr>
+                    <tr><td>Payroll Cycle</td><td class="amount">semi-monthly</td></tr>
+                    <tr><td>TIN</td><td class="amount">397-102-533</td></tr>
+                    <tr><td>SSS</td><td class="amount">34-9844946-1</td></tr>
+                    <tr><td>HDMF</td><td class="amount">1213-1224-7806</td></tr>
+                    <tr><td>Philhealth</td><td class="amount">11-253934120-3</td></tr>
                 </table>
 
                 <div class="section-title">Employer Contribution</div>
                 <table>
-                    <tr><td>SSS</td><td>450.00</td></tr>
-                    <tr><td>WISP</td><td>275.00</td></tr>
-                    <tr><td>SSS EC</td><td>50.00</td></tr>
-                    <tr><td>HDMF</td><td>50.00</td></tr>
-                    <tr><td>Philhealth</td><td>192.00</td></tr>
+                    <tr><td>SSS</td><td class="amount">450.00</td></tr>
+                    <tr><td>WISP</td><td class="amount">275.00</td></tr>
+                    <tr><td>SSS EC</td><td class="amount">50.00</td></tr>
+                    <tr><td>HDMF</td><td class="amount">50.00</td></tr>
+                    <tr><td>Philhealth</td><td class="amount">192.00</td></tr>
                 </table>
 
                 <div class="section-title">Year to Date Figures</div>
                 <table>
-                    <tr><td>Gross Income</td><td>218,841.35</td></tr>
-                    <tr><td>Taxable Income</td><td>187,637.21</td></tr>
-                    <tr><td>Withholding Tax</td><td>4,796.70</td></tr>
-                    <tr><td>Net Pay</td><td>199,947.15</td></tr>
-                    <tr><td>Allowance</td><td>32,066.64</td></tr>
-                    <tr><td>SSS Employer</td><td>14,250.00</td></tr>
-                    <tr><td>WISP Employer</td><td>6,032.50</td></tr>
-                    <tr><td>SSS EC Employer</td><td>240.00</td></tr>
-                    <tr><td>Philhealth Employer</td><td>3,780.00</td></tr>
-                    <tr><td>Pagibig Employer</td><td>750.00</td></tr>
+                    <tr><td>Gross Income</td><td class="amount">218,841.35</td></tr>
+                    <tr><td>Taxable Income</td><td class="amount">187,637.21</td></tr>
+                    <tr><td>Withholding Tax</td><td class="amount">4,796.70</td></tr>
+                    <tr><td>Net Pay</td><td class="amount">199,947.15</td></tr>
+                    <tr><td>Allowance</td><td class="amount">32,066.64</td></tr>
+                    <tr><td>SSS Employer</td><td class="amount">14,250.00</td></tr>
+                    <tr><td>WISP Employer</td><td class="amount">6,032.50</td></tr>
+                    <tr><td>SSS EC Employer</td><td class="amount">240.00</td></tr>
+                    <tr><td>Philhealth Employer</td><td class="amount">3,780.00</td></tr>
+                    <tr><td>Pagibig Employer</td><td class="amount">750.00</td></tr>
                 </table>
             </div>
 

@@ -45,6 +45,14 @@ class ViewEmployeePayrollTable extends Component implements HasForms, HasTable
             ->query(Payroll::query()->where('pay_period_id', $pay_period_id))
             // ->defaultGroup('status')
             ->columns([
+                TextColumn::make('status')->label('Audit Status')
+                ->badge()
+                ->color(fn (string $state): string => match($state) {
+                    'pending' => 'warning',
+                    'approved' => 'success',
+                    'denied' => 'danger',
+                    'void' => 'danger',
+                }),
                 ColumnGroup::make('Employee Details', [
                     TextColumn::make('payroll_id')->label('ID'),
                     ImageColumn::make('avatar')
@@ -92,15 +100,6 @@ class ViewEmployeePayrollTable extends Component implements HasForms, HasTable
                     $bgColor = '#d3d3d3';
                     return ['style' => "background-color: {$bgColor}"];
                 }),
-                TextColumn::make('status')
-                ->badge()
-                ->color(fn (string $state): string => match($state) {
-                    'pending' => 'warning',
-                    'approved' => 'success',
-                    'denied' => 'danger',
-                    'void' => 'danger',
-                })
-                ->label('Status'),
 
             ])
             ->filters([
