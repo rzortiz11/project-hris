@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payroll extends Model
@@ -24,4 +25,8 @@ class Payroll extends Model
     // is over_time_hours == regular_overtim_hours
     // or regular_overtime_hours + $rest_day_hours == over_time_hours and over_time_pay
 
+    public function pay_period(): BelongsTo
+    {
+        return $this->belongsTo(PayPeriod::class, 'pay_period_id', 'pay_period_id');
+    }
 }

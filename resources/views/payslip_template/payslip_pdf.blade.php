@@ -30,37 +30,50 @@
             font-size: 20px;
             margin-bottom: 20px;
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid black;
-            padding-bottom: 10px;
-        }
-        
-        .header div {
-            width: 50%;
-            text-align: left;
-        }
         .company-logo img {
             max-width: 100px; /* Adjust the width as needed */
             height: auto; /* Maintain aspect ratio */
         }
+
+        /* New Table Header Styling */
+        .header-table {
+            width: 100%;
+            border-bottom: 1px solid black;
+            margin-top: 20px;
+            table-layout: fixed; /* Ensures equal width for all columns */
+        }
+
+        .header-table-logo {
+            width: 100%;
+            margin-top: 0px;
+            table-layout: fixed; /* Ensures equal width for all columns */
+        }
+
+        .header-table td {
+            padding: 5px;
+            width: 33.33%; /* Ensure all columns take up 1/3 of the width */
+        }
+        .header-table td.start {
+            text-align: left; /* Align to start (left) */
+        }
+        .header-table td.center {
+            text-align: center; /* Align to center */
+        }
+        .header-table td.end {
+            text-align: right; /* Align to end (right) */
+        }
         .header-title {
             font-weight: bold;
         }
-
-        .header-title-left{
-            display: inline-block;
-            width: 40%;
-            padding: 0;
-            margin: 0;
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        .header-title-left{
-            display: inline-block;
-            width: 40%;
-            padding: 0;
-            margin: 0;
-        }  
+
+        .header img {
+            width: 150px; /* Adjust the size of the logo */
+        }
+        
         .content {
             display: flex;
             margin-top: 20px;
@@ -165,21 +178,35 @@
 </head>
 <body>
     <div class="container">
-        <h1>Payslip</h1>
-        <div class="header">
-            <div>
-                <p class="header-title ">Pay Run</p>
-                <p>Aug 25, 2023</p>
-            </div>
-            <div>
-                <p class="header-title">Pay Period</p>
-                <p>Aug 1 - Aug 15, 2023</p>
-            </div>
-            <div>
-                <p class="header-title">Attendance</p>
-                <p>Aug 1 - Aug 15, 2023</p>
-            </div>
-        </div>
+        <table class="header-table-logo" style="margin-bottom: 0px">
+            <tr>
+                <td class="start">
+                    <h1>Payslip</h1>
+                </td>
+                <td class="end">
+                    <div class="header" style="text-align: right;margin-bottom: 0px;">
+                        <img src="{{ $logo_base64 }}" alt="Logo" style="height: 80px; width: auto;">
+                    </div>
+                </td>
+            </tr>
+        </table>         
+ 
+        <table class="header-table">
+            <tr>
+                <td class="start">
+                    <p class="header-title">Pay Run</p>
+                    <p>Aug 25, 2023</p>
+                </td>
+                <td class="center">
+                    <p class="header-title">Pay Period</p>
+                    <p>Aug 1 - Aug 15, 2023</p>
+                </td>
+                <td class="end">
+                    <p class="header-title">Attendance</p>
+                    <p>Aug 1 - Aug 15, 2023</p>
+                </td>
+            </tr>
+        </table>
 
         <div class="content">
             <div class="left">
