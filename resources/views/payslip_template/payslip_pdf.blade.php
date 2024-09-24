@@ -38,6 +38,7 @@
         /* New Table Header Styling */
         .header-table {
             width: 100%;
+            border-top: 1px solid black;
             border-bottom: 1px solid black;
             margin-top: 20px;
             table-layout: fixed; /* Ensures equal width for all columns */
@@ -54,13 +55,13 @@
             width: 33.33%; /* Ensure all columns take up 1/3 of the width */
         }
         .header-table td.start {
-            text-align: left; /* Align to start (left) */
+            text-align: center; /* Align to start (left) */
         }
         .header-table td.center {
             text-align: center; /* Align to center */
         }
         .header-table td.end {
-            text-align: right; /* Align to end (right) */
+            text-align: center; /* Align to end (right) */
         }
         .header-title {
             font-weight: bold;
