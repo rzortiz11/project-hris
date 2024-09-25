@@ -353,8 +353,6 @@ class ViewPayPeriod extends ViewRecord
                         TextInput::make('leave_pay')->prefix('₱ ')->default(0)->inlineLabel(), // check if i need to add this or not
                         TextInput::make('over_time_pay')->prefix('₱ ')->default(0)->inlineLabel(),
                         TextInput::make('holiday_pay')->prefix('₱ ')->default(0)->inlineLabel(),
-                        TextInput::make('time_change_pay')->prefix('₱ ')->default(0)->inlineLabel(),
-                        TextInput::make('under_time_pay')->prefix('₱ ')->default(0)->inlineLabel(),
                         TextInput::make('retro_pay')->prefix('₱ ')->default(0)->inlineLabel(),
                         TextInput::make('allowances_pay')->prefix('₱ ')->default(0)->inlineLabel(),
                         TextInput::make('bonuses_pay')->prefix('₱ ')->default(0)->inlineLabel(),
@@ -415,10 +413,8 @@ class ViewPayPeriod extends ViewRecord
                 'under_time_hours' => $data['under_time_hours'],
                 'retro_hours' => $data['retro_hours'],
                 'basic_pay' => $data['basic_salary_per_cutoff'],
-                'time_change_pay' =>  $data['time_change_pay'],
                 'over_time_pay' => $data['over_time_pay'], //regular_overtime + rest_day_overtime
                 'holiday_pay' => $data['holiday_pay'],
-                'under_time_pay' =>  $data['under_time_pay'],
                 'allowances_pay' => $data['allowances_pay'],
                 'retro_pay' => $data['retro_pay'],
                 'bonuses_pay' => $data['bonuses_pay'],
@@ -432,7 +428,7 @@ class ViewPayPeriod extends ViewRecord
                 'cash_advance' => $data['cash_advance'],
                 'adjustment' => $data['adjustment'],
                 'total_net_pay' => $data['total_net_pay'],
-                'status' => "pending",
+                'remarks' => $data['total_net_pay'],
                 'created_by' => auth()->id()
             ];
 

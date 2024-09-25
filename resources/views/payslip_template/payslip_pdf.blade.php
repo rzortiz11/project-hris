@@ -266,9 +266,10 @@
                     <tr><td class="highlight">Gross Income</td><td class="amount">3,733.33</td></tr>
                 </table>
 
-                <div class="section-title-with-no-border">Allowance (taxable allowance)</div>
+                <div class="section-title-with-no-border">Other Deductions</div>
                 <table>
-                    <tr><td>De Minimis</td><td class="amount">2,133.33</td></tr>
+                    <tr><td>Absent</td><td class="amount">(2,133.33)</td></tr>
+                    <tr><td>Late</td><td class="amount">(600.33)</td></tr>
                 </table>
                 <div class="section-title-with-no-border">Mandatory Deduction</div>
                 <table>
@@ -283,7 +284,7 @@
                 </table>
                 <div class="section-title-with-no-border">Tax </div>
                 <table>
-                    <tr><td>Withholding Tax</td><td class="amount">3,733.33</td></tr>
+                    <tr><td>Withholding Tax</td><td class="amount">(3,733.33)</td></tr>
                 </table>
                 <div class="section-title-with-no-border">Allowance </div>
                 <table>
