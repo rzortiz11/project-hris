@@ -43,10 +43,9 @@ return new class extends Migration
             $table->float('retro_hours')->nullable(); 
             
             $table->decimal('basic_pay', 10, 2)->default(0.00);
-            $table->decimal('time_change_pay', 10, 2)->default(0.00);
+            // $table->decimal('time_change_pay', 10, 2)->default(0.00);
             $table->decimal('over_time_pay', 10, 2)->default(0.00); // over time with regular pay
             $table->decimal('holiday_pay', 10, 2)->default(0.00); // over time with holiday pay
-            $table->decimal('under_time_pay', 10, 2)->default(0.00);
             $table->decimal('allowances_pay', 10, 2)->default(0.00);
             $table->decimal('retro_pay', 10, 2)->default(0.00); // Retro Pay (Retroactive Pay) - Compensation that is owed to an employee for work done in a prior pay period but was not paid correctly
             $table->decimal('bonuses_pay', 10, 2)->default(0.00);
@@ -55,6 +54,7 @@ return new class extends Migration
             $table->decimal('sss_contribution', 10, 2)->default(0.00);  // Social Security System (SSS) contribution
             $table->decimal('philhealth_contribution', 10, 2)->default(0.00);  // PhilHealth contribution
             $table->decimal('pagibig_contribution', 10, 2)->default(0.00);  // Pag-IBIG contribution
+            // $table->decimal('under_time_deductions', 10, 2)->default(0.00);
             $table->decimal('other_deductions', 10, 2)->default(0);  // Any other deductions
             $table->decimal('taxable_income', 10, 2)->default(0.00); // Taxable portion of the salary (total gross pay - contributions)
             $table->decimal('income_tax_withheld', 10, 2)->default(0.00); // Amount of income tax withheld example 30% is the tax of the government / (taxable income)
@@ -64,6 +64,10 @@ return new class extends Migration
             $table->decimal('adjustment', 10, 2)->default(0.00);
 
             $table->enum('status', ['pending', 'approved', 'denied', 'void'])->nullable()->default('pending');
+            $table->longText('remarks')->nullable();
+            $table->boolean('is_audited')->default(false);
+            $table->boolean('is_viewable')->default(false);
+
             $table->unsignedBigInteger('created_by')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();

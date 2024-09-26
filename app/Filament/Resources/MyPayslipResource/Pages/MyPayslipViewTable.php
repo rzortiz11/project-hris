@@ -62,40 +62,40 @@ class MyPayslipViewTable extends Page implements HasForms, HasTable
                 $query;
             }),
             'January' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 1);
+                $query->whereMonth('cut_off', 1);
             }),
             'February' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 2);
+                $query->whereMonth('cut_off', 2);
             }),
             'March' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 3);
+                $query->whereMonth('cut_off', 3);
             }),
             'April' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 4);
+                $query->whereMonth('cut_off', 4);
             }),
             'May' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 5);
+                $query->whereMonth('cut_off', 5);
             }),
             'June' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 6);
+                $query->whereMonth('cut_off', 6);
             }),
             'July' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 7);
+                $query->whereMonth('cut_off', 7);
             }),
             'August' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 8);
+                $query->whereMonth('cut_off', 8);
             }),
             'September' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 9);
+                $query->whereMonth('cut_off', 9);
             }),
             'October' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 10);
+                $query->whereMonth('cut_off', 10);
             }),
             'November' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 11);
+                $query->whereMonth('cut_off', 11);
             }),
             'December' => Tab::make()->modifyQueryUsing(function ($query) {
-                $query->whereMonth('created_at', 12);
+                $query->whereMonth('cut_off', 12);
             }),
         ];
     }
@@ -132,13 +132,17 @@ class MyPayslipViewTable extends Page implements HasForms, HasTable
             ->query($this->getTableQuery())
             ->modifyQueryUsing($this->modifyQueryWithActiveTab(...))
             ->columns([
-                TextColumn::make('fullname')->label('Employee Name')->searchable(),
-                TextColumn::make('cut_off_from')->label('Pay Period From'),
-                TextColumn::make('cut_off_to')->label('Pay Period To'),
-                TextColumn::make('cut_off'),
+                TextColumn::make('pay_period.type')->label('Pay Type'),
+                ColumnGroup::make('Pay Period Date', [
+                    TextColumn::make('cut_off_from')->label('Pay Period From'),
+                    TextColumn::make('cut_off_to')->label('Pay Period To'),
+                ])
+                ->alignment(Alignment::Center)
+                ->wrapHeader(),
+                TextColumn::make('cut_off')->label('Cut Off Date')->searchable(),
             ])
             ->striped()
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('cut_off', 'desc')
             ->paginated([31, 'all'])
             ->filters([
                 SelectFilter::make('year')
@@ -148,7 +152,7 @@ class MyPayslipViewTable extends Page implements HasForms, HasTable
                 ->query(function ($query, array $data) {
 
                     if (isset($data['value'])) {
-                        $query->whereYear('created_at', $data['value']);
+                        $query->whereYear('cut_off', $data['value']);
                     }
 
                     $query->where('employee_id', $this->record->employee_id);
@@ -163,7 +167,11 @@ class MyPayslipViewTable extends Page implements HasForms, HasTable
                 ->action(function (Payroll $record, array $data) {
 
                     redirect()->route('download.payslip.pdf', ['payroll_id' => $record->payroll_id]);
-                }),
+                })
+                ->disabled(function (Payroll $record) {
+
+                    return !$record->is_viewable ? true : false; 
+                })->tooltip('Your Payslip is available!'),
             ])
             ->bulkActions([
                 // ...

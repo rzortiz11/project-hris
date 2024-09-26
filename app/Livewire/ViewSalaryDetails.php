@@ -7,6 +7,7 @@ use App\Models\EmployeeSalaryDetail;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -37,19 +38,21 @@ class ViewSalaryDetails extends Component implements HasForms, HasTable
             ->relationship(fn (): HasMany => $this->record->salary())
             // ->inverseRelationship('employee')
             ->columns([
+                TextColumn::make('name')
+                ->label('Name'), 
                 TextColumn::make('type')
                 ->label('Type')
                 ->sortable(), 
-                TextColumn::make('monthly_amount')
-                ->label('Montly Amount')
+                TextColumn::make('amount')
+                ->label('Amount')
                 ->sortable()
                 ->alignment('right')
                 ->summarize(Sum::make()->label('Total Monthly')), 
-                TextColumn::make('yearly_amount')
-                ->label('Yearly Amount')
-                ->sortable()
-                ->alignment('right')
-                ->summarize(Sum::make()->label('Total Yearly'))
+                CheckboxColumn::make('is_taxable')->disabled()->alignment('center'),
+                TextColumn::make('pay_period'),
+                TextColumn::make('effective_date'),
+                TextColumn::make('expiration_date'),
+
             ])
             // ->poll('5s')
             ->paginated(false)
