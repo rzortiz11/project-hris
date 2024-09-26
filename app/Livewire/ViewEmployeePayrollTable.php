@@ -13,6 +13,7 @@ use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\CheckboxColumn;
 use Filament\Tables\Columns\ColumnGroup;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Summarizers\Sum;
@@ -53,6 +54,7 @@ class ViewEmployeePayrollTable extends Component implements HasForms, HasTable
                     'denied' => 'danger',
                     'void' => 'danger',
                 }),
+                CheckboxColumn::make('is_audited')->label('Audited')->disabled(),
                 ColumnGroup::make('Employee Details', [
                     TextColumn::make('payroll_id')->label('ID'),
                     ImageColumn::make('avatar')
@@ -100,7 +102,7 @@ class ViewEmployeePayrollTable extends Component implements HasForms, HasTable
                     $bgColor = '#d3d3d3';
                     return ['style' => "background-color: {$bgColor}"];
                 }),
-
+                CheckboxColumn::make('is_viewable')->label('Viewable'),
             ])
             ->filters([
                 //

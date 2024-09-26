@@ -14,7 +14,7 @@ class EmployeeSalaryDetail extends Model
 
     protected $primaryKey = 'employee_salary_id';
     
-    protected $fillable = ['employee_id','name','type','daily_amount','bi_weekly_amount','monthly_amount','yearly_amount'];
+    protected $fillable = ['employee_id','name','type','amount','pay_period' ,'effective_date','expiration_date','is_taxable'];
 
     public function employee(): BelongsToMany
     {

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payroll extends Model
@@ -28,5 +30,25 @@ class Payroll extends Model
     public function pay_period(): BelongsTo
     {
         return $this->belongsTo(PayPeriod::class, 'pay_period_id', 'pay_period_id');
+    }
+
+    public function allowance(): HasMany
+    {
+        return $this->hasMany(PayrollAllowance::class, 'payroll_id', 'payroll_id');
+    }
+    
+    public function deduction(): HasMany
+    {
+        return $this->hasMany(PayrollDeduction::class, 'payroll_id', 'payroll_id');
+    }
+
+    public function contribution(): HasMany
+    {
+        return $this->hasMany(PayrollEmployeeContribution::class, 'payroll_id', 'payroll_id');
+    }
+
+    public function audit(): HasOne
+    {
+        return $this->hasOne(PayrollAudit::class, 'payroll_id', 'payroll_id');
     }
 }

@@ -6,7 +6,12 @@ use App\Filament\Resources\PayrollResource;
 use App\Livewire\EditPayPeriodForm;
 use App\Livewire\ViewEmployeePayrollTable;
 use App\Models\Employee;
+use App\Models\EmployeeSalaryDetail;
 use App\Models\Payroll;
+use App\Models\PayrollAllowance;
+use App\Models\PayrollBonus;
+use App\Models\PayrollDeduction;
+use App\Models\PayrollEmployeeContribution;
 use App\Models\User;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -18,6 +23,7 @@ use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Split;
@@ -48,12 +54,6 @@ class ViewPayPeriod extends ViewRecord
 
     public function mount(int | string $record): void
     {
-        // if($record == 'pay-period'){
-        //     $employee = auth()->user()->employee;
-        //     $record = $employee->employee_id;
-        //     $this->isPayPeriodView = true;
-        // }
-        
         $this->record = $this->resolveRecord($record);
 
         static::authorizeResourceAccess();
@@ -129,10 +129,8 @@ class ViewPayPeriod extends ViewRecord
                                 ->searchable()
                                 ->required()
                                 ->afterStateUpdated(function (Get $get, Set $set) use ($record){
-        
                                     $user_id = $get('employee');
                                     $user = User::find($user_id);
-        
                                 
                                     $fullname = $user->first_name ." ".$user->last_name;
                                     $set('fullname',$fullname);
@@ -143,11 +141,11 @@ class ViewPayPeriod extends ViewRecord
         
                                     if(isset($user->employee->salary)){
                                         $basic_salary = $user->employee->salary()
-                                        ->where('type', 'BASIC-SALARY')
+                                        ->where('type', 'basic')
                                         ->first();
                                     }
-                                    
-                                    $basic_salary_amount = isset($basic_salary) ? $basic_salary->monthly_amount : 0;
+
+                                    $basic_salary_amount = isset($basic_salary) ? $basic_salary->amount : 0;
                                     
                                     $set('basic_salary', $basic_salary_amount);
                                     
@@ -174,8 +172,13 @@ class ViewPayPeriod extends ViewRecord
                                         if ($current_date->isWeekday()) {
                                             $working_days++;
                                         }
-                                        $current_date->addDay(); // Move to the next day
+                                        $current_date->addDay(); 
                                     }
+
+                                    // $set('allowances', [
+                                    //     ['type' => '', 'amount' => ''],
+                                    //     ['type' => '', 'amount' => ''],
+                                    // ]);
     
                                     $set('working_days', $working_days);
                                     $set('total_gross_pay',1000);
@@ -185,7 +188,6 @@ class ViewPayPeriod extends ViewRecord
                                     $set('cash_advance',100);
                                     $set('adjustment',100);
                                     $set('total_net_pay',1000);
-        
         
                                 })->live(),
                                 TextInput::make('fullname')
@@ -227,7 +229,6 @@ class ViewPayPeriod extends ViewRecord
                     ->schema([
                         Group::make()
                         ->schema([
-                            
                             TextInput::make('day_range')->label('Day Range')->default(0)->inlineLabel(),
                             TextInput::make('working_days')->label('Working Days')->default(0)->inlineLabel(),
                             TextInput::make('absent')->default(0)->inlineLabel(),
@@ -264,7 +265,7 @@ class ViewPayPeriod extends ViewRecord
                     Section::make('')
                     ->schema([
                         Split::make([
-                            Fieldset::make('Leave With Pay')
+                            Fieldset::make('Leave With Pay')    
                             ->schema([
                                 TextInput::make('leave')->label('Days')->default(0),
                                 TextInput::make('leave_hours')->label('Hours')->default(0),
@@ -280,16 +281,122 @@ class ViewPayPeriod extends ViewRecord
                     Section::make('Allowances')
                     ->schema([
                         Group::make([
-    
-                        ])->columns(3),
-                    ])->columns(1)
+                            Repeater::make('allowances')
+                                ->defaultItems(0)
+                                ->label('')
+                                ->schema([
+                                    Select::make('employee_salary_id')->label('Type')
+                                    ->required()
+                                    ->inlineLabel()
+                                    ->options(function (Get $get) {
+                                        $userId = $get('../../employee');
+                                        $user = User::find($userId);
+                                        if ($user && isset($user->employee)) {
+                                            return EmployeeSalaryDetail::where('employee_id', $user->employee->employee_id)
+                                                ->where('type', 'allowance')
+                                                ->pluck('name', 'employee_salary_id')
+                                                ->toArray();
+                                        }
+                                        return [];
+                                    })
+                                    ->disabled(fn(Get $get) : bool => ! filled($get('../../employee')))
+                                    ->afterStateUpdated(function (Get $get, Set $set) use ($record){
+                                       $salary_detail = EmployeeSalaryDetail::find($get('employee_salary_id'));
+                                       $set('amount', $salary_detail->amount);
+                                       $set('name', $salary_detail->name);
+                                       $set('is_taxable', $salary_detail->is_taxable ? true : false);
+
+                                       //after state update update the allowance field
+                                    })
+                                    ->live()
+                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+                                    TextInput::make('name')
+                                    ->hidden(true)
+                                    ->readOnly(),
+                                    TextInput::make('amount')
+                                    ->inlineLabel()
+                                    ->label('Amount')
+                                    ->readOnly(),
+                                    Checkbox::make('is_taxable')->inline()
+                                ])
+                                ->reorderable(false)
+                                ->columns(3)
+                        ])->columnSpanFull()
+                    ])
+                    ->collapsible()
+                    ->columns(1)
                     ->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                     Section::make('Deductions')
                     ->schema([
                         Group::make([
-    
-                        ])->columns(3),
+                            Repeater::make('deductions')
+                                ->defaultItems(0)
+                                ->label('')
+                                ->schema([
+                                    TextInput::make('name')
+                                    ->required()
+                                    ->inlineLabel(),
+                                    TextInput::make('amount')
+                                    ->afterStateUpdated(function (Get $get, Set $set) use ($record){
+                                       //after state update the deduction field
+                                    })
+                                    ->live(debounce: 500)
+                                    ->inlineLabel()
+                                    ->label('Amount'),
+                                ])
+                                ->reorderable(false)
+                                ->columns(2)
+                        ])->columnSpanFull()
                     ])->columns(1)
+                    ->collapsible()
+                    ->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                    Section::make('Bonuses')
+                    ->schema([
+                        Group::make([
+                            Repeater::make('bonuses')
+                                ->defaultItems(0)
+                                ->label('')
+                                ->schema([
+                                    Select::make('employee_salary_id')->label('Type')
+                                    ->required()
+                                    ->inlineLabel()
+                                    ->options(function (Get $get) {
+                                        $userId = $get('../../employee');
+                                        $user = User::find($userId);
+                                
+                                        if ($user && isset($user->employee)) {
+                                            return EmployeeSalaryDetail::where('employee_id', $user->employee->employee_id)
+                                                ->where('type', 'bonuses')
+                                                ->pluck('name', 'employee_salary_id')
+                                                ->toArray();
+                                        }
+                                        return [];
+                                    })
+                                    ->disabled(fn(Get $get) : bool => ! filled($get('../../employee')))
+                                    ->afterStateUpdated(function (Get $get, Set $set) use ($record){
+                                       $salary_detail = EmployeeSalaryDetail::find($get('employee_salary_id'));
+                                       $set('amount', $salary_detail->amount);
+                                       $set('name', $salary_detail->name);
+                                       $set('is_taxable', $salary_detail->is_taxable ? true : false);
+
+                                       //after state update the bonuses field
+                                    })
+                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+                                    TextInput::make('name')
+                                    ->hidden(true)
+                                    ->readOnly(),
+                                    TextInput::make('amount')
+                                    ->inlineLabel()
+                                    ->label('Amount')
+                                    ->readOnly(),
+                                    Checkbox::make('is_taxable')->inline()
+                                ])
+                                ->reorderable(false)
+                                ->columns(3)
+                        ])->columnSpanFull()
+                    ])
+                    ->collapsible()
+                    ->columns(1)
                     ->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                     Section::make('Contribution')
                     ->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'])
@@ -301,14 +408,17 @@ class ViewPayPeriod extends ViewRecord
                                 Checkbox::make('with_sss')->label('with SSS')
                                 ->afterStateUpdated(function (Get $get, Set $set){
                                     $set('sss',100);
+                                    $set('employee_sss',100);
                                 })->live(),
                                 Checkbox::make('with_pag_ibig')->label('with Pag-Ibig')
                                 ->afterStateUpdated(function (Get $get, Set $set){
                                     $set('pag_ibig',200);
+                                    $set('employee_pag_ibig',200);
                                 })->live(),
                                 Checkbox::make('with_philhealth')->label('with Philhealth')
                                 ->afterStateUpdated(function (Get $get, Set $set){
                                     $set('philhealth',300);
+                                    $set('employee_philhealth',300);
                                 })->live(),
                             ])
                             ->grow(false)
@@ -326,9 +436,9 @@ class ViewPayPeriod extends ViewRecord
                             ->schema([
                                 Fieldset::make('Employer Contribution')
                                 ->schema([
-                                    TextInput::make('e_sss')->label('SSS')->default(0)->inlineLabel(),
-                                    TextInput::make('e_pag_ibig')->label('Pag-Ibig')->default(0)->inlineLabel(),
-                                    TextInput::make('e_philhealth')->label('Philhealth')->default(0)->inlineLabel(), // need to update this to a table with type mandatory,employer contribution
+                                    TextInput::make('employee_sss')->label('SSS')->default(0)->inlineLabel(),
+                                    TextInput::make('employee_pag_ibig')->label('Pag-Ibig')->default(0)->inlineLabel(),
+                                    TextInput::make('employee_philhealth')->label('Philhealth')->default(0)->inlineLabel(),
                                 ])->columns(1),
                             ]),
                         ])
@@ -382,7 +492,7 @@ class ViewPayPeriod extends ViewRecord
         ])->modalWidth('8xl')
         ->action(function ($data) use ($record) {
             $user = User::where('user_id',$data['employee'])->first();
-   
+
             $post_data = [
                 'pay_period_id' => $record->pay_period_id,
                 'employee_id' => $user->employee->employee_id,
@@ -432,11 +542,63 @@ class ViewPayPeriod extends ViewRecord
                 'created_by' => auth()->id()
             ];
 
-            $results = Payroll::create(
+            $result = Payroll::create(
                 $post_data
             );
 
-            if($results){
+            if($result) {
+                $payroll_id = $result->payroll_id;
+
+                // add employee contribution
+                if(isset($data['contribution'])){
+                    PayrollEmployeeContribution::create([
+                        'payroll_id' => $payroll_id,
+                        'sss_contribution' => $data['employee_sss'],     
+                        'philhealth_contribution' => $data['employee_philhealth'],     
+                        'pagibig_contribution' => $data['employee_pag_ibig'],     
+                    ]);
+                }
+
+                // add allowance
+                if(isset($data['allowances'])){
+                    foreach($data['allowances'] as $allowance) {
+
+                        PayrollAllowance::create([
+                            'payroll_id' => $payroll_id,
+                            'name' => $allowance['name'],     
+                            'is_taxable' => $allowance['is_taxable'],     
+                            'amount' => $allowance['amount'],     
+                        ]);
+                    }
+                };
+
+                // add deduction
+                if(isset($data['deductions'])){
+                    foreach($data['deductions'] as $allowance) {
+
+                        PayrollDeduction::create([
+                            'payroll_id' => $payroll_id,
+                            'name' => $allowance['name'],     
+                            'amount' => $allowance['amount'],     
+                        ]);
+                    }
+                };
+
+                // add bonuses
+                if(isset($data['bonuses'])){
+                    foreach($data['bonuses'] as $allowance) {
+
+                        PayrollBonus::create([
+                            'payroll_id' => $payroll_id,
+                            'name' => $allowance['name'],     
+                            'is_taxable' => $allowance['is_taxable'],     
+                            'amount' => $allowance['amount'],     
+                        ]);
+                    }
+                };
+            }
+
+            if($result){
                 // GENERATE PAYROLL/PAYSLIP PDF FILE.
                 self::sendRequestNotification($user);
             }
@@ -486,7 +648,6 @@ class ViewPayPeriod extends ViewRecord
         ->success()
         ->send();
     }
-
 
     public function infolist(Infolist $infolist): Infolist
     {

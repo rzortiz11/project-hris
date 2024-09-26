@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('overtime_entitlement')->default(false)->nullable();
             $table->date('employement_date')->nullable();
             $table->date('probation_end_date')->nullable();
-            $table->enum('employment_status', ['EMPLOYED', 'TERMINATED', 'RESIGNED', 'SEPERATED'])->default('EMPLOYED')->nullable();;
+            $table->enum('employment_status', ['EMPLOYED', 'TERMINATED', 'RESIGNED', 'SEPERATED'])->default('EMPLOYED')->nullable();
             $table->string('payroll_cycle')->default('Company')->nullable();
             $table->string('payment_structure')->default('Company')->nullable();
             $table->string('company')->nullable();

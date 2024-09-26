@@ -27,6 +27,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Repeater;
@@ -697,9 +698,13 @@ class EmployeeResource extends Resource
             ])
             ->schema([
                 Placeholder::make('')->content('Guaranteed'),
-                Placeholder::make('')->content('Monthly'),
-                Placeholder::make('')->content('Yearly'),
-            ])->columns(3),
+                Placeholder::make('')->content('Type'),
+                Placeholder::make('')->content('Amount'),
+                Placeholder::make('')->content('Effective Date'),
+                Placeholder::make('')->content('Expiration Date'),
+                Placeholder::make('')->content('Is Taxable'),
+                Placeholder::make('')->content('Pay Period'),
+            ])->columns(7),
 
             // Add salary Body repeater
             // added this package composer require icetalker/filament-table-repeater to make the repeater not spacious
@@ -722,39 +727,38 @@ class EmployeeResource extends Resource
                 ->searchable(),
                 Select::make('type')->label('Type')
                 ->options([
-                    'BASIC-SALARY' => 'Basic-Salary',
-                    'ALLOWANCE' => 'Allowance',
-                    '13_MONTH' => '13th-Month',
-                    '14_MONTH' => '14th-Month',
+                    'basic' => 'Basic',
+                    'allowance' => 'Allowance',
+                    'bonuses' => 'Bonuses',
                 ])
                 ->preload()
                 ->required()
                 ->searchable(),
-                TextInput::make('monthly_amount')
-                ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
-
-                    if ($old !== $state) {
-                        $yearly = $get('monthly_amount') ? $get('monthly_amount') * 12 : 0;
-                        $set('yearly_amount', $yearly);
-                    }
-                })
-                ->live(debounce: 1000)
+                Select::make('pay_period')->label('Pay Period')
+                ->options([
+                    'weekly' => 'Weekly',
+                    'bi-weekly' => 'Bi-weekly',
+                    'monthly' => 'Monthly',
+                    'annually' => 'Annually',
+                ])
+                ->preload()
+                ->required()
+                ->searchable(),
+                TextInput::make('amount')
                 ->prefix('₱')
                 ->numeric()
                 ->required()
                 ->placeholder(0),
-                TextInput::make('yearly_amount')
-                ->prefix('₱')
-                ->readOnly()
-                ->numeric()
-                ->placeholder(0),
+                DatePicker::make('effective_date'),
+                DatePicker::make('expiration_date'),
+                Checkbox::make('is_taxable')
             ])
             ->live()
             ->addActionLabel('Add Pay Component')
             ->deleteAction(
                 fn (Action $action) => $action->requiresConfirmation(),
             )
-            ->columns(4),
+            ->columns(7),
         ]);
 
         return $salary;

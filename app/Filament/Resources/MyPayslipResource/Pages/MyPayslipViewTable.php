@@ -167,7 +167,11 @@ class MyPayslipViewTable extends Page implements HasForms, HasTable
                 ->action(function (Payroll $record, array $data) {
 
                     redirect()->route('download.payslip.pdf', ['payroll_id' => $record->payroll_id]);
-                }),
+                })
+                ->disabled(function (Payroll $record) {
+
+                    return !$record->is_viewable ? true : false; 
+                })->tooltip('Your Payslip is available!'),
             ])
             ->bulkActions([
                 // ...
