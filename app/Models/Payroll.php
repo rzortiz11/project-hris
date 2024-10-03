@@ -27,6 +27,12 @@ class Payroll extends Model
     // is over_time_hours == regular_overtim_hours
     // or regular_overtime_hours + $rest_day_hours == over_time_hours and over_time_pay
 
+    
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'pay_period_id', 'pay_period_id');
+    }
+
     public function pay_period(): BelongsTo
     {
         return $this->belongsTo(PayPeriod::class, 'pay_period_id', 'pay_period_id');
@@ -40,6 +46,11 @@ class Payroll extends Model
     public function deduction(): HasMany
     {
         return $this->hasMany(PayrollDeduction::class, 'payroll_id', 'payroll_id');
+    }
+
+    public function bonuses(): HasMany
+    {
+        return $this->hasMany(PayrollBonus::class, 'payroll_id', 'payroll_id');
     }
 
     public function contribution(): HasMany

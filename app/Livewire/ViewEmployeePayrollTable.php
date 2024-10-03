@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
@@ -108,13 +109,13 @@ class ViewEmployeePayrollTable extends Component implements HasForms, HasTable
                 //
             ])
             ->actions([
-                Tables\Actions\Action::make('Approve')
-                ->color('success')
-                ->icon('heroicon-o-archive-box-x-mark')
-                ->action(function (Payroll $record, array $data) {
-                    $record->status = "approved";
-                    $record->save();
-                })->requiresConfirmation(),
+                // Tables\Actions\Action::make('Approve')
+                // ->color('success')
+                // ->icon('heroicon-o-archive-box-x-mark')
+                // ->action(function (Payroll $record, array $data) {
+                //     $record->status = "approved";
+                //     $record->save();
+                // })->requiresConfirmation(),
                 Tables\Actions\Action::make('pdf')
                 ->label('Payslip')
                 ->color('danger')
