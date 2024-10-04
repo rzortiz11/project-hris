@@ -65,7 +65,6 @@ return new class extends Migration
 
             $table->enum('status', ['pending', 'approved', 'denied', 'void'])->nullable()->default('pending');
             $table->longText('remarks')->nullable();
-            $table->boolean('is_audited')->default(false);
             $table->boolean('is_viewable')->default(false);
 
             $table->unsignedBigInteger('created_by')->nullable();

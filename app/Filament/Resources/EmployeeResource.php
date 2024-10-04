@@ -28,6 +28,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Repeater;
@@ -436,70 +437,125 @@ class EmployeeResource extends Resource
                 ])
                 ->relationship('employment')
                 ->schema([
-                    Grid::make([
-                        'default' => 1
-                    ])
+                    Grid::make()
                     ->schema([
-                        Select::make('employment_type')->options([
-                            'PROBATION' => 'Probation',
-                            'REGULAR' => 'Regular'
+                        Group::make()
+                        ->schema([
+                            Grid::make([
+                                'default' => 1
+                            ])
+                            ->schema([
+                                Grid::make([
+                                    'default' => 1
+                                ])
+                                ->schema([
+                                    Select::make('employment_type')->options([
+                                        'PROBATION' => 'Probation',
+                                        'REGULAR' => 'Regular'
+                                    ])
+                                    ->required()
+                                    ->preload(),
+                                    Select::make('employment_category')->options([
+                                        'PARTTIME' => 'Part-time',
+                                        'FULLTIME' => 'Full-time',
+                                        'THIRDPARTY' => 'Third-Party'
+                                    ])
+                                    ->required()
+                                    ->preload(),
+                                    Select::make('employment_status')->options([
+                                        'EMPLOYED' => 'Employed',
+                                        'TERMINATED' => 'Terminated',
+                                        'RESIGNED' => 'Resigned',
+                                        'SEPERATED' => "Seperated"
+                                    ])
+                                    ->required()
+                                    ->preload(),
+                                    Select::make('work_arrangement')->options([
+                                        'ONSITE' => 'On-site',
+                                        'WFH' => 'Work from home',
+                                        'HYBRID' => 'Hybrid'
+                                    ])
+                                    ->required()
+                                    ->preload(),
+                                ])->columns(4),
+                                Group::make([
+                                    Select::make('company')
+                                    ->required()
+                                    ->options([
+                                        'companya' => 'Company A',
+                                        'companyb' => 'Company B',
+                                    ]),
+                                    Select::make('payment_structure')
+                                    ->options([
+                                        'COMPANY' => 'Company',
+                                    ])
+                                    ->required()
+                                    ->searchable(),                                                    
+                                    Select::make('payroll_cycle')->options([
+                                        'BI-MONTHLY' => 'Bi-montly',
+                                        'MONTHLY' => 'Monthly'
+                                    ])->preload()
+                                    ->required(),
+                                ])->columns(3),
+                                Group::make([
+                                    DatePicker::make('employement_date')
+                                    ->suffixIcon('heroicon-o-calendar-days')
+                                    ->required(),
+                                    DatePicker::make('probation_end_date')
+                                    ->suffixIcon('heroicon-o-calendar-days'),
+                                    DatePicker::make('termination_date')
+                                    ->suffixIcon('heroicon-o-calendar-days'),
+                                    DatePicker::make('seperation_date')
+                                    ->suffixIcon('heroicon-o-calendar-days')
+                                ])->columns(4),
+                            ])->columns(1),
                         ])
-                        ->required()
-                        ->preload(),
-                        Select::make('employment_category')->options([
-                            'PARTTIME' => 'Part-time',
-                            'FULLTIME' => 'Full-time',
-                            'THIRDPARTY' => 'Third-Party'
-                        ])
-                        ->required()
-                        ->preload(),
-                        Select::make('employment_status')->options([
-                            'EMPLOYED' => 'Employed',
-                            'TERMINATED' => 'Terminated',
-                            'RESIGNED' => 'Resigned',
-                            'SEPERATED' => "Seperated"
-                        ])
-                        ->required()
-                        ->preload(),
-                        Select::make('work_arrangement')->options([
-                            'ONSITE' => 'On-site',
-                            'WFH' => 'Work from home',
-                            'HYBRID' => 'Hybrid'
-                        ])
-                        ->required()
-                        ->preload(),
-                    ])->columns(4),
-                    Group::make([
-                        Select::make('company')
-                        ->required()
-                        ->options([
-                            'companya' => 'Company A',
-                            'companyb' => 'Company B',
+                        ->columnSpan([
+                            'default' => 1,
+                            'sm' => 1,
+                            'md' => 1,
+                            'lg' => 3,
+                            'xl' => 3,
+                            '2xl' => 3,
                         ]),
-                        Select::make('payment_structure')
-                        ->options([
-                            'COMPANY' => 'Company',
-                        ])
-                        ->required()
-                        ->searchable(),                                                    
-                        Select::make('payroll_cycle')->options([
-                            'BI-MONTHLY' => 'Bi-montly',
-                            'MONTHLY' => 'Monthly'
-                        ])->preload()
-                        ->required(),
-                    ])->columns(3),
-                    Group::make([
-                        DatePicker::make('employement_date')
-                        ->suffixIcon('heroicon-o-calendar-days')
-                        ->required(),
-                        DatePicker::make('probation_end_date')
-                        ->suffixIcon('heroicon-o-calendar-days'),
-                        DatePicker::make('termination_date')
-                        ->suffixIcon('heroicon-o-calendar-days'),
-                        DatePicker::make('seperation_date')
-                        ->suffixIcon('heroicon-o-calendar-days')
-                    ])->columns(4),
-   
+                        Group::make()
+                        ->schema([
+                            Grid::make([
+                                'default' => 1
+                            ])
+                            ->schema([
+                                // CheckboxList::make('work_schedule')
+                                // ->label("Work Schedule")
+                                // ->options([
+                                //     'monday'    => 'Monday',
+                                //     'tuesday'   => 'Tuesday',
+                                //     'wednesday' => 'Wednesday',
+                                //     'thursday'  => 'Thursday',
+                                //     'friday'    => 'Friday',
+                                //     'saturday'  => 'Saturday',
+                                //     'sunday'    => 'Sunday'
+                                // ])
+                                // ->required()
+                                // ->columns(2)
+                                // ->gridDirection('row'),
+                                Select::make('work_schedule')
+                                ->options([
+                                    'monday'    => 'Monday',
+                                    'tuesday'   => 'Tuesday',
+                                    'wednesday' => 'Wednesday',
+                                    'thursday'  => 'Thursday',
+                                    'friday'    => 'Friday',
+                                    'saturday'  => 'Saturday',
+                                    'sunday'    => 'Sunday'
+                                ])
+                                ->required()
+                                ->multiple()
+                            ])
+                            ->columns(1),
+                        ])  
+                        ->columnSpan(1),    
+                    ])
+                    ->columns(4),
                 ])->columns(1),
                 Grid::make([
                     'default' => 1

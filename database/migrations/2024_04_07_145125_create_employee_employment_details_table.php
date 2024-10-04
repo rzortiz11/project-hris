@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('payment_structure')->default('Company')->nullable();
             $table->string('company')->nullable();
             $table->enum('work_arrangement',['ONSITE','WFH','HYBRID'])->nullable();
+            $table->json('work_schedule')->nullable();
             $table->date('termination_date')->nullable();
             $table->date('seperation_date')->nullable();
             $table->timestamps();
