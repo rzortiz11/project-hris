@@ -167,7 +167,7 @@ class ViewPayPeriod extends ViewRecord
                                     $working_days = 0;
                                     $current_date = $start_date->copy(); // Clone the start date to avoid modifying the original
     
-                                    while ($current_date <= $end_date) {
+                                    while ($current_date <= $end_date) {    
                                         // Check if the current day is a weekday (1 = Monday, 5 = Friday)
                                         if ($current_date->isWeekday()) {
                                             $working_days++;

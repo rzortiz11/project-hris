@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Filament\Resources\EmployeeResource\Pages\TodayBirthdayView;
 use App\Filament\Resources\LeaveResource\Widgets\OnLeaveCalendarWidget;
+use App\Filament\Resources\TimesheetResource\Pages\EmployeeTimeLogsPage;
 use App\Livewire\AnnouncementDashboardTable;
 use App\Livewire\EmployeeNoticeBoardTable;
 use App\Models\Announcement;
@@ -76,37 +77,16 @@ class Dashboard extends Page implements HasForms
                 ->schema([
                     Tabs::make('Tabs')
                     ->tabs([
-                        // Tab::make('On Leave Today')
-                        // ->badge(function () {
-                        //     return Leave::query()
-                        //     // add on leave today
-                        //     ->where('status', 'approved')
-                        //     ->count();
-                        // })
-                        // ->icon('heroicon-o-megaphone')
-                        // ->schema([
-                        //     Livewire::make(OnLeaveTodayCalendarWidget::class)
-                        // ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
-                        Tab::make("Celebrating Birthday's")
-                        ->badge(function () {
-                            return Employee::query()
-                            // add on birth today and query with birthday
-                            // ->where('status', 'approved')
-                            ->count();
-                        })
-                        ->icon('heroicon-o-cake')
+                        Tab::make("Clock IN/OUT")
+                        ->icon('heroicon-o-clock')
                         ->schema([
                             // If you are rendering multiple of the same Livewire component, please make sure to pass a unique key() to each:
-                            Livewire::make(TodayBirthdayView::class)->key(self::generateUuid())
-                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'])
+                            static::ClockInOutSection($employee, $current_date, $current_time, $timesheet)
+                        ])
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString()
                     ->contained(false),
-                    Split::make([
-                        static::timeInSection($employee, $current_date, $current_time, $timesheet),
-                        static::timeOutSection($employee, $current_date, $current_time, $timesheet),
-                    ])->from('lg'),
                     Section::make('Notice Board')
                     ->schema([
                         Livewire::make(EmployeeNoticeBoardTable ::class)->key(self::generateUuid())
@@ -136,6 +116,18 @@ class Dashboard extends Page implements HasForms
                             // having multiple Livewire error on uncaugth snapshot
                             // try every Livewire to be on a form or Component.
                             Livewire::make(OnLeaveCalendarWidget::class)->key(self::generateUuid())
+                        ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
+                        Tab::make("Celebrating Birthday's")
+                        ->badge(function () {
+                            return Employee::query()
+                            // add on birth today and query with birthday
+                            // ->where('status', 'approved')
+                            ->count();
+                        })
+                        ->icon('heroicon-o-cake')
+                        ->schema([
+                            // If you are rendering multiple of the same Livewire component, please make sure to pass a unique key() to each:
+                            Livewire::make(TodayBirthdayView::class)->key(self::generateUuid())
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make('Company News & Announcement')
                         ->badge(function () {
@@ -169,211 +161,173 @@ class Dashboard extends Page implements HasForms
         return (string) Str::uuid();
     }
 
+    public static function ClockInOutSection($employee, $current_date, $current_time, $timesheet): Section
+    {
+        // Determine if the employee has already clocked in
+        $hasClockedIn = isset($timesheet->time_in) && $timesheet->time_in != '00:00:00';
+        $hasClockedOut = isset($timesheet->time_out) && $timesheet->time_out != '00:00:00';
     
-    public static function timeInSection($employee, $current_date, $current_time, $timesheet): Section
-    {
-        return Section::make('Time in')
-            ->icon('heroicon-o-clock')
-            ->id('Date and Time in')
+        // Choose action based on clock-in status
+        $action = $hasClockedIn
+            ? static::createClockOutAction($employee, $current_date, $current_time, $timesheet,$hasClockedOut)
+            : static::createClockInAction($employee, $current_date, $current_time, $timesheet);
+    
+        return Section::make()
+            ->id('Time Logs')
             ->schema([
-                Placeholder::make('time')->label('Time')
-                ->content(function () use($timesheet) {
-
-                    if(isset($timesheet->time_in)){
-                        if($timesheet->time_in != '00:00:00'){
-                            return date('h:i A', strtotime($timesheet->time_in));
-                        }
-                    }
-
-                    return '-- : --';
-                })
+                Livewire::make(EmployeeTimeLogsPage::class)->data(['record' => $employee->employee_id])->key(self::generateUuid()),
             ])
             ->footerActions([
-                FormAction::make('Time in')
-                    ->form([
-                        Placeholder::make('Do you want to time in?'),
-                        Select::make('location')
-                        ->options([
-                            'OFFICE' => 'Office',
-                            'ONFIELD' => 'Onfield',
-                            'WFH' => 'Work From Home',
-                        ])->required(),   
-                    ])
-                    ->disabled(function () use($timesheet) {
-                        
-                        if(isset($timesheet->time_in)){
-                            if($timesheet->time_in != '00:00:00'){
-                                return true;
-                            }
-                        }
-
-                        return false;
-                    })
-                    ->action(function (array $data) use ($employee, $current_date, $current_time, $timesheet) {
-
-                        $location = $data['location'];
-
-                        if($employee){
-
-                            $result = $employee->employee_timelogs()->create([
-                                    'date' => $current_date,
-                                    'day' => now()->format('l'),
-                                    'type' => 'TIMEIN',
-                                    'time' => $current_time,
-                                    'location' => $location
-                            ]);
-
-                            if($result) {
-                                
-                                if ($timesheet) {
-                                    
-                                    $timesheet->time_in = $current_time;
-                                    $timesheet->in_location = $location;
-                                    $timesheet->save();
-                                } else {
-
-                                    // if no timesheet create for this attendance
-                                    $time_in = $employee->employment->time_in ? Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A') : "00:00";
-                                    $time_out = $employee->employment->time_out ? Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A') : "00:00";
-                                    $schedule = $time_in . ' - ' . $time_out;
-
-                                    $employee->employee_timesheets()->create([
-                                        'date' => $current_date,
-                                        'shift_schedule' => $schedule,
-                                        'time_in' => $current_time,
-                                        'in_location' => $location,
-                                    ]);
-                                }
-                                
-                                Notification::make()
-                                ->success()
-                                ->title('Attendace')
-                                ->body('Time in '.date('h:i A', strtotime($current_time)).' successfully.')
-                                ->send();
-                            }
-                        }
-                    })
-                    ->icon('heroicon-o-clock')
-                    ->tooltip('Do you want to Time in!'),
-            ])  
-            ->footerActionsAlignment(Alignment::Center) 
-            ->extraAttributes([
-                'style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);'
-            ]);   
-    } 
-
-    public static function timeOutSection($employee, $current_date, $current_time, $timesheet): Section
-    {
-        return Section::make('Time out')
-            ->icon('heroicon-s-clock')
-            ->id('Date and Time out')
-            ->schema([
-                Placeholder::make('time')->label('Time')
-                ->content(function () use($timesheet) {
-
-                    if(isset($timesheet->time_out)){
-                        if($timesheet->time_out != '00:00:00'){
-                            return date('h:i A', strtotime($timesheet->time_out));
-                        }
-                    }
-
-                    return '-- : --';
-                })
+                $action,
             ])
-            ->footerActions([
-                FormAction::make('Time out')
-                ->form([
-                    Placeholder::make('are you sure you want to time out?'),
-                    Select::make('location')
+            ->footerActionsAlignment(Alignment::Center)
+            ->extraAttributes(['style' => 'box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']);
+    }
+    
+    private static function createClockOutAction($employee, $current_date, $current_time, $timesheet, $hasClockedOut): FormAction
+    {
+        return FormAction::make('clock_out')
+            ->label('PM - CLOCK OUT')
+            ->form([
+                Placeholder::make('Are you sure you want to time out?'),
+                Select::make('location')
                     ->options([
                         'OFFICE' => 'Office',
                         'ONFIELD' => 'Onfield',
                         'WFH' => 'Work From Home',
-                    ])->required(),   
-                ])
-                ->disabled(function () use($timesheet) {
-                            
-                    if(isset($timesheet->time_in)){
-                        
-                        if($timesheet->time_in == '00:00:00'){
-                            // did not time-in yet
-                            return true;
-                        }
-
-                        if($timesheet->time_out != '00:00:00'){
-                            return true;
-                        }
-                    }
-
-                    if(!isset($timesheet->time_in)){
-                        return true;
-                    }
-
-                    return false;
-                })  
-                ->action(function (array $data) use ($employee, $current_date, $current_time, $timesheet) {
-                    $location = $data['location'];
-
-                    if ($employee) {
-                        $result = $employee->employee_timelogs()->create([
-                            'date' => $current_date,
-                            'day' => now()->format('l'),
-                            'type' => 'TIMEOUT',
-                            'time' => $current_time,
-                            'location' => $location
-                        ]);
-
-                        if ($result) {
-                            if ($timesheet) {
-                                $timesheet->time_out = $current_time;
-                                $timesheet->out_location = $location;
-                                $timesheet->out_date = $current_date;
-
-                                // WILL MOVE THIS TO A JOB OR SCHEDULER
-                                    // ALSO WILL ASKED IF TIME_IN LATE IS IMPORTANT OR TIME_OUT_LATE
-                                    // Calculate late time for time_in and early leave time for time_out
-                                    
-                                    // ALSO CONSIDER THE SHIFT SCHEDULE 8am to 5pm, 8pm to 5am, 10pm to 8am etc.
-                                    // CONSIDER WHAT WILL HAPPEN IF SHIFT WILL BE UPDATED.
-
-                                    $shiftSchedule = explode(' - ', $timesheet->shift_schedule);
-                                    $shiftStart = Carbon::parse($shiftSchedule[0]);
-                                    $shiftEnd = Carbon::parse($shiftSchedule[1]);
-
-                                    $timeIn = Carbon::parse($timesheet->time_in);
-                                    $timeOut = Carbon::parse($current_time);
-
-                                    $lateTimeInMinutes = 0;
-                                    if ($timeIn->greaterThan($shiftStart)) {
-                                        $lateTimeInMinutes = $shiftStart->diffInMinutes($timeIn);
-                                    }
-
-                                    $earlyLeaveMinutes = 0;
-                                    if ($timeOut->lessThan($shiftEnd)) {
-                                        $earlyLeaveMinutes = $timeOut->diffInMinutes($shiftEnd);
-                                    }
-
-                                    // Sum late arrival and early leave times
-                                    $totalLateMinutes = $lateTimeInMinutes + $earlyLeaveMinutes;
-                                    $timesheet->late_time = gmdate('H:i:s', $totalLateMinutes * 60);
-                                // WILL MOVE THIS TO A JOB OR SCHEDULER
-
-                                $timesheet->save();
-
-                                Notification::make()
-                                    ->success()
-                                    ->title('Attendance')
-                                    ->body('Time out ' . date('h:i A', strtotime($current_time)) . ' successfully.')
-                                    ->send();
-                            }
-                        }
-                    }
-                })
-                ->icon('heroicon-s-clock')
-                ->tooltip('Do you want to Time out!'),
-            ])  
-            ->footerActionsAlignment(Alignment::Center)                 
-            ->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']);         
+                    ])
+                    ->required(),
+            ])
+            ->disabled(function () use ($timesheet, $hasClockedOut) {
+                return !$timesheet || $hasClockedOut;
+            })
+            ->action(function (array $data) use ($employee, $current_date, $current_time, $timesheet) {
+                static::processClockOut($employee, $current_date, $current_time, $data['location'], $timesheet);
+            })
+            ->icon('heroicon-s-clock')
+            ->tooltip('Do you want to Clock out!');
     }
     
+    private static function createClockInAction($employee, $current_date, $current_time, $timesheet): FormAction
+    {
+        return FormAction::make('clock_in')
+            ->label('AM - CLOCK IN')
+            ->form([
+                Placeholder::make('Do you want to time in?'),
+                Select::make('location')
+                    ->options([
+                        'OFFICE' => 'Office',
+                        'ONFIELD' => 'Onfield',
+                        'WFH' => 'Work From Home',
+                    ])
+                    ->required(),
+            ])
+            ->disabled(function () use ($timesheet) {
+                return isset($timesheet->time_in) && $timesheet->time_in != '00:00:00';
+            })
+            ->action(function (array $data) use ($employee, $current_date, $current_time, $timesheet) {
+                static::processClockIn($employee, $current_date, $current_time, $data['location'], $timesheet);
+            })
+            ->icon('heroicon-o-clock')
+            ->tooltip('Do you want to Clock in!');
+    }
+    
+    private static function processClockOut($employee, $current_date, $current_time, $location, $timesheet)
+    {
+        if ($employee) {
+            $result = $employee->employee_timelogs()->create([
+                'date' => $current_date,
+                'day' => now()->format('l'),
+                'type' => 'TIMEOUT',
+                'time' => $current_time,
+                'location' => $location,
+            ]);
+    
+            if ($result && $timesheet) {
+                $timesheet->time_out = $current_time;
+                $timesheet->out_location = $location;
+                $timesheet->out_date = $current_date;
+    
+                // Calculate late and early leave time
+                static::calculateLateAndEarlyLeave($timesheet, $current_time);
+    
+                $timesheet->save();
+    
+                Notification::make()
+                    ->success()
+                    ->title('Attendance')
+                    ->body('Time out ' . date('h:i A', strtotime($current_time)) . ' successfully.')
+                    ->send();
+            }
+        }
+    }
+    
+    private static function processClockIn($employee, $current_date, $current_time, $location, $timesheet)
+    {
+        if ($employee) {
+            $result = $employee->employee_timelogs()->create([
+                'date' => $current_date,
+                'day' => now()->format('l'),
+                'type' => 'TIMEIN',
+                'time' => $current_time,
+                'location' => $location,
+            ]);
+    
+            if ($result) {
+                if ($timesheet) {
+                    $timesheet->time_in = $current_time;
+                    $timesheet->in_location = $location;
+                    $timesheet->save();
+                } else {
+                    $schedule = static::generateShiftSchedule($employee);
+                    $employee->employee_timesheets()->create([
+                        'date' => $current_date,
+                        'shift_schedule' => $schedule,
+                        'time_in' => $current_time,
+                        'in_location' => $location,
+                    ]);
+                }
+    
+                Notification::make()
+                    ->success()
+                    ->title('Attendance')
+                    ->body('Time in ' . date('h:i A', strtotime($current_time)) . ' successfully.')
+                    ->send();
+            }
+        }
+    }
+    
+    private static function calculateLateAndEarlyLeave($timesheet, $current_time)
+    {
+        // WILL MOVE THIS TO A JOB OR SCHEDULER
+        // ALSO WILL ASKED IF TIME_IN LATE IS IMPORTANT OR TIME_OUT_LATE
+        // Calculate late time for time_in and early leave time for time_out
+        
+        // ALSO CONSIDER THE SHIFT SCHEDULE 8am to 5pm, 8pm to 5am, 10pm to 8am etc.
+        // CONSIDER WHAT WILL HAPPEN IF SHIFT WILL BE UPDATED.
+
+        $shiftSchedule = explode(' - ', $timesheet->shift_schedule);
+        $shiftStart = Carbon::parse($shiftSchedule[0]);
+        $shiftEnd = Carbon::parse($shiftSchedule[1]);
+    
+        $timeIn = Carbon::parse($timesheet->time_in);
+        $timeOut = Carbon::parse($current_time);
+    
+        $lateTimeInMinutes = $timeIn->greaterThan($shiftStart) ? $shiftStart->diffInMinutes($timeIn) : 0;
+        $earlyLeaveMinutes = $timeOut->lessThan($shiftEnd) ? $timeOut->diffInMinutes($shiftEnd) : 0;
+                                
+        // Sum late arrival and early leave times
+        $totalLateMinutes = $lateTimeInMinutes + $earlyLeaveMinutes;
+        $timesheet->late_time = gmdate('H:i:s', $totalLateMinutes * 60);
+        $timesheet->save();
+
+        // WILL MOVE THIS TO A JOB OR SCHEDULER
+    }
+    
+    private static function generateShiftSchedule($employee)
+    {
+        $time_in = $employee->employment->time_in ? Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A') : "00:00";
+        $time_out = $employee->employment->time_out ? Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A') : "00:00";
+        return $time_in . ' - ' . $time_out;
+    }
 }

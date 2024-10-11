@@ -291,8 +291,12 @@ class EmployeeResource extends Resource
             TextInput::make('religion'),
             TextInput::make('nationality'),
             TextInput::make('gender'),
-            Placeholder::make('employee_reference')
-            ->content(fn (Employee $record): ?string => $record ? $record->employee_reference : ""),
+            Group::make([
+                TextInput::make('biometric_id')->label('Biometric ID'),
+                Placeholder::make('employee_reference')
+                ->content(fn (Employee $record): ?string => $record ? $record->employee_reference : ""),
+            ])->columns(2),
+
         ])->columns(2);
     }
 
