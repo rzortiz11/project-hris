@@ -16,7 +16,7 @@ class Employee extends Model
 
     protected $primaryKey = 'employee_id';
     
-    protected $fillable = ['employee_reference','user_id','title','gender','birthdate','religion', 'nationality', 'picture','is_active', 'progress','created_by'];
+    protected $fillable = ['employee_reference','biometric_id','user_id','title','gender','birthdate','religion', 'nationality', 'picture','is_active', 'progress','created_by'];
 
     public function user(): BelongsTo
     {

@@ -1,5 +1,5 @@
 <div x-data="birthdayComponent()" class="relative">
-    <div class="flex items-center justify-center bg-cover" style="background-image: url('{{ asset('/images/birthday_card.jpg') }}'); height: 450px;">
+    <div class="flex items-center justify-center bg-cover" style="background-image: url('{{ asset('/images/birthday_card.jpg') }}'); height: 70vh;">
         <template x-if="records.length > 0">
             <div class="text-center max-w-lg w-full">
                 <div class="mb-4">

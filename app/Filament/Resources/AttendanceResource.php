@@ -17,6 +17,9 @@ use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Actions\Action;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AttendanceResource extends Resource
 {
@@ -45,18 +48,20 @@ class AttendanceResource extends Resource
     {
         return $table
             ->headerActions([
-                // ImportAction::make()
-                //     ->importer(TimeSheetImporter::class)
-                //     ->label('Import Time Logs')
-                //     ->color('primary')
-                //     ->icon('heroicon-o-arrow-up-tray'),
-                // ExportAction::make()
-                // ->columnMapping(false)
-                // ->exporter(TimeSheetExporter::class)
-                // ->label('Export Time sheet')
-                // ->color('warning')
-                // ->icon('heroicon-o-arrow-down-tray')
-                // ->iconPosition(IconPosition::After)
+                Action::make('Import Time Logs')
+                ->color('primary')
+                ->icon('heroicon-o-arrow-up-on-square')
+                ->iconPosition(IconPosition::After)
+                ->requiresConfirmation()
+                ->form([
+                    FileUpload::make('csv')
+                    ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'text/plain'])
+                    ->required()
+                    ->label('CSV File')
+                ])
+                ->action(function ($data) {
+                    Excel::import(new TimeSheetExporter(), $data['csv'], 'public');
+                }),
             ])
             ->columns([
                 TextColumn::make('employee_id')->label('ID'),

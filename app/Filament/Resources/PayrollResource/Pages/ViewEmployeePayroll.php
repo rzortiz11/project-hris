@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
 use Carbon\Carbon;
 use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\Livewire;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
@@ -35,13 +36,7 @@ class ViewEmployeePayroll extends ViewRecord
         }
         
         $this->record = $this->resolveRecord($record);
-        
-        // $this->authorizeAccess();
-    
-        // if (! $this->hasInfolist()) {
-        //     $this->fillForm();
-        // }
-
+     
         static::authorizeResourceAccess();
         $this->fillForm();
     }
@@ -49,19 +44,10 @@ class ViewEmployeePayroll extends ViewRecord
     protected function getActions(): array
     {
         $actions = [];
-                
-        // $actions[] = Action::make('generate_payroll')
-        // ->color('success')
-        // ->label('Generate Payroll')
-        // ->action(function () {
-
-        // });
-
         $actions[] = Action::make('return')
         ->color('info')
         ->label('Return')
         ->action(function () {
-                //artisan route:list to view the filament route list
             redirect()->route('filament.admin.resources.payrolls.index');
         })
         ->hidden($this->isPayrollView);
@@ -72,9 +58,17 @@ class ViewEmployeePayroll extends ViewRecord
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
+        ->schema([
+            Group::make()
             ->schema([
-           
-            ]);
+                TextEntry::make('type'),
+                TextEntry::make('start_date')->date(),
+                TextEntry::make('end_date')->date(),
+                TextEntry::make('cut_off_date')->date(),
+                TextEntry::make('created_by'),
+                TextEntry::make('created_at')->date(),
+            ])->columns(3),
+        ]);
     }
 
     public static function generateUuid()

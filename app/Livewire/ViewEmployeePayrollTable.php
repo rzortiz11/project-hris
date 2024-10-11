@@ -38,6 +38,7 @@ use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Pages\Page;
@@ -541,6 +542,23 @@ class ViewEmployeePayrollTable extends Page implements HasForms, HasTable, HasAc
             ])
             ->columns(3),
         ]);
+    }
+
+    public function handleAudit(Payroll $record, $status)
+    {
+        // Set the status and audit flag
+        $record->status = $status;
+        $record->save();
+
+        $notificationColor = $status === config('constants.PAYROLL_DENIED') || $status === config('constants.PAYROLL_VOID') 
+            ? 'danger' 
+            : 'success';
+
+        Notification::make()
+            ->title('Payroll')
+            ->body(ucwords($status) . ' Successfully.')
+            ->color($notificationColor)
+            ->send();
     }
 
     // public function deleteAction(): Action
