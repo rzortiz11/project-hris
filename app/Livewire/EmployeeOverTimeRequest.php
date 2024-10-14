@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Employee;
 use App\Models\OverTimeRequest;
 use App\Models\TimeChangeRequest;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -23,6 +24,7 @@ use Illuminate\Contracts\View\View;
 use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
 
 class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
 {
@@ -38,8 +40,14 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
 
     public function table(Table $table): Table
     {
+        if($this->record != null){
+            $over_time_query = OverTimeRequest::query()->where('approver_id', $this->record->user_id);
+        } else {
+            $over_time_query = OverTimeRequest::query();
+        }
+
         return $table
-            ->query(OverTimeRequest::query()->where('approver_id', $this->record->user_id))
+            ->query($over_time_query)
             ->columns([
                 Split::make([
                     TextColumn::make('date_filling')
@@ -164,6 +172,21 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
                                 return $state;
                             }), 
                         ]),
+                        Split::make([
+                            TextColumn::make('approver_id')
+                            ->formatStateUsing(function ($state) {
+                                return 'Approver :';
+                            })
+                            ->grow(false)
+                            ->weight(FontWeight::Bold),
+                            TextColumn::make('approver_id')
+                            ->formatStateUsing(function ($state) {
+                                $approver_id = $state;
+                                $user = User::find($approver_id);
+                                return $user ? ucwords(strtolower($user->name)) : '';
+                            }), 
+                        ])
+                        ->visible($this->record == null ? true : false),   
                     ])
                     ->alignment(Alignment::Start)
                     ->grow(false),
@@ -181,7 +204,13 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('status')
+                ->options([
+                    'pending' => 'Pending',
+                    'approved' => 'Approved',
+                    'denied' => 'Denied',
+                    'void' => 'Void',
+                ])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -200,6 +229,7 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
                         self::approvedRequestNotification($employee->user);
                     }
                 })
+                ->hidden($this->record == null ? true : false)
                 ->disabled(fn (OverTimeRequest $record) => self::isActionAvailable($record))
                 ->requiresConfirmation(),
                 Tables\Actions\Action::make('Disapproved')
@@ -216,6 +246,7 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
                         self::deniedRequestNotification($employee->user);
                     }
                 })
+                ->hidden($this->record == null ? true : false)
                 ->disabled(fn (OverTimeRequest $record) => self::isActionAvailable($record))
                 ->requiresConfirmation()
             ])

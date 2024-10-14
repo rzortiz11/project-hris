@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Employee;
 use App\Models\UnderTimeRequest;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -22,6 +23,7 @@ use Illuminate\Contracts\View\View;
 use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
 
 class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
 {
@@ -37,8 +39,14 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
 
     public function table(Table $table): Table
     {
+        if($this->record != null){
+            $under_time_query = UnderTimeRequest::query()->where('approver_id', $this->record->user_id);
+        } else {
+            $under_time_query = UnderTimeRequest::query();
+        }
+
         return $table
-            ->query(UnderTimeRequest::query()->where('approver_id', $this->record->user_id))
+            ->query($under_time_query)
             ->columns([
                 Split::make([
                     TextColumn::make('date_filling')
@@ -127,6 +135,21 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
                                 return $state;
                             }), 
                         ]),
+                        Split::make([
+                            TextColumn::make('approver_id')
+                            ->formatStateUsing(function ($state) {
+                                return 'Approver :';
+                            })
+                            ->grow(false)
+                            ->weight(FontWeight::Bold),
+                            TextColumn::make('approver_id')
+                            ->formatStateUsing(function ($state) {
+                                $approver_id = $state;
+                                $user = User::find($approver_id);
+                                return $user ? ucwords(strtolower($user->name)) : '';
+                            }), 
+                        ])
+                        ->visible($this->record == null ? true : false),   
 
                     ])
                     ->alignment(Alignment::Start)
@@ -145,7 +168,13 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('status')
+                ->options([
+                    'pending' => 'Pending',
+                    'approved' => 'Approved',
+                    'denied' => 'Denied',
+                    'void' => 'Void',
+                ])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -164,6 +193,7 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
                         self::approvedRequestNotification($employee->user);
                     }
                 })
+                ->hidden($this->record == null ? true : false)
                 ->disabled(fn (UnderTimeRequest $record) => self::isActionAvailable($record))
                 ->requiresConfirmation(),
                 Tables\Actions\Action::make('Disapproved')
@@ -180,6 +210,7 @@ class EmployeeUnderTimeRequest extends Component implements HasForms, HasTable
                         self::deniedRequestNotification($employee->user);
                     }
                 })
+                ->hidden($this->record == null ? true : false)
                 ->disabled(fn (UnderTimeRequest $record) => self::isActionAvailable($record))
                 ->requiresConfirmation()
             ])

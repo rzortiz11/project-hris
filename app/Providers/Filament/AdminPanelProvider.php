@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->databaseNotifications()
             ->colors([
-                'primary' => Color::hex('#007fff'),
+                'primary' => Color::Orange,
                 'secondary' => Color::Green
                 // 'primary' => Color::Slate
             ])

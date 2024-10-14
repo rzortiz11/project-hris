@@ -23,6 +23,7 @@ use Illuminate\Contracts\View\View;
 use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
 
 class EmployeeLeaveRequest extends Component implements HasForms, HasTable
 {
@@ -38,8 +39,14 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
 
     public function table(Table $table): Table
     {
+        if($this->record != null){
+            $leave_query = Leave::query()->where('approver_id', $this->record->user_id);
+        } else {
+            $leave_query = Leave::query();
+        }
+
         return $table
-            ->query(Leave::query()->where('approver_id', $this->record->user_id))
+            ->query($leave_query)
             ->columns([
                 Split::make([
                     TextColumn::make('date_filling')
@@ -124,6 +131,21 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                                 return $state;
                             }), 
                         ]),
+                        Split::make([
+                            TextColumn::make('approver_id')
+                            ->formatStateUsing(function ($state) {
+                                return 'Approver :';
+                            })
+                            ->grow(false)
+                            ->weight(FontWeight::Bold),
+                            TextColumn::make('approver_id')
+                            ->formatStateUsing(function ($state) {
+                                $approver_id = $state;
+                                $user = User::find($approver_id);
+                                return $user ? ucwords(strtolower($user->name)) : '';
+                            }), 
+                        ])
+                        ->visible($this->record == null ? true : false),   
                     ])
                     ->alignment(Alignment::Start)
                     ->grow(false),
@@ -142,7 +164,13 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('status')
+                ->options([
+                    'pending' => 'Pending',
+                    'approved' => 'Approved',
+                    'denied' => 'Denied',
+                    'void' => 'Void',
+                ])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -161,11 +189,13 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                         self::approvedRequestNotification($employee->user);
                     }
                 })
+                ->hidden($this->record == null ? true : false)
                 ->disabled(fn (Leave $record) => self::isActionAvailable($record))
                 ->requiresConfirmation(),
                 Tables\Actions\Action::make('Disapproved')
                 ->color('danger')
                 ->icon('heroicon-s-x-circle')
+                ->hidden($this->record == null ? true : false)
                 ->action(function (Leave $record, array $data) {
                     
                     $employee = Employee::find($record['employee_id']);

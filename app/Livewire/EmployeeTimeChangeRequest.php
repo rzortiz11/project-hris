@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Employee;
 use App\Models\TimeChangeRequest;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
+use Filament\Tables\Filters\SelectFilter;
 
 class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
 {
@@ -38,8 +40,14 @@ class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
 
     public function table(Table $table): Table
     {
+        if($this->record != null){
+            $time_change_query = TimeChangeRequest::query()->where('approver_id', $this->record->user_id);
+        } else {
+            $time_change_query = TimeChangeRequest::query();
+        }
+
         return $table
-            ->query(TimeChangeRequest::query()->where('approver_id', $this->record->user_id))
+            ->query($time_change_query)
             ->columns([
                 Split::make([
                     TextColumn::make('date_filling')
@@ -153,7 +161,21 @@ class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
                                 return $state;
                             }), 
                         ]),
-
+                        Split::make([
+                            TextColumn::make('approver_id')
+                            ->formatStateUsing(function ($state) {
+                                return 'Approver :';
+                            })
+                            ->grow(false)
+                            ->weight(FontWeight::Bold),
+                            TextColumn::make('approver_id')
+                            ->formatStateUsing(function ($state) {
+                                $approver_id = $state;
+                                $user = User::find($approver_id);
+                                return $user ? ucwords(strtolower($user->name)) : '';
+                            }), 
+                        ])
+                        ->visible($this->record == null ? true : false),   
                     ])
                     ->alignment(Alignment::Start)
                     ->grow(false),
@@ -171,7 +193,13 @@ class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('status')
+                ->options([
+                    'pending' => 'Pending',
+                    'approved' => 'Approved',
+                    'denied' => 'Denied',
+                    'void' => 'Void',
+                ])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
@@ -190,6 +218,7 @@ class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
                         self::approvedRequestNotification($employee->user);
                     }
                 })
+                ->hidden($this->record == null ? true : false)
                 ->disabled(fn (TimeChangeRequest $record) => self::isActionAvailable($record))
                 ->requiresConfirmation(),
                 Tables\Actions\Action::make('Disapproved')
@@ -206,6 +235,7 @@ class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
                         self::deniedRequestNotification($employee->user);
                     }
                 })
+                ->hidden($this->record == null ? true : false)
                 ->disabled(fn (TimeChangeRequest $record) => self::isActionAvailable($record))
                 ->requiresConfirmation()
             ])
