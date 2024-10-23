@@ -77,17 +77,20 @@ class Dashboard extends Page implements HasForms
                 ->schema([
                     Tabs::make('Tabs')
                     ->tabs([
-                        Tab::make("Clock IN/OUT")
+                        isset($employee) ? Tab::make("Clock IN/OUT")
                         ->icon('heroicon-o-clock')
                         ->schema([
-                            // If you are rendering multiple of the same Livewire component, please make sure to pass a unique key() to each:
                             static::ClockInOutSection($employee, $current_date, $current_time, $timesheet)
+                        ]) 
+                        : Tab::make("Current user : ADMIN")
+                        ->schema([
+
                         ])
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString()
                     ->contained(false),
-                    Section::make('Notice Board')
+                    Section::make('Your Notice Board')
                     ->schema([
                         Livewire::make(EmployeeNoticeBoardTable ::class)->key(self::generateUuid())
                     ])->extraAttributes([
