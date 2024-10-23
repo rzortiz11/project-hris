@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Livewire\ViewSalaryDetails;
 use App\Models\Employee;
@@ -36,6 +37,8 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Support\Enums\IconPosition;
+use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 
@@ -142,6 +145,13 @@ class EmployeeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                ImportAction::make('importUser')
+                ->importer(UserImporter::class)
+                ->color('primary')
+                ->icon('heroicon-o-arrow-up-on-square')
+                ->iconPosition(IconPosition::After)
+            ])
             ->columns([
                 TextColumn::make('employee_id')->label('ID'),
                 ImageColumn::make('avatar')
