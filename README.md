@@ -53,7 +53,8 @@ Clone the Repo inside the wsl - (FOR project-hris)
 open the project folder
  - code .
  - update .env file configuration (FOR Project-hris)
-	add additional .env for pusher
+	
+    - add additional .env for pusher
 	PUSHER_APP_ID=1817660
 	PUSHER_APP_KEY=11a093b62f2d4d330a70
 	PUSHER_APP_SECRET=f39bfd4156e8262aaffc
