@@ -20,7 +20,9 @@ class ViewMyPayslip extends ViewRecord
       
         if($record == 'payslip'){
             $employee = auth()->user()->employee;
-            $record = $employee->employee_id;
+            if(isset($employee->employee_id)) {
+                $record = $employee->employee_id;
+            } 
         }
 
         $this->record = $this->resolveRecord($record);

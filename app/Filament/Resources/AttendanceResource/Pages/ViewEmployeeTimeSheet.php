@@ -40,7 +40,9 @@ class ViewEmployeeTimeSheet extends ViewRecord
     {
         if($record == 'timesheet'){
             $employee = auth()->user()->employee;
-            $record = $employee->employee_id;
+            if(isset($employee->employee_id)) {
+              $record = $employee->employee_id;
+            } 
             $this->isTimeSheetView = true;
         }
         
