@@ -31,7 +31,9 @@ class ViewEmployeePayroll extends ViewRecord
     {
         if($record == 'employee-payrolls'){
             $employee = auth()->user()->employee;
-            $record = $employee->employee_id;
+            if(isset($employee->employee_id)) {
+                $record = $employee->employee_id;
+            } 
             $this->isPayrollView = true;
         }
         

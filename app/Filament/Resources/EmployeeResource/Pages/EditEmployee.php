@@ -19,7 +19,9 @@ class EditEmployee extends EditRecord
     {
         if($record == 'employee'){
             $employee = auth()->user()->employee;
-            $record = $employee->employee_id;
+            if(isset($employee->employee_id)) {
+                $record = $employee->employee_id;
+            } 
             $this->isEmployeeView = true;
         }
         
