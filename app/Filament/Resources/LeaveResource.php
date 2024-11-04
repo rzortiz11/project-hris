@@ -120,7 +120,8 @@ class LeaveResource extends Resource
                         ->schema([
                             Livewire::make(LeaveAllocationPieChart::class)
                             ->data(['record' => $model_record])
-                            ->key(self::generateUuid()),
+                            ->key(self::generateUuid())
+                            ->lazy(),
                         ]),
                         Section::make("EMPLOYEE LEAVE APPROVER'S")
                         ->description('LEAVE APPROVERS')

@@ -38,18 +38,17 @@ class LeaveAllocationPieChart extends ChartWidget
         if($this->record){
 
             $leave_balance_id = $this->filter ? $this->filter : 0;
-
             // Fetch the employee leave balance using the employee_id
             $employee_leave = EmployeeLeaveBalance::find( $leave_balance_id);
-            if($employee_leave){
 
+            if($employee_leave){
                 return [
                     'datasets' => [
                         [
                             'label' => $employee_leave['type'],
-                            'data' => [0 ,$employee_leave['used_balance'], $employee_leave['remaining_balance']],
+                            'data' => [$employee_leave['balance'] ,$employee_leave['used_balance'], $employee_leave['remaining_balance']],
                             'backgroundColor' => [
-                                'rgb(255, 255, 255)',
+                                'rgb(128, 128, 128)',
                                 'rgb(255, 99, 132)',
                                 'rgb(54, 162, 235)',
                             ]
