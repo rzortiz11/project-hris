@@ -210,7 +210,30 @@ class EmployeeTimeChangeRequest extends Component implements HasForms, HasTable
                 ->action(function (TimeChangeRequest $record, array $data) {
                     
                     $employee = Employee::find($record['employee_id']);
-            
+                    $location = "";
+                    $timesheet = $employee->employee_timesheets()->where('date',  $record->date_filling)->first();
+
+                    if (!$timesheet) {
+
+                        // making sure to create a timesheet for this date if does not exists.
+                        // if no timesheet create for this attendance
+                        $time_in = $employee->employment->time_in ? Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A') : "00:00";
+                        $time_out = $employee->employment->time_out ? Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A') : "00:00";
+                        $schedule = $time_in . ' - ' . $time_out;
+
+                        $employee->employee_timesheets()->create([
+                            'date' => $record->date_filling,
+                            'shift_schedule' => $schedule,
+                            'time_in' => $record->new_time_in,
+                            'time_out' => $record->new_time_out,
+                            'in_location' => $location,
+                        ]);   
+                    } else {
+                        $timesheet->time_in = $record->new_time_in;
+                        $timesheet->time_out = $record->new_time_out;
+                        $timesheet->save();
+                    }
+
                     $record['status'] = 'approved';
                     $result = $record->save();
 
