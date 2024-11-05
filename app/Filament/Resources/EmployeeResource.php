@@ -5,9 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Livewire\ViewSalaryDetails;
-use App\Models\Employee;
 use App\Models\EmployeeFamilyDetail;
-use App\Models\EmployeeSalaryDetail;
+use App\Models\EmployeeManagement;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
@@ -29,7 +28,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Livewire;
 use Filament\Forms\Components\Repeater;
@@ -44,7 +42,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class EmployeeResource extends Resource
 {
-    protected static ?string $model = Employee::class;
+    protected static ?string $model = EmployeeManagement::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-user-group';
 
@@ -54,7 +52,8 @@ class EmployeeResource extends Resource
 
     public static function form(Form $form): Form
     {
-        $employee = Employee::get();
+        //EmployeeManagement extends Employee Model for policy to work to hide this on user with employee ROLE
+        $employee = EmployeeManagement::get();
 
         return $form
             ->schema([
@@ -156,7 +155,7 @@ class EmployeeResource extends Resource
                 TextColumn::make('employee_id')->label('ID'),
                 ImageColumn::make('avatar')
                 ->grow(false)
-                ->getStateUsing(function (Employee $data): string {
+                ->getStateUsing(function (EmployeeManagement $data): string {
 
                     return isset($data->picture) ? $data->picture : '';
                 })
@@ -170,11 +169,11 @@ class EmployeeResource extends Resource
                     'active' => 'success',
                     'inactive' => 'danger',
                 })
-                ->getStateUsing(function (Employee $record): string {
+                ->getStateUsing(function (EmployeeManagement $record): string {
                     return $record->is_active ? 'active': 'inactive';
                 }),
                 TextColumn::make('created_at')->label('Created Date and Time')               
-                ->getStateUsing(function (Employee $employee): string {
+                ->getStateUsing(function (EmployeeManagement $employee): string {
 
                     $created_at = Carbon::parse($employee->created_at);
                     return $created_at->format('Y-m-d H:i:s');
@@ -229,13 +228,13 @@ class EmployeeResource extends Resource
                     '1:1',
                 ]),
                 Placeholder::make('Employee Name')->label('')
-                ->content(fn (Employee $record): ?string => $record ? $record->user->name : "")
+                ->content(fn (EmployeeManagement $record): ?string => $record ? $record->user->name : "")
                 ->extraAttributes(['class' => 'text-xs']),
                 Placeholder::make('Position')->label('')                                
-                ->content(fn (Employee $record): ?string => isset($record->position) ? $record->position->job_position : "N/A")
+                ->content(fn (EmployeeManagement $record): ?string => isset($record->position) ? $record->position->job_position : "N/A")
                 ->extraAttributes(['class' => 'text-xs']),
                 Placeholder::make('Employee Number')->label('')
-                ->content(fn (Employee $record): ?string => $record ? $record->employee_reference : "")
+                ->content(fn (EmployeeManagement $record): ?string => $record ? $record->employee_reference : "")
                 ->extraAttributes(['class' => 'text-xs']),
             ])->extraAttributes(['class' => 'flex justify-center items-center text-center'])
             ->columns(1),
@@ -304,7 +303,7 @@ class EmployeeResource extends Resource
             Group::make([
                 TextInput::make('biometric_id')->label('Biometric ID'),
                 Placeholder::make('employee_reference')
-                ->content(fn (Employee $record): ?string => $record ? $record->employee_reference : ""),
+                ->content(fn (EmployeeManagement $record): ?string => $record ? $record->employee_reference : ""),
             ])->columns(2),
 
         ])->columns(2);
@@ -369,9 +368,9 @@ class EmployeeResource extends Resource
         ->icon('heroicon-s-device-phone-mobile')
         ->schema([
             Placeholder::make('mobile')
-            ->content(fn (Employee $record): ?string => $record ? $record->user->mobile : ""),
+            ->content(fn (EmployeeManagement $record): ?string => $record ? $record->user->mobile : ""),
             Placeholder::make('email')
-            ->content(fn (Employee $record): ?string => $record ? $record->user->email : ""),
+            ->content(fn (EmployeeManagement $record): ?string => $record ? $record->user->email : ""),
             Grid::make([
                 'default' => 1
             ])
@@ -694,7 +693,7 @@ class EmployeeResource extends Resource
 
     public static function salaryInformation() : Section
     {
-        return Section::make(function (Employee $employee) {
+        return Section::make(function (EmployeeManagement $employee) {
             return 'SALARY DETAILS : '. strtoupper($employee->user->fullname) ?? 'SALARY DETAILS';
         })
         ->description()
@@ -705,17 +704,17 @@ class EmployeeResource extends Resource
             ])
             ->schema([
                 Placeholder::make('fullname')->label('Employee Name')
-                ->content(fn (Employee $record): ?string => isset($record->user->fullname) ? $record->user->fullname : ""),
+                ->content(fn (EmployeeManagement $record): ?string => isset($record->user->fullname) ? $record->user->fullname : ""),
                 Placeholder::make('category')->label('Category')
-                ->content(fn (Employee $record): ?string => isset($record->position->job_category) ? $record->position->job_category : ""),
+                ->content(fn (EmployeeManagement $record): ?string => isset($record->position->job_category) ? $record->position->job_category : ""),
                 Placeholder::make('job_position')->label('Job Position')
-                ->content(fn (Employee $record): ?string => isset($record->position->job_position) ? $record->position->job_position : ""),
+                ->content(fn (EmployeeManagement $record): ?string => isset($record->position->job_position) ? $record->position->job_position : ""),
                 Placeholder::make('payroll_cycle')->label('Payroll Cycle')
-                ->content(fn (Employee $record): ?string => isset($record->employment->payroll_cycle) ? $record->employment->payroll_cycle : ""),
+                ->content(fn (EmployeeManagement $record): ?string => isset($record->employment->payroll_cycle) ? $record->employment->payroll_cycle : ""),
                 Placeholder::make('payment_structure')->label('Payment Structure')
-                ->content(fn (Employee $record): ?string => isset($record->employment->payment_structure) ? $record->employment->payment_structure : ""),
+                ->content(fn (EmployeeManagement $record): ?string => isset($record->employment->payment_structure) ? $record->employment->payment_structure : ""),
                 Placeholder::make('employement_date')->label('Effective Date From')
-                ->content(fn (Employee $record): ?string => isset($record->employment->employement_date) ? $record->employment->employement_date : ""),
+                ->content(fn (EmployeeManagement $record): ?string => isset($record->employment->employement_date) ? $record->employment->employement_date : ""),
                 Grid::make([
                     'default' => 1
                 ])
@@ -1386,7 +1385,7 @@ class EmployeeResource extends Resource
 
     public static function idInformation(): Section
     {
-        return Section::make(function (Employee $employee) {
+        return Section::make(function (EmployeeManagement $employee) {
             return 'ID DETAILS - EMPLOYEE NUMBER : '. strtoupper($employee->employee_reference) ?? 'ID DETAILS';
         })
         ->description('Employee ID Information')

@@ -2,24 +2,20 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\MyPayslipResource\Pages\ViewMyPayslip;
+use App\Filament\Resources\SelfServiceEmployeeResource\Pages;
 use App\Models\EmployeeSelfService;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-class MyPayslipResource extends Resource
+class SelfServiceEmployeeResource extends Resource
 {
     protected static ?string $model = EmployeeSelfService::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-arrow-down';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Employee Self Service';
-
-    protected static ?string $navigationLabel = 'My Payslip';
-
-    protected static ?string $modelLabel = "My Payslip";
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Form $form): Form
     {
@@ -58,8 +54,7 @@ class MyPayslipResource extends Resource
     public static function getPages(): array
     {
         return [
-            'view' => ViewMyPayslip::route('/{record}/view'),
-            'index' => ViewMyPayslip::route("/payslip/view"),
+            'index' => Pages\ListSelfServiceEmployees::route('/'),
         ];
     }
 }

@@ -2,26 +2,20 @@
 
 namespace App\Filament\Resources\TimesheetResource\Pages;
 
-use App\Filament\Resources\EmployeeResource;
-use App\Filament\Resources\TimesheetResource;
-use App\Models\Employee;
-use Filament\Actions;
-use Filament\Forms\Components\Placeholder;
+use App\Filament\Resources\DashboardNoPolicyResource;
 use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Infolist;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
-use Illuminate\Support\HtmlString;
 
 class EmployeeTimeLogsPage extends ViewRecord
 {
     protected ?String $heading = '';
 
-    protected static string $resource = EmployeeResource::class;
+    protected static string $resource = DashboardNoPolicyResource::class;
 
     public function mount(int | string $record): void
     {

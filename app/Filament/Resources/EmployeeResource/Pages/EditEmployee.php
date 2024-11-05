@@ -4,7 +4,6 @@ namespace App\Filament\Resources\EmployeeResource\Pages;
 
 use App\Filament\Resources\EmployeeResource;
 use App\Livewire\ViewSalaryDetails;
-use App\Models\Employee;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -26,6 +25,7 @@ class EditEmployee extends EditRecord
         }
         
         $this->record = $this->resolveRecord($record);
+        
         static::authorizeResourceAccess();
         $this->fillForm();
     }

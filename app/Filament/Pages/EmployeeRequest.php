@@ -15,7 +15,6 @@ use App\Models\UnderTimeRequest;
 use Filament\Infolists\Components\Livewire;
 use Filament\Infolists\Components\Tabs;
 use Filament\Infolists\Components\Tabs\Tab;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Pages\Page;
 use Filament\Infolists\Infolist;
 use Illuminate\Support\Str;
@@ -33,6 +32,12 @@ class EmployeeRequest extends Page
     protected ?String $heading = 'Request From Your Colleagues';
     
     public $record;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user->hasRole(['Request_approver']);
+    }
 
     public function mount()
     {

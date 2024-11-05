@@ -8,6 +8,7 @@ use App\Filament\Resources\LeaveResource\Widgets\LeaveAllocationPieChart;
 use App\Livewire\EmployeeLeaveHistoryTable;
 use App\Livewire\ViewSalaryDetails;
 use App\Models\Employee;
+use App\Models\EmployeeManagement;
 use App\Models\Leave;
 use App\Models\User;
 use Filament\Forms;
@@ -34,7 +35,7 @@ use Illuminate\Support\Str;
 
 class LeaveResource extends Resource
 {
-    protected static ?string $model = Employee::class;
+    protected static ?string $model = EmployeeManagement::class;
 
     protected static ?string $navigationIcon = 'heroicon-s-calendar';
 

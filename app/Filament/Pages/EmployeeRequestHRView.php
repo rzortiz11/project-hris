@@ -33,6 +33,13 @@ class EmployeeRequestHRView extends Page
 
     public $record;
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+        return $user->hasRole(['Admin', 'Human_resource']);
+    }
+    
+
     public function mount()
     {
         $this->record = NULL;
