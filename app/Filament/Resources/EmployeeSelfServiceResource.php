@@ -227,9 +227,9 @@ class EmployeeSelfServiceResource extends Resource
             ])
             ->relationship('user')
             ->schema([
-                TextInput::make('first_name')->required(),
-                TextInput::make('last_name')->required(),
-                TextInput::make('middle_name'),
+                TextInput::make('first_name')->required()->disabled(),
+                TextInput::make('last_name')->required()->disabled(),
+                TextInput::make('middle_name')->disabled(),
                 TextInput::make('suffix'),
             ])->columns(4),
             Grid::make([
@@ -238,10 +238,12 @@ class EmployeeSelfServiceResource extends Resource
             ->relationship('user')
             ->schema([
                 TextInput::make('mobile')
+                ->disabled()
                 ->suffixIcon('heroicon-o-device-phone-mobile')
                 ->unique(ignoreRecord: true)
                 ->required(),
                 TextInput::make('email')
+                ->disabled()
                 ->email()
                 ->suffixIcon('heroicon-o-envelope')
                 ->default('')
@@ -253,19 +255,21 @@ class EmployeeSelfServiceResource extends Resource
             TextInput::make('title'),
             Split::make([
                 DatePicker::make('birthdate')
+                ->disabled()
                 ->label('Date of Birth')
                 ->suffixIcon('heroicon-o-calendar-days')
                 ->maxDate(now()),
                 Placeholder::make('age')
+                ->disabled()
                 ->content(function ($record) {
                     return static::getAge(isset($record->birthdate) ? $record->birthdate : "");
                 }),
             ])->from('lg'),
             TextInput::make('religion'),
             TextInput::make('nationality'),
-            TextInput::make('gender'),
+            TextInput::make('gender')->disabled(),
             Group::make([
-                TextInput::make('biometric_id')->label('Biometric ID'),
+                TextInput::make('biometric_id')->label('Biometric ID')->disabled(),
                 Placeholder::make('employee_reference')
                 ->content(fn (EmployeeSelfService $record): ?string => $record ? $record->employee_reference : ""),
             ])->columns(2),
@@ -407,6 +411,7 @@ class EmployeeSelfServiceResource extends Resource
         return Section::make('EMPLOYMENT DETAILS')
         ->description('Employee Employement Information')
         ->icon('heroicon-s-briefcase')
+        ->disabled()
         ->schema([
             Split::make([
                 Grid::make([
@@ -567,6 +572,7 @@ class EmployeeSelfServiceResource extends Resource
     {
         return Section::make('POSITION DETAILS')
         ->description('Employee Position Information')
+        ->disabled()
         ->icon('heroicon-s-flag')
         ->schema([
             Grid::make([
@@ -620,6 +626,7 @@ class EmployeeSelfServiceResource extends Resource
     public static function issuedItemInformation(): Section
     {
         return Section::make('ISSUED ITEM DETAILS')
+        ->disabled()
         ->description('Employee Issued Item Information')
         ->icon('heroicon-s-wrench-screwdriver')
         ->schema([
@@ -689,6 +696,7 @@ class EmployeeSelfServiceResource extends Resource
     public static function payComponentInformation(): Section
     {
         return Section::make('Pay Component')
+        ->disabled()
         ->schema([
             Tabs::make('Tabs')
             ->tabs([
@@ -1211,7 +1219,8 @@ class EmployeeSelfServiceResource extends Resource
 
     public static function healthBenefitFields(): Section
     {
-        return Section::make('HEALTH BENEFIT DETAILS')
+        return Section::make('HEALTH BENEFIT DETAILS')  
+        ->disabled()
         ->description('Employee Health Benefit Information')
         ->icon('heroicon-c-plus-circle')
         ->schema([
@@ -1352,6 +1361,7 @@ class EmployeeSelfServiceResource extends Resource
         return Section::make(function (EmployeeSelfService $employee) {
             return 'ID DETAILS - EMPLOYEE NUMBER : '. strtoupper($employee->employee_reference) ?? 'ID DETAILS';
         })
+        ->disabled()
         ->description('Employee ID Information')
         ->icon('heroicon-s-identification')
         ->schema([
@@ -1376,6 +1386,7 @@ class EmployeeSelfServiceResource extends Resource
     public static function bankInformation(): Section
     {
         return Section::make(['BANK DETAILS'])
+        ->disabled()
         ->description('Employee Bank Information')
         ->icon('heroicon-s-credit-card')
         ->schema([
