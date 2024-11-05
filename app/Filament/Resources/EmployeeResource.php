@@ -7,6 +7,7 @@ use App\Filament\Resources\EmployeeResource\Pages;
 use App\Livewire\ViewSalaryDetails;
 use App\Models\EmployeeFamilyDetail;
 use App\Models\EmployeeManagement;
+use App\Models\Nationality;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
@@ -298,8 +299,18 @@ class EmployeeResource extends Resource
                 }),
             ])->from('lg'),
             TextInput::make('religion'),
-            TextInput::make('nationality'),
-            TextInput::make('gender'),
+            Select::make('nationality')
+            ->options(Nationality::getNationalities()->pluck('nationality', 'nationality')->toArray())
+            ->default('Filipino')
+            ->searchable()
+            ->preload(),
+            Select::make('gender')->options([
+                'Male' => 'Male',
+                'Female' => 'Female',
+                'Others' => 'Others'
+            ])
+            ->required()
+            ->preload(),
             Group::make([
                 TextInput::make('biometric_id')->label('Biometric ID'),
                 Placeholder::make('employee_reference')

@@ -10,6 +10,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use App\Livewire\ViewSalaryDetails;
 use App\Models\EmployeeFamilyDetail;
+use App\Models\Nationality;
 use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
@@ -266,8 +267,19 @@ class EmployeeSelfServiceResource extends Resource
                 }),
             ])->from('lg'),
             TextInput::make('religion'),
-            TextInput::make('nationality'),
-            TextInput::make('gender')->disabled(),
+            Select::make('nationality')
+            ->options(Nationality::getNationalities()->pluck('nationality', 'nationality')->toArray())
+            ->default('Filipino')
+            ->required()
+            ->searchable()
+            ->preload(),    
+            Select::make('gender')->options([
+                'Male' => 'Male',
+                'Female' => 'Female',
+                'Others' => 'Others'
+            ])
+            ->required()
+            ->preload(),
             Group::make([
                 TextInput::make('biometric_id')->label('Biometric ID')->disabled(),
                 Placeholder::make('employee_reference')
