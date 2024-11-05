@@ -3,21 +3,15 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AttendanceResource\Pages\ViewEmployeeTimeSheet;
-use App\Filament\Resources\AttendanceSelfServiceResource\Pages;
-use App\Filament\Resources\AttendanceSelfServiceResource\RelationManagers;
-use App\Models\Attendance;
 use App\Models\AttendanceSelfService;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AttendanceSelfServiceResource extends Resource
 {
-    protected static ?string $model = Attendance::class;
+    protected static ?string $model = AttendanceSelfService::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 

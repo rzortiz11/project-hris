@@ -16,6 +16,8 @@ class RolesSeeder extends Seeder
         $defaults = [
             'Admin',
             'Employee',
+            'Human_resource',
+            'Request_approver',
             'Applicant',
         ];
 

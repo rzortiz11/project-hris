@@ -2,15 +2,14 @@
 
 namespace App\Filament\Resources\EmployeeResource\Pages;
 
-use App\Filament\Resources\EmployeeResource;
+use App\Filament\Resources\DashboardNoPolicyResource;
 use App\Models\Employee;
 use Carbon\Carbon;
 use Filament\Resources\Pages\Page;
-use Filament\Infolists\Infolist;
 
 class TodayBirthdayView extends Page
 {
-    protected static string $resource = EmployeeResource::class;
+    protected static string $resource = DashboardNoPolicyResource::class;
 
     protected static string $view = 'filament.resources.employee-resource.pages.today-birthday-view';
 

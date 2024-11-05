@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LeaveSelfServiceResource\Pages\EmployeeSelfServiceLeaveView;
-use App\Models\Leave;
+use App\Models\LeaveSelfService;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -11,7 +11,7 @@ use Filament\Tables\Table;
 
 class LeaveSelfServiceResource extends Resource
 {
-    protected static ?string $model = Leave::class;
+    protected static ?string $model = LeaveSelfService::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar';
 

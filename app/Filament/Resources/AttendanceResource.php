@@ -7,13 +7,11 @@ use App\Filament\Imports\TimeSheetImporter;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Resources\AttendanceResource\Pages\ViewEmployeeTimeSheet;
 use App\Models\Employee;
-use App\Models\TimeSheet;
+use App\Models\EmployeeManagement;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\IconPosition;
 use Filament\Tables;
-use Filament\Tables\Actions\ExportAction;
-use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -26,7 +24,7 @@ class AttendanceResource extends Resource
     // protected static ?string $model = Attendance::class;
     // Replace new employee button as Generate Timesheet to a Employee.
 
-    protected static ?string $model = Employee::class;
+    protected static ?string $model = EmployeeManagement::class;
 
     protected static ?string $modelLabel = "Employee Attendance";
 

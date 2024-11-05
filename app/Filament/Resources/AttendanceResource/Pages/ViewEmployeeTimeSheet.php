@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\AttendanceResource\Pages;
 
-use App\Filament\Resources\AttendanceResource;
+use App\Filament\Resources\SelfServiceEmployeeResource;
 use App\Livewire\EmployeeTimeLogs;
 use App\Livewire\EmployeeTimeSheet;
 use App\Livewire\OverTimeRequestTable;
@@ -12,27 +12,23 @@ use App\Livewire\UnderTimeRequestTable;
 use App\Models\Employee;
 use App\Models\TimeSheet;
 use Carbon\Carbon;
-use Filament\Actions;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Livewire;
-use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\Tabs;
 use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\ViewEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists\Infolist;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Table;
 use Illuminate\Support\Str;
 
 
 class ViewEmployeeTimeSheet extends ViewRecord
 {
     
-    protected static string $resource = AttendanceResource::class;
+    protected static string $resource = SelfServiceEmployeeResource::class;
 
     public $isTimeSheetView = false;
 
