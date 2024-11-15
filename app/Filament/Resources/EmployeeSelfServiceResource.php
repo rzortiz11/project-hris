@@ -10,7 +10,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use App\Livewire\ViewSalaryDetails;
 use App\Models\EmployeeFamilyDetail;
+use App\Models\Nationality;
 use App\Models\User;
+use App\Models\UtilityBarangay;
+use App\Models\UtilityCity;
+use App\Models\UtilityDisctrict;
+use App\Models\UtilityRegion;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
@@ -227,9 +232,9 @@ class EmployeeSelfServiceResource extends Resource
             ])
             ->relationship('user')
             ->schema([
-                TextInput::make('first_name')->required(),
-                TextInput::make('last_name')->required(),
-                TextInput::make('middle_name'),
+                TextInput::make('first_name')->required()->disabled(),
+                TextInput::make('last_name')->required()->disabled(),
+                TextInput::make('middle_name')->disabled(),
                 TextInput::make('suffix'),
             ])->columns(4),
             Grid::make([
@@ -238,10 +243,12 @@ class EmployeeSelfServiceResource extends Resource
             ->relationship('user')
             ->schema([
                 TextInput::make('mobile')
+                ->disabled()
                 ->suffixIcon('heroicon-o-device-phone-mobile')
                 ->unique(ignoreRecord: true)
                 ->required(),
                 TextInput::make('email')
+                ->disabled()
                 ->email()
                 ->suffixIcon('heroicon-o-envelope')
                 ->default('')
@@ -253,19 +260,32 @@ class EmployeeSelfServiceResource extends Resource
             TextInput::make('title'),
             Split::make([
                 DatePicker::make('birthdate')
+                ->disabled()
                 ->label('Date of Birth')
                 ->suffixIcon('heroicon-o-calendar-days')
                 ->maxDate(now()),
                 Placeholder::make('age')
+                ->disabled()
                 ->content(function ($record) {
                     return static::getAge(isset($record->birthdate) ? $record->birthdate : "");
                 }),
             ])->from('lg'),
             TextInput::make('religion'),
-            TextInput::make('nationality'),
-            TextInput::make('gender'),
+            Select::make('nationality')
+            ->options(Nationality::getNationalities()->pluck('nationality', 'nationality')->toArray())
+            ->default('Filipino')
+            ->required()
+            ->searchable()
+            ->preload(),    
+            Select::make('gender')->options([
+                'Male' => 'Male',
+                'Female' => 'Female',
+                'Others' => 'Others'
+            ])
+            ->required()
+            ->preload(),
             Group::make([
-                TextInput::make('biometric_id')->label('Biometric ID'),
+                TextInput::make('biometric_id')->label('Biometric ID')->disabled(),
                 Placeholder::make('employee_reference')
                 ->content(fn (EmployeeSelfService $record): ?string => $record ? $record->employee_reference : ""),
             ])->columns(2),
@@ -302,10 +322,52 @@ class EmployeeSelfServiceResource extends Resource
                     'default' => 1
                 ])
                 ->schema([
-                    Select::make('region_id')->label('Region'),
-                    Select::make('city_id')->label('City'),
-                    Select::make('district_id')->label('District/Municipality'),
-                    Select::make('barangay_id')->label('Barangay'),   
+                    Select::make('region_id')->label('Region')
+                    ->options(UtilityRegion::all()->pluck('name','utility_region_id')->map(function ($name) {
+                        return ucwords(strtolower($name));
+                    })->toArray())
+                    ->searchable()
+                    ->preload()
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        $set('city_id', '');
+                        $set('district_id', '');
+                        $set('barangay_id', '');
+                    })
+                    ->live(),
+                    Select::make('city_id')->label('City')
+                    ->searchable()
+                    ->options(fn (Get $get): array => match ($get('region_id')) {
+                        default => UtilityCity::where('utility_region_id', $get('region_id'))
+                            ->pluck('name', 'utility_city_id')
+                            ->map(fn ($name) => ucwords(strtolower($name)))
+                            ->toArray(),
+                    })
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        $set('district_id', '');
+                        $set('barangay_id', '');
+                    })
+                    ->live(),
+                    Select::make('district_id')->label('District/Municipality')
+                    ->searchable()
+                    ->options(fn (Get $get): array => match ($get('city_id')) {
+                        default => UtilityDisctrict::where('utility_city_id', $get('city_id'))
+                            ->pluck('name', 'utility_district_id')
+                            ->map(fn ($name) => ucwords(strtolower($name)))
+                            ->toArray(),
+                    })
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        $set('barangay_id', '');
+                    })
+                    ->live(),
+                    Select::make('barangay_id')->label('Barangay')
+                    ->searchable()
+                    ->options(fn (Get $get): array => match ($get('district_id')) {
+                        default => UtilityBarangay::where('utility_district_id', $get('district_id'))
+                            ->pluck('name', 'utility_barangay_id')
+                            ->map(fn ($name) => ucwords(strtolower($name)))
+                            ->toArray(),
+                    })
+                    ->live(),  
                 ])->columns(2)
             ])
             ->itemLabel(function (array $state): ?string {
@@ -407,6 +469,7 @@ class EmployeeSelfServiceResource extends Resource
         return Section::make('EMPLOYMENT DETAILS')
         ->description('Employee Employement Information')
         ->icon('heroicon-s-briefcase')
+        ->disabled()
         ->schema([
             Split::make([
                 Grid::make([
@@ -567,6 +630,7 @@ class EmployeeSelfServiceResource extends Resource
     {
         return Section::make('POSITION DETAILS')
         ->description('Employee Position Information')
+        ->disabled()
         ->icon('heroicon-s-flag')
         ->schema([
             Grid::make([
@@ -620,6 +684,7 @@ class EmployeeSelfServiceResource extends Resource
     public static function issuedItemInformation(): Section
     {
         return Section::make('ISSUED ITEM DETAILS')
+        ->disabled()
         ->description('Employee Issued Item Information')
         ->icon('heroicon-s-wrench-screwdriver')
         ->schema([
@@ -689,6 +754,7 @@ class EmployeeSelfServiceResource extends Resource
     public static function payComponentInformation(): Section
     {
         return Section::make('Pay Component')
+        ->disabled()
         ->schema([
             Tabs::make('Tabs')
             ->tabs([
@@ -1211,7 +1277,8 @@ class EmployeeSelfServiceResource extends Resource
 
     public static function healthBenefitFields(): Section
     {
-        return Section::make('HEALTH BENEFIT DETAILS')
+        return Section::make('HEALTH BENEFIT DETAILS')  
+        ->disabled()
         ->description('Employee Health Benefit Information')
         ->icon('heroicon-c-plus-circle')
         ->schema([
@@ -1352,6 +1419,7 @@ class EmployeeSelfServiceResource extends Resource
         return Section::make(function (EmployeeSelfService $employee) {
             return 'ID DETAILS - EMPLOYEE NUMBER : '. strtoupper($employee->employee_reference) ?? 'ID DETAILS';
         })
+        ->disabled()
         ->description('Employee ID Information')
         ->icon('heroicon-s-identification')
         ->schema([
@@ -1376,6 +1444,7 @@ class EmployeeSelfServiceResource extends Resource
     public static function bankInformation(): Section
     {
         return Section::make(['BANK DETAILS'])
+        ->disabled()
         ->description('Employee Bank Information')
         ->icon('heroicon-s-credit-card')
         ->schema([

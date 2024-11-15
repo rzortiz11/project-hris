@@ -46,8 +46,7 @@ class ViewSalaryDetails extends Component implements HasForms, HasTable
                 TextColumn::make('amount')
                 ->label('Amount')
                 ->sortable()
-                ->alignment('right')
-                ->summarize(Sum::make()->label('Total Monthly')), 
+                ->alignment('right'), 
                 CheckboxColumn::make('is_taxable')->disabled()->alignment('center'),
                 TextColumn::make('pay_period'),
                 TextColumn::make('effective_date'),
