@@ -9,6 +9,10 @@ use App\Models\EmployeeFamilyDetail;
 use App\Models\EmployeeManagement;
 use App\Models\Nationality;
 use App\Models\User;
+use App\Models\UtilityBarangay;
+use App\Models\UtilityCity;
+use App\Models\UtilityDisctrict;
+use App\Models\UtilityRegion;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
@@ -349,10 +353,52 @@ class EmployeeResource extends Resource
                     'default' => 1
                 ])
                 ->schema([
-                    Select::make('region_id')->label('Region'),
-                    Select::make('city_id')->label('City'),
-                    Select::make('district_id')->label('District/Municipality'),
-                    Select::make('barangay_id')->label('Barangay'),   
+                    Select::make('region_id')->label('Region')
+                    ->options(UtilityRegion::all()->pluck('name','utility_region_id')->map(function ($name) {
+                        return ucwords(strtolower($name));
+                    })->toArray())
+                    ->searchable()
+                    ->preload()
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        $set('city_id', '');
+                        $set('district_id', '');
+                        $set('barangay_id', '');
+                    })
+                    ->live(),
+                    Select::make('city_id')->label('City')
+                    ->searchable()
+                    ->options(fn (Get $get): array => match ($get('region_id')) {
+                        default => UtilityCity::where('utility_region_id', $get('region_id'))
+                            ->pluck('name', 'utility_city_id')
+                            ->map(fn ($name) => ucwords(strtolower($name)))
+                            ->toArray(),
+                    })
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        $set('district_id', '');
+                        $set('barangay_id', '');
+                    })
+                    ->live(),
+                    Select::make('district_id')->label('District/Municipality')
+                    ->searchable()
+                    ->options(fn (Get $get): array => match ($get('city_id')) {
+                        default => UtilityDisctrict::where('utility_city_id', $get('city_id'))
+                            ->pluck('name', 'utility_district_id')
+                            ->map(fn ($name) => ucwords(strtolower($name)))
+                            ->toArray(),
+                    })
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        $set('barangay_id', '');
+                    })
+                    ->live(),
+                    Select::make('barangay_id')->label('Barangay')
+                    ->searchable()
+                    ->options(fn (Get $get): array => match ($get('district_id')) {
+                        default => UtilityBarangay::where('utility_district_id', $get('district_id'))
+                            ->pluck('name', 'utility_barangay_id')
+                            ->map(fn ($name) => ucwords(strtolower($name)))
+                            ->toArray(),
+                    })
+                    ->live(),  
                 ])->columns(2)
             ])
             ->itemLabel(function (array $state): ?string {

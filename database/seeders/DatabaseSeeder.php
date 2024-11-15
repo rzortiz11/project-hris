@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
             ApplicationStatusTypeSeeder::class,
             ApplicantSeeder::class,
             DefaultUserSeeder::class,
+            UtilityRegionSeeder::class,
+            UtilityCitySeeder::class,
+            UtilityDistrictSeeder::class,
+            UtilityBarangaySeeder::class,
         ]);
     }
 }

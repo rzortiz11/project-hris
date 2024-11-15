@@ -39,8 +39,8 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->databaseNotifications()
             ->colors([
-                'primary' => Color::Orange,
-                // 'primary' => 'rgb(243, 196, 19)',
+                // 'primary' => Color::Orange,
+                'primary' => 'rgb(243, 196, 19)',
                 'secondary' => Color::Green
                 // 'primary' => Color::Slate
             ])
