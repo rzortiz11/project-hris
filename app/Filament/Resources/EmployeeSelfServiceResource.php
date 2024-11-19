@@ -55,6 +55,7 @@ class EmployeeSelfServiceResource extends Resource
     {
         //EmployeeSelfService extends Employee Model for policy to work
         $employee = EmployeeSelfService::get();
+        $model_record = $form->getRecord();
 
         return $form
             ->schema([
@@ -82,7 +83,27 @@ class EmployeeSelfServiceResource extends Resource
                                Tab::make('Work Details')
                                     ->schema([
                                         static::employementInformation(),  
-                                        static::employementPositionInformation(),  
+                                        Grid::make()
+                                        ->schema([
+                                            Group::make()
+                                            ->schema([
+                                                static::employementPositionInformation(),  
+                                            ])
+                                            ->columnSpan([
+                                                'default' => 1,
+                                                'sm' => 1,
+                                                'md' => 1,
+                                                'lg' => 2,
+                                                'xl' => 2,
+                                                '2xl' => 2,
+                                            ]),
+                                            Group::make()
+                                            ->schema([
+                                                static::employeeRequestApprover(),
+                                            ])  
+                                            ->columnSpan(1),    
+                                        ])
+                                        ->columns(3),
                                         static::issuedItemInformation(),  
                                     ]),    
                                Tab::make('Salary Details')                                
@@ -98,7 +119,7 @@ class EmployeeSelfServiceResource extends Resource
                                     ]),           
                                 Tab::make('Dependent & HMO')
                                 ->schema([
-                                        static::dependentAndhealthBenefitInformation(),
+                                        static::dependentAndhealthBenefitInformation($model_record),
                                 ]),                                                                                                                                                                                 
                                Tab::make('Education & Work History')
                                     ->schema([
@@ -681,6 +702,29 @@ class EmployeeSelfServiceResource extends Resource
         ]);
     }
 
+    public static function employeeRequestApprover(): Section
+    {
+        return Section::make("EMPLOYEE REQUEST APPROVER'S")
+        ->disabled()
+        ->description('Request approvers')
+        ->icon('heroicon-o-shield-check')
+        ->schema([
+            Repeater::make('employee_request_approvers')
+            ->label('')
+            ->relationship()
+            ->simple(
+                Select::make('approver_id')
+                ->options(User::all()->pluck('name', 'user_id')->map(function ($name) {
+                    return ucwords(strtolower($name));
+                }))
+                ->label('Approver')
+                ->preload()
+            )
+            ->deletable(false)
+            ->addable(false)
+        ]);
+    }
+
     public static function issuedItemInformation(): Section
     {
         return Section::make('ISSUED ITEM DETAILS')
@@ -754,6 +798,8 @@ class EmployeeSelfServiceResource extends Resource
     public static function payComponentInformation(): Section
     {
         return Section::make('Pay Component')
+        ->collapsible()
+        ->collapsed()
         ->disabled()
         ->schema([
             Tabs::make('Tabs')
@@ -1267,11 +1313,11 @@ class EmployeeSelfServiceResource extends Resource
         ]);
     }
 
-    public static function dependentAndhealthBenefitInformation() : Split
+    public static function dependentAndhealthBenefitInformation($model_record) : Split
     {
         return Split::make([
             static::healthBenefitFields(),
-            static::dpendentFields()
+            static::dpendentFields($model_record)
         ])->from('lg');
     }
 
@@ -1317,7 +1363,7 @@ class EmployeeSelfServiceResource extends Resource
         ]);
     }
 
-    public static function dpendentFields(): Section
+    public static function dpendentFields($model_record): Section
     {
         return   Section::make('DEPENDENT DETAILS')
         ->description('Employee Dependent Information')
@@ -1331,21 +1377,30 @@ class EmployeeSelfServiceResource extends Resource
                 ->label('')
                 ->relationship()
                 ->simple(
-                    
                     Select::make('employee_family_id')
-                    ->options(EmployeeFamilyDetail::all()->pluck('name', 'employee_family_id')->map(function ($name) {
-                        return ucwords(strtolower($name));
-                    }))
+                    ->options(function () use ($model_record) {
+
+                        if (!$model_record) {
+                            return [];
+                        }
+                
+                        return EmployeeFamilyDetail::where('employee_id', $model_record->employee_id)
+                            ->pluck('name', 'employee_family_id')
+                            ->map(function ($name) {
+                                return ucwords(strtolower($name));
+                            })
+                            ->toArray();
+                    })
                     ->label('Dependent Name')
                     ->preload()
                     ->required()
                     ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+                    // ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
 
-                            $family_id = $state;
-                            $family = EmployeeFamilyDetail::where('employee_family_id', $family_id)->first();
-                            $set('relationship', $family->relationship);
-                    })
+                    //         $family_id = $state;
+                    //         $family = EmployeeFamilyDetail::where('employee_family_id', $family_id)->first();
+                    //         $set('relationship', $family->relationship);
+                    // })
                     ->searchable()
                 )
                 ->addActionLabel('Add Dependent')

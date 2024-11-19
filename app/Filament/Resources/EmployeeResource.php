@@ -42,12 +42,12 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
-use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Maatwebsite\Excel\Facades\Excel;
-use Filament\Forms\Components\Actions\Action as formAction;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Actions as formComponentACtion;
 class EmployeeResource extends Resource
 {
@@ -63,7 +63,8 @@ class EmployeeResource extends Resource
     {
         //EmployeeManagement extends Employee Model for policy to work to hide this on user with employee ROLE
         $employee = EmployeeManagement::get();
-
+        $model_record = $form->getRecord();
+        
         return $form
             ->schema([
                 Grid::make([
@@ -126,7 +127,7 @@ class EmployeeResource extends Resource
                                     ]),           
                                 Tab::make('Dependent & HMO')
                                 ->schema([
-                                        static::dependentAndhealthBenefitInformation(),
+                                        static::dependentAndhealthBenefitInformation($model_record),
                                 ]),                                                                                                                                                                                 
                                Tab::make('Education & Work History')
                                     ->schema([
@@ -174,7 +175,7 @@ class EmployeeResource extends Resource
     {
         return $table
             ->headerActions([
-                Action::make('Import')
+                TableAction::make('Import')
                 ->label("Import Employee's")
                 ->icon('heroicon-o-arrow-up-on-square')
                 ->iconPosition(IconPosition::After)
@@ -185,7 +186,7 @@ class EmployeeResource extends Resource
                     ->required()
                     ->label('CSV File'),
                     formComponentACtion::make([
-                        formAction::make('export')
+                        Action::make('export')
                         ->label('Download example CSV file')
                         ->link()
                         ->icon('heroicon-o-arrow-down-on-square')
@@ -772,7 +773,6 @@ class EmployeeResource extends Resource
             ->label('')
             ->relationship()
             ->simple(
-                
                 Select::make('approver_id')
                 ->options(User::all()->pluck('name', 'user_id')->map(function ($name) {
                     return ucwords(strtolower($name));
@@ -1381,11 +1381,11 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function dependentAndhealthBenefitInformation() : Split
+    public static function dependentAndhealthBenefitInformation($model_record) : Split
     {
         return Split::make([
             static::healthBenefitFields(),
-            static::dpendentFields()
+            static::dpendentFields($model_record)
         ])->from('lg');
     }
 
@@ -1430,7 +1430,7 @@ class EmployeeResource extends Resource
         ]);
     }
 
-    public static function dpendentFields(): Section
+    public static function dpendentFields($model_record): Section
     {
         return   Section::make('DEPENDENT DETAILS')
         ->description('Employee Dependent Information')
@@ -1444,21 +1444,30 @@ class EmployeeResource extends Resource
                 ->label('')
                 ->relationship()
                 ->simple(
-                    
                     Select::make('employee_family_id')
-                    ->options(EmployeeFamilyDetail::all()->pluck('name', 'employee_family_id')->map(function ($name) {
-                        return ucwords(strtolower($name));
-                    }))
+                    ->options(function () use ($model_record) {
+
+                        if (!$model_record) {
+                            return [];
+                        }
+                
+                        return EmployeeFamilyDetail::where('employee_id', $model_record->employee_id)
+                            ->pluck('name', 'employee_family_id')
+                            ->map(function ($name) {
+                                return ucwords(strtolower($name));
+                            })
+                            ->toArray();
+                    })
                     ->label('Dependent Name')
                     ->preload()
                     ->required()
                     ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+                    // ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
 
-                            $family_id = $state;
-                            $family = EmployeeFamilyDetail::where('employee_family_id', $family_id)->first();
-                            $set('relationship', $family->relationship);
-                    })
+                    //         $family_id = $state;
+                    //         $family = EmployeeFamilyDetail::where('employee_family_id', $family_id)->first();
+                    //         $set('relationship', $family->relationship);
+                    // })
                     ->searchable()
                 )
                 ->addActionLabel('Add Dependent')
