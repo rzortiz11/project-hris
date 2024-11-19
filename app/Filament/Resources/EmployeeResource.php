@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\EmployeeImporterExample;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\EmployeeResource\Pages;
 use App\Livewire\ViewSalaryDetails;
@@ -179,16 +180,20 @@ class EmployeeResource extends Resource
                 ->iconPosition(IconPosition::After)
                 ->requiresConfirmation()
                 ->form([
-                    formComponentACtion::make([
-                        formAction::make('download')
-                        ->icon('heroicon-m-star')
-                        ->action(function () {
-                        }),
-                    ])->fullWidth(),
                     FileUpload::make('csv')
                     ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'text/plain'])
                     ->required()
-                    ->label('CSV File')
+                    ->label('CSV File'),
+                    formComponentACtion::make([
+                        formAction::make('export')
+                        ->label('Download example CSV file')
+                        ->link()
+                        ->icon('heroicon-o-arrow-down-on-square')
+                        ->action(function () {
+                            return Excel::download(new EmployeeImporterExample(), 'employee-importer-example.csv');
+                        }),
+                    ]),
+                    // ->fullWidth(),
                 ])
                 ->action(function ($data) {
                     $importer = new UserImporter();
@@ -212,7 +217,8 @@ class EmployeeResource extends Resource
                 })
                 ->circular(),
                 TextColumn::make('employee_reference')->searchable(),
-                TextColumn::make('user.name')->label('User')->searchable(['first_name','last_name']),
+                TextColumn::make('user.name')->label('Employee')->searchable(['first_name','last_name']),
+                TextColumn::make('user.email')->label('Email')->searchable(),
                 TextColumn::make('position.job_position')->label('Position'),
                 TextColumn::make('position.reporting_designation')->label('Designation'),
                 TextColumn::make('active')->badge()

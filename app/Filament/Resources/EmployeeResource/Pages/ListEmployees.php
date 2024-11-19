@@ -41,28 +41,25 @@ class ListEmployees extends ListRecords
                 ->description('Fill out the required * Employee Details')
                 ->icon('heroicon-s-user-circle')
                 ->schema([
-                    TextInput::make('first_name')->required()->default("John"),
-                    TextInput::make('last_name')->required()->default("Doe"),
+                    TextInput::make('first_name')->required(),
+                    TextInput::make('last_name')->required(),
                     TextInput::make('middle_name'),
                     TextInput::make('suffix'),
                     TextInput::make('mobile')
                     ->unique()
-                    ->required()->default("09302244437")
+                    ->required()
                     ->suffixIcon('heroicon-o-device-phone-mobile'),
                     TextInput::make('email')
                     ->suffixIcon('heroicon-o-envelope')
                     ->unique()
                     ->placeholder('morepower.ph')
-                    ->required()
-                    ->default("moretesting@morepower.ph"),
+                    ->required(),
                     TextInput::make('password')->revealable()
                     ->password()
                     ->confirmed()
                     ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $context): bool => $context === 'create')
-                    ->default("test1234"),
-                    TextInput::make('password_confirmation')->label('Password Confirmation')->password()->revealable()
-                    ->default("test1234"),
+                    ->required(fn (string $context): bool => $context === 'create'),
+                    TextInput::make('password_confirmation')->label('Password Confirmation')->password()->revealable(),
                 ])->columns(2)
             ])
             ->successNotification(
