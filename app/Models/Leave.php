@@ -13,7 +13,7 @@ class Leave extends Model
 
     protected $primaryKey = 'leave_id';
     
-    protected $fillable = ['employee_id','job_position','type','date_filling','from','to', 'hours', 'remarks', 'approver_id','action_date','disapproved_reason','is_paid','status'];
+    protected $fillable = ['employee_id', 'leave_balance_id','job_position','type','date_filling','from','to', 'hours', 'remarks', 'approver_id','action_date','disapproved_reason','is_paid','status'];
 
     public function leave_documents(): HasMany {
         return $this->hasMany(LeaveDocument::class, 'leave_id', 'leave_id');

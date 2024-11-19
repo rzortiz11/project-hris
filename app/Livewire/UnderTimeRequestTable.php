@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\EmployeeLeaveApprover;
+use App\Models\EmployeeRequestApprover;
 use App\Models\UnderTimeRequest;
 use App\Models\User;
 use Carbon\Carbon;
@@ -228,7 +228,7 @@ class UnderTimeRequestTable extends Component implements HasForms, HasTable
             ->rows(5),
             Select::make('approver_id')->label('Approver')
             ->required()
-            ->options(EmployeeLeaveApprover::all()->pluck('approver_id','leave_approver_id')->map(function ($approver_id) {
+            ->options(EmployeeRequestApprover::all()->pluck('approver_id','approver_id')->map(function ($approver_id) {
 
                 $approver = User::find($approver_id);
                 return $approver ? ucwords(strtolower($approver->name)) : '';

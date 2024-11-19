@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class EmployeeLeaveApprover extends Model
+class EmployeeRequestApprover extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory,SoftDeletes;
 
-    protected $primaryKey = 'leave_approver_id';
+    protected $primaryKey = 'request_approver_id';
     
     protected $fillable = ['employee_id','approver_id'];
 }

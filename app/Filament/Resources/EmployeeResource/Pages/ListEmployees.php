@@ -34,6 +34,7 @@ class ListEmployees extends ListRecords
     {
         return [
             Actions\CreateAction::make()
+            ->label('Create Employee')
             ->model(User::class)  
             ->form([
                 Section::make('Employee Basic Details')

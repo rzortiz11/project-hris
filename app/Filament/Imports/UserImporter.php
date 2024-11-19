@@ -2,65 +2,67 @@
 
 namespace App\Filament\Imports;
 
+use App\Models\Employee;
 use App\Models\User;
-use Filament\Actions\Imports\ImportColumn;
-use Filament\Actions\Imports\Importer;
-use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 
-class UserImporter extends Importer
+
+class UserImporter implements ToCollection
 {
-    protected static ?string $model = User::class;
+    private $duplicates = []; // Store duplicate emails here
 
-    public static function getColumns(): array
+    public function collection(Collection $rows)
     {
-        return [
-            ImportColumn::make('first_name')
-                ->example('John')
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
-            ImportColumn::make('last_name')
-                ->example('Doe')
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
-            ImportColumn::make('middle_name')
-                ->rules(['max:255']),
-            ImportColumn::make('suffix')
-                ->rules(['max:10']),
-            ImportColumn::make('mobile')
-                ->example('09123456789')
-                ->requiredMapping()
-                ->rules(['required','max:255']),
-            ImportColumn::make('email')
-                ->example('jdoe@morepower.ph')
-                ->requiredMapping()
-                ->rules(['required', 'email', 'max:255']),
-            ImportColumn::make('password')
-                ->example('2024518')
-                ->requiredMapping()
-                ->rules(['required', 'max:255']),
-        ];
+        // Remove the first row (header)
+        $rows->shift();
+
+        // Process the remaining rows
+        return $rows->map(function($row) {
+
+            $email = $row[5]; // Extract the email from the current row
+
+            if (User::where('email', $email)->exists()) {
+                $this->duplicates[] = $email;
+                return null; 
+            }
+
+            $result = User::create([
+                'first_name'    => $row[0], 
+                'last_name'    => $row[1], 
+                'middle_name'    => $row[2], 
+                'suffix'    => $row[3], 
+                'mobile'    => $row[4],
+                'email'    => $email, 
+                'password'    => $row[6], 
+            ]);
+
+            if($result){
+                $result->assignRole(config('constants.USER_ROLE_IS_EMPLOYEE'));
+
+                $reference = 'MP-' . str_pad($result->user_id, 6, '0', STR_PAD_LEFT);
+
+                
+
+                $result->employee()->create([
+                    'biometric_id' => Employee::where('biometric_id',$row[7])->exists() ? NULL : $row[7],
+                    'employee_reference' => $reference,
+                    'created_by' => auth()->id(),
+                ]);
+
+            }
+        });
     }
 
-    public function resolveRecord(): ?User
+    public function getDuplicates(): array
     {
-        dump($this->data);
-        die;
-        // // return User::firstOrNew([
-        // //     // Update existing records, matching them by `$this->data['column_name']`
-        // //     'email' => $this->data['email'],
-        // // ]);
-
-        return new User();
+        return $this->duplicates;
     }
 
-    public static function getCompletedNotificationBody(Import $import): string
+    // create a function to notify each user of his email and password after creating a data to HRIS with url,uname,password
+
+    public function chunkSize(): int
     {
-        $body = 'Your user import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
-
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
-        }
-
-        return $body;
+        return 500;
     }
 }

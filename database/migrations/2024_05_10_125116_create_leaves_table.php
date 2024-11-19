@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('leaves', function (Blueprint $table) {
             $table->id('leave_id');
             $table->unsignedBigInteger('employee_id');
+            $table->unsignedBigInteger('leave_balance_id');
             $table->string('job_position')->nullable();
             $table->string('type')->nullable();
             $table->date('date_filling')->nullable();

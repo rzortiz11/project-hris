@@ -31,7 +31,6 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Livewire;
@@ -40,11 +39,15 @@ use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\IconPosition;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ImportAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
-
+use Maatwebsite\Excel\Facades\Excel;
+use Filament\Forms\Components\Actions\Action as formAction;
+use Filament\Forms\Components\Actions as formComponentACtion;
 class EmployeeResource extends Resource
 {
     protected static ?string $model = EmployeeManagement::class;
@@ -86,7 +89,27 @@ class EmployeeResource extends Resource
                                Tab::make('Work Details')
                                     ->schema([
                                         static::employementInformation(),  
-                                        static::employementPositionInformation(),  
+                                        Grid::make()
+                                        ->schema([
+                                            Group::make()
+                                            ->schema([
+                                                static::employementPositionInformation(),  
+                                            ])
+                                            ->columnSpan([
+                                                'default' => 1,
+                                                'sm' => 1,
+                                                'md' => 1,
+                                                'lg' => 2,
+                                                'xl' => 2,
+                                                '2xl' => 2,
+                                            ]),
+                                            Group::make()
+                                            ->schema([
+                                                static::employeeRequestApprover(),
+                                            ])  
+                                            ->columnSpan(1),    
+                                        ])
+                                        ->columns(3),
                                         static::issuedItemInformation(),  
                                     ]),    
                                Tab::make('Salary Details')                                
@@ -150,11 +173,34 @@ class EmployeeResource extends Resource
     {
         return $table
             ->headerActions([
-                ImportAction::make('importUser')
-                ->importer(UserImporter::class)
-                ->color('primary')
+                Action::make('Import')
+                ->label("Import Employee's")
                 ->icon('heroicon-o-arrow-up-on-square')
                 ->iconPosition(IconPosition::After)
+                ->requiresConfirmation()
+                ->form([
+                    formComponentACtion::make([
+                        formAction::make('download')
+                        ->icon('heroicon-m-star')
+                        ->action(function () {
+                        }),
+                    ])->fullWidth(),
+                    FileUpload::make('csv')
+                    ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'text/plain'])
+                    ->required()
+                    ->label('CSV File')
+                ])
+                ->action(function ($data) {
+                    $importer = new UserImporter();
+                    Excel::import($importer, $data['csv'], 'public');
+
+                    // $duplicates = $importer->getDuplicates();
+
+                    Notification::make()
+                    ->success()
+                    ->title("Employee's imported successfully")
+                    ->send();
+                }),
             ])
             ->columns([
                 TextColumn::make('employee_id')->label('ID'),
@@ -708,6 +754,41 @@ class EmployeeResource extends Resource
                 Textarea::make('job_description')->columnSpanFull()
             ])->columns(3),
         ]);
+    }
+
+    public static function employeeRequestApprover(): Section
+    {
+        return Section::make("EMPLOYEE REQUEST APPROVER'S")
+        ->description('Request approvers')
+        ->icon('heroicon-o-shield-check')
+        ->schema([
+            Repeater::make('employee_request_approvers')
+            ->label('')
+            ->relationship()
+            ->simple(
+                
+                Select::make('approver_id')
+                ->options(User::all()->pluck('name', 'user_id')->map(function ($name) {
+                    return ucwords(strtolower($name));
+                }))
+                ->label('Approver')
+                ->preload()
+                ->required()
+                // ->live()
+                // ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
+
+                //         $family_id = $state;
+                //         $family = EmployeeFamilyDetail::where('employee_family_id', $family_id)->first();
+                //         $set('relationship', $family->relationship);
+                // })
+                ->searchable()
+            )
+            ->addActionLabel('Add Approver')
+            ->deleteAction(
+                fn (Action $action) => $action->requiresConfirmation()
+            )
+        ])
+        ;
     }
 
     public static function issuedItemInformation(): Section
