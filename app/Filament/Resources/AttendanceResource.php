@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Exports\TimeSheetExporter;
+use App\Filament\Exports\TimeSheetImporterExample;
 use App\Filament\Imports\TimeSheetImporter;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Resources\AttendanceResource\Pages\ViewEmployeeTimeSheet;
@@ -18,6 +19,8 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\Action;
 use Maatwebsite\Excel\Facades\Excel;
+use Filament\Forms\Components\Actions\Action as formAction;
+use Filament\Forms\Components\Actions as formComponentACtion;
 
 class AttendanceResource extends Resource
 {
@@ -46,7 +49,8 @@ class AttendanceResource extends Resource
     {
         return $table
             ->headerActions([
-                Action::make('Import Time Logs')
+                Action::make('importer_time_logs')
+                ->label('Timesheet Importer')
                 ->color('primary')
                 ->icon('heroicon-o-arrow-up-on-square')
                 ->iconPosition(IconPosition::After)
@@ -55,10 +59,19 @@ class AttendanceResource extends Resource
                     FileUpload::make('csv')
                     ->acceptedFileTypes(['text/csv', 'application/vnd.ms-excel', 'text/plain'])
                     ->required()
-                    ->label('CSV File')
+                    ->label('CSV File'),
+                    formComponentACtion::make([
+                        formAction::make('export')
+                        ->label('Download example CSV file')
+                        ->link()
+                        ->icon('heroicon-o-arrow-down-on-square')
+                        ->action(function () {
+                            return Excel::download(new TimeSheetImporterExample(), 'timesheet-importer-example.csv');
+                        }),
+                    ]),
                 ])
                 ->action(function ($data) {
-                    Excel::import(new TimeSheetExporter(), $data['csv'], 'public');
+                    Excel::import(new TimeSheetImporter(), $data['csv'], 'public');
                 }),
             ])
             ->columns([

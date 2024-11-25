@@ -3,9 +3,11 @@
 namespace App\Livewire;
 
 use App\Models\Employee;
+use App\Models\EmployeeLeaveBalance;
 use App\Models\Leave;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Support\Enums\Alignment;
@@ -181,7 +183,35 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                 ->action(function (Leave $record, array $data) {
                     
                     $employee = Employee::find($record['employee_id']);
-            
+                    $work_schedule = $employee->employment->work_schedule;
+                    $fromDate = Carbon::parse($record->from); // Start date, e.g., "2024-11-19"
+                    $toDate = Carbon::parse($record->to); // End date, e.g., "2024-11-22"
+                    
+                    // Generate the range of dates
+                    $period = CarbonPeriod::create($fromDate, $toDate);
+                    
+                    // Initialize leave days counter
+                    $leaveDaysUsed = 0;
+                    
+                    // Iterate through the date range
+                    foreach ($period as $date) {
+                        // Check if the day is in the work schedule
+                        if (in_array(strtolower($date->format('l')), $work_schedule)) {
+                            $leaveDaysUsed++;
+                        }
+                    }
+                    
+                    $leave_balance = EmployeeLeaveBalance::where('leave_balance_id',$record->leave_balance_id)->first();
+                    if ($leave_balance) {
+                        $leave_balance->used_balance += $leaveDaysUsed;
+                        $leave_balance->remaining_balance = $leave_balance->balance - $leave_balance->used_balance; 
+                        if ($leave_balance->remaining_balance < 0) {
+                            $leave_balance->remaining_balance = 0;
+                        }
+                    
+                        $leave_balance->save();
+                    }
+
                     $record['status'] = 'approved';
                     $result = $record->save();
 

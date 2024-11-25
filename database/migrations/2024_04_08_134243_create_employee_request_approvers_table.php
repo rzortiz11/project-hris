@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employee_leave_approvers', function (Blueprint $table) {
-            $table->id('leave_approver_id');
+        Schema::create('employee_request_approvers', function (Blueprint $table) {
+            $table->id('request_approver_id');
             $table->unsignedBigInteger('employee_id');
             $table->unsignedBigInteger('approver_id');
             $table->timestamps();
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_leave_approvers');
+        Schema::dropIfExists('employee_request_approvers');
     }
 };

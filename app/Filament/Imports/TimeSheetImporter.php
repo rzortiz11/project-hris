@@ -2,87 +2,116 @@
 
 namespace App\Filament\Imports;
 
+use App\Models\Employee;
 use App\Models\TimeSheet;
-use Filament\Actions\Imports\ImportColumn;
-use Filament\Actions\Imports\Importer;
-use Filament\Actions\Imports\Models\Import;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 
-class TimeSheetImporter extends Importer
+class TimeSheetImporter implements ToCollection
 {
-    protected static ?string $model = TimeSheet::class;
 
-    public static function getColumns(): array
+    public function collection(Collection $rows)
     {
-        return [
-            ImportColumn::make('employee_id')
-                ->requiredMapping()
-                ->numeric()
-                ->rules(['required', 'integer']),
-            ImportColumn::make('date')
-                ->rules(['date']),
-            ImportColumn::make('shift_schedule')
-                ->rules(['max:255']),
-            ImportColumn::make('time_in')
-                ->requiredMapping()
-                ->rules(['required']),
-            ImportColumn::make('in_location')
-                ->rules(['max:255']),
-            ImportColumn::make('in_latitude')
-                ->rules(['max:255']),
-            ImportColumn::make('in_longitude')
-                ->rules(['max:255']),
-            ImportColumn::make('break_time_out')
-                ->requiredMapping()
-                ->rules(['required']),
-            ImportColumn::make('break_time_in')
-                ->requiredMapping()
-                ->rules(['required']),
-            ImportColumn::make('time_out')
-                ->requiredMapping()
-                ->rules(['required']),
-            ImportColumn::make('out_location')
-                ->rules(['max:255']),
-            ImportColumn::make('out_latitude')
-                ->rules(['max:255']),
-            ImportColumn::make('out_longitude')
-                ->rules(['max:255']),
-            ImportColumn::make('out_date')
-                ->rules(['date']),
-            ImportColumn::make('time_in_2')
-                ->requiredMapping()
-                ->rules(['required']),
-            ImportColumn::make('time_out_2')
-                ->requiredMapping()
-                ->rules(['required']),
-            ImportColumn::make('late_time')
-                ->requiredMapping()
-                ->rules(['required']),
-            ImportColumn::make('over_time')
-                ->requiredMapping()
-                ->rules(['required']),
-            ImportColumn::make('remarks')
-                ->rules(['max:255']),
-        ];
+        // Remove the first row (header)
+        $rows->shift();
+    
+        // Process the remaining rows
+        return $rows->map(function($row) {
+            $biometric_id = $row[0]; // Extract the biometric_id from the current row
+    
+            $employee = Employee::where('biometric_id', $biometric_id)->first();
+    
+            if ($employee) {
+                // Format the date to m-d-Y
+                $formatted_date = Carbon::parse($row[1])->format('Y-m-d');
+    
+                // Check if the timesheet entry already exists
+                $existingTimesheet = TimeSheet::where('employee_id', $employee->employee_id)
+                    ->where('date', $formatted_date)
+                    ->first();
+    
+                if (!$existingTimesheet) {
+
+                    $schedule = static::generateShiftSchedule($employee);
+
+                    // Create new TimeSheet entry
+                    TimeSheet::create([
+                        'employee_id'    => $employee->employee_id,
+                        'shift_schedule' => $schedule,
+                        'date'           => $formatted_date,
+                        'time_in'        => $row[2] ?? '00:00:00',
+                        'break_time_out' => $row[3] ?? '00:00:00',
+                        'break_time_in'  => $row[4] ?? '00:00:00',
+                        'time_out'       => $row[5] ?? '00:00:00',
+                    ]);
+                } else {
+                    // Update the existing TimeSheet entry
+                    $existingTimesheet->update([
+                        'time_in'        => $row[2] ?? '00:00:00',
+                        'break_time_out' => $row[3] ?? '00:00:00',
+                        'break_time_in'  => $row[4] ?? '00:00:00',
+                        'time_out'       => $row[5] ?? '00:00:00',
+                    ]);
+                }
+    
+                // Check for time_in and create or update TIMEIN log
+                if (!empty($row[2])) {
+                    $existingTimeInLog = $employee->employee_timelogs()
+                        ->where('date', $formatted_date)
+                        ->where('type', 'TIMEIN')
+                        ->first();
+    
+                    if (!$existingTimeInLog) {
+                        $employee->employee_timelogs()->create([
+                            'date'     => $formatted_date,
+                            'day'      => now()->format('l'),
+                            'type'     => 'TIMEIN',
+                            'time'     => $row[2] ?? '00:00:00',
+                            'location' => null,
+                        ]);
+                    } else {
+                        $existingTimeInLog->update([
+                            'time' => $row[2] ?? '00:00:00',
+                        ]);
+                    }
+                }
+    
+                // Check for time_out and create or update TIMEOUT log
+                if (!empty($row[5])) {
+                    $existingTimeOutLog = $employee->employee_timelogs()
+                        ->where('date', $formatted_date)
+                        ->where('type', 'TIMEOUT')
+                        ->first();
+    
+                    if (!$existingTimeOutLog) {
+                        $employee->employee_timelogs()->create([
+                            'date'     => $formatted_date,
+                            'day'      => now()->format('l'),
+                            'type'     => 'TIMEOUT',
+                            'time'     => $row[5] ?? '00:00:00',
+                            'location' => null,
+                        ]);
+                    } else {
+                        $existingTimeOutLog->update([
+                            'time' => $row[5] ?? '00:00:00',
+                        ]);
+                    }
+                }
+            }
+        });
     }
 
-    public function resolveRecord(): ?TimeSheet
+    private static function generateShiftSchedule($employee)
     {
-        // return TimeSheet::firstOrNew([
-        //     // Update existing records, matching them by `$this->data['column_name']`
-        //     'email' => $this->data['email'],
-        // ]);
-
-        return new TimeSheet();
+        $time_in = $employee->employment->time_in ? Carbon::createFromFormat('H:i:s', $employee->employment->time_in)->format('h:i A') : "00:00";
+        $time_out = $employee->employment->time_out ? Carbon::createFromFormat('H:i:s', $employee->employment->time_out)->format('h:i A') : "00:00";
+        return $time_in . ' - ' . $time_out;
     }
 
-    public static function getCompletedNotificationBody(Import $import): string
+    public function chunkSize(): int
     {
-        $body = 'Your time sheet import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
-
-        if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
-        }
-
-        return $body;
+        return 500;
     }
 }

@@ -4,12 +4,14 @@ namespace App\Livewire;
 
 use App\Filament\Resources\EmployeeLeaveServiceResource\Widgets\LeaveSelfServiceAllocationPieChart;
 use App\Models\Employee;
-use App\Models\EmployeeLeaveApprover;
 use App\Models\EmployeeLeaveBalance;
+use App\Models\EmployeeRequestApprover;
 use App\Models\EmployeeSalaryDetail;
 use App\Models\Leave;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Closure;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components\Grid;
@@ -41,6 +43,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
@@ -64,6 +67,7 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
     public function table(Table $table): Table
     {
         $employee_id = $this->record->employee_id;
+        $record = $this->record;
 
         return $table
             // ->query(EmployeeSalaryDetail::query()->where('employee_id', $this->record->employee_id))
@@ -124,13 +128,19 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
              
                     return $data;
                 })
+                ->before(function (array $data) {
+                    $leave = EmployeeLeaveBalance::where('leave_balance_id',$data['leave_balance_id'])->select('leave_balance_id','type')->first();
+                    
+                    $data['type'] = isset($leave) ? $leave->type : "";
+                    return $data;       
+                })
                 ->label('Request a Leave')
                 ->model(Leave::class)
                 ->form([
-                    self::LeaveForm($employee_id)
+                    self::LeaveForm($record)
                 ])
                 ->after(function ($record) {
-
+                    
                     $recipient = User::find($record['approver_id']);
 
                     self::sendRequestNotification($recipient);
@@ -145,8 +155,9 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
             ]);
     }
 
-    public static function leaveForm() : FormGrid
+    public static function leaveForm($record) : FormGrid
     {
+
         return FormGrid::make()
         ->schema([
             FormSplit::make([
@@ -160,16 +171,27 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                     ->icon('heroicon-o-document-duplicate')
                     ->id('createLeaveSection')
                     ->schema([
-                        Select::make('type')->label('Leave Type')
+                        Select::make('leave_balance_id')->label('Leave Type')
                         ->required()
-                        ->options(EmployeeLeaveBalance::all()->pluck('type','leave_balance_id')->map(function ($type) {
-                            return ucwords(strtolower($type));
-                        })->toArray())
-                        ->afterStateUpdated(function (Get $get, Set $set, $livewire) {
+                        ->options(
+                            EmployeeLeaveBalance::where('employee_id', $record->employee_id)
+                                ->get()
+                                ->pluck('type', 'leave_balance_id')
+                                ->map(function ($type) {
+                                    return ucwords(strtolower($type)); 
+                                })
+                                ->toArray() 
+                        )
+                        ->rules([
+                            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
 
-                            $leave_balance_id = $get('type');
-                            $livewire->dispatch('updateAllocationPieChart', $leave_balance_id);
-                        })
+                                $Leave_balance = EmployeeLeaveBalance::find($get('leave_balance_id'));
+
+                                if (!$Leave_balance || $Leave_balance['remaining_balance'] <= 0) {
+                                    $fail("Leave remaining balance must be greater than 0.");
+                                }
+                            },
+                        ])
                         ->live(),
                         FormGrid::make([
                             'default' => 1
@@ -179,27 +201,58 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                             ->required()
                             ->label('From')
                             ->suffixIcon('heroicon-o-calendar-days')
-                            ->minDate(now()),
+                            ->minDate(now())
+                            ->afterStateUpdated(function (Get $get,Set $set) use ($record){
+
+                                $work_schedule = $record->employment->work_schedule;
+                                $fromDate = Carbon::parse($get('from')); 
+                                $toDate = Carbon::parse($get('to')); 
+                                
+                                $period = CarbonPeriod::create($fromDate, $toDate);
+                                $leaveDaysUsed = 0;
+                                
+                                foreach ($period as $date) {
+                                    if (in_array(strtolower($date->format('l')), $work_schedule)) {
+                                        $leaveDaysUsed++;
+                                    }
+                                }
+                                
+                                $convert_to_hours = $leaveDaysUsed * 8; // this is temporary x 8 hours as regular work hours
+                                $set('hours',$convert_to_hours);
+                            }),
                             DatePicker::make('to')
                             ->required()
                             ->label('To')
                             ->suffixIcon('heroicon-o-calendar-days')
-                            ->minDate(now()),   
+                            ->minDate(now())
+                            ->afterStateUpdated(function (Get $get,Set $set) use ($record){
+                                // repeatitive will convert this to one function later on
+                                $work_schedule = $record->employment->work_schedule;
+                                $fromDate = Carbon::parse($get('from')); 
+                                $toDate = Carbon::parse($get('to'));
+                                
+                                $period = CarbonPeriod::create($fromDate, $toDate);
+                                
+                                $leaveDaysUsed = 0;
+                                
+                                foreach ($period as $date) {
+                                    if (in_array(strtolower($date->format('l')), $work_schedule)) {
+                                        $leaveDaysUsed++;
+                                    }
+                                }
+                                $convert_to_hours = $leaveDaysUsed * 8; // this is temporary x 8 hours as regular work hours
+                                $set('hours',$convert_to_hours);
+                            })
                         ])
+                        ->live()
                         ->columns(2),    
+                        TextInput::make('hours')->readOnly(),
                         Textarea::make('remarks')->label('Remarks')
                         ->required()
                         ->minLength(2)
                         ->maxLength(255)
                         ->autosize()
                         ->rows(5),
-                        Select::make('approver_id')->label('Approver')
-                        ->required()
-                        ->options(EmployeeLeaveApprover::all()->pluck('approver_id','leave_approver_id')->map(function ($approver_id) {
-        
-                            $approver = User::find($approver_id);
-                            return $approver ? ucwords(strtolower($approver->name)) : '';
-                        })->toArray()),
                         Repeater::make('leave_documents')
                         ->label('')
                         ->relationship()
@@ -222,11 +275,22 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                 ])
                 ->columnSpan(4)
                 ->schema([
+                    Select::make('approver_id')->label('Approver')
+                    ->required()
+                    ->options(EmployeeRequestApprover::all()->pluck('approver_id','approver_id')->map(function ($approver_id) {
+    
+                        $approver = User::find($approver_id);
+                        return $approver ? ucwords(strtolower($approver->name)) : '';
+                    })->toArray()),
                         FormSection::make('ALLOCATION DETAILS')
                         ->description('LEAVE ALLOCATIONS')
                         ->icon('heroicon-o-chart-pie')
                         ->schema([
-                        Livewire::make(LeaveSelfServiceAllocationPieChart::class)->key(self::generateUuid())->lazy()
+                        Livewire::make(LeaveSelfServiceAllocationPieChart::class)->data(function (Get $get){
+                            
+                            $leave_balance_id = $get('leave_balance_id');
+                            return ['record' => $leave_balance_id];
+                        })->key(self::generateUuid())->lazy()
                     ]),
                 ])
             ])

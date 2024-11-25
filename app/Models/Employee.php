@@ -140,8 +140,8 @@ class Employee extends Model
         return $this->hasMany(EmployeeLeaveBalance::class, 'employee_id', 'employee_id');
     }
 
-    public function employee_leave_approvers(): HasMany {
-        return $this->hasMany(EmployeeLeaveApprover::class, 'employee_id', 'employee_id');
+    public function employee_request_approvers(): HasMany {
+        return $this->hasMany(EmployeeRequestApprover::class, 'employee_id', 'employee_id');
     }
 
     public function employee_notice_board(): HasMany {

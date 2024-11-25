@@ -124,36 +124,6 @@ class LeaveResource extends Resource
                             ->key(self::generateUuid())
                             ->lazy(),
                         ]),
-                        Section::make("EMPLOYEE LEAVE APPROVER'S")
-                        ->description('LEAVE APPROVERS')
-                        ->icon('heroicon-o-shield-check')
-                        ->schema([
-                            Repeater::make('employee_leave_approvers')
-                            ->label('')
-                            ->relationship()
-                            ->simple(
-                                
-                                Select::make('approver_id')
-                                ->options(User::all()->pluck('name', 'user_id')->map(function ($name) {
-                                    return ucwords(strtolower($name));
-                                }))
-                                ->label('Approver')
-                                ->preload()
-                                ->required()
-                                // ->live()
-                                // ->afterStateUpdated(function (Get $get, Set $set, ?string $old, ?string $state) {
-            
-                                //         $family_id = $state;
-                                //         $family = EmployeeFamilyDetail::where('employee_family_id', $family_id)->first();
-                                //         $set('relationship', $family->relationship);
-                                // })
-                                ->searchable()
-                            )
-                            ->addActionLabel('Add Approver')
-                            ->deleteAction(
-                                fn (Action $action) => $action->requiresConfirmation()
-                            )
-                        ]),
                     ])
                     ->from('lg'),
                     Section::make('EMPLOYEE LEAVE HISTORY')
