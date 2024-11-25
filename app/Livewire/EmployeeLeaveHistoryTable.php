@@ -11,6 +11,7 @@ use App\Models\Leave;
 use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Closure;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Infolists\Components\Grid;
@@ -127,6 +128,12 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
              
                     return $data;
                 })
+                ->before(function (array $data) {
+                    $leave = EmployeeLeaveBalance::where('leave_balance_id',$data['leave_balance_id'])->select('leave_balance_id','type')->first();
+                    
+                    $data['type'] = isset($leave) ? $leave->type : "";
+                    return $data;       
+                })
                 ->label('Request a Leave')
                 ->model(Leave::class)
                 ->form([
@@ -166,14 +173,25 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                     ->schema([
                         Select::make('leave_balance_id')->label('Leave Type')
                         ->required()
-                        ->options(EmployeeLeaveBalance::all()->pluck('type','leave_balance_id')->map(function ($type) {
-                            return ucwords(strtolower($type));
-                        })->toArray())
-                        ->afterStateUpdated(function (Get $get, Set $set, $livewire) {
+                        ->options(
+                            EmployeeLeaveBalance::where('employee_id', $record->employee_id)
+                                ->get()
+                                ->pluck('type', 'leave_balance_id')
+                                ->map(function ($type) {
+                                    return ucwords(strtolower($type)); 
+                                })
+                                ->toArray() 
+                        )
+                        ->rules([
+                            fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
 
-                            $leave_balance_id = $get('type');
-                            $livewire->dispatch('updateAllocationPieChart', $leave_balance_id);
-                        })
+                                $Leave_balance = EmployeeLeaveBalance::find($get('leave_balance_id'));
+
+                                if (!$Leave_balance || $Leave_balance['remaining_balance'] <= 0) {
+                                    $fail("Leave remaining balance must be greater than 0.");
+                                }
+                            },
+                        ])
                         ->live(),
                         FormGrid::make([
                             'default' => 1
@@ -222,8 +240,6 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                                         $leaveDaysUsed++;
                                     }
                                 }
-                    
-                                
                                 $convert_to_hours = $leaveDaysUsed * 8; // this is temporary x 8 hours as regular work hours
                                 $set('hours',$convert_to_hours);
                             })
@@ -270,7 +286,11 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                         ->description('LEAVE ALLOCATIONS')
                         ->icon('heroicon-o-chart-pie')
                         ->schema([
-                        Livewire::make(LeaveSelfServiceAllocationPieChart::class)->key(self::generateUuid())->lazy()
+                        Livewire::make(LeaveSelfServiceAllocationPieChart::class)->data(function (Get $get){
+                            
+                            $leave_balance_id = $get('leave_balance_id');
+                            return ['record' => $leave_balance_id];
+                        })->key(self::generateUuid())->lazy()
                     ]),
                 ])
             ])

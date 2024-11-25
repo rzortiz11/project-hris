@@ -4,29 +4,21 @@ namespace App\Filament\Resources\EmployeeLeaveServiceResource\Widgets;
 
 use App\Models\EmployeeLeaveBalance;
 use Filament\Widgets\ChartWidget;
-
-class LeaveSelfServiceAllocationPieChart extends ChartWidget
+use Livewire\Attributes\Reactive;
+class LeaveSelfServiceAllocationPieChart extends ChartWidget 
 {
     protected static ?string $heading = 'Chart';
 
     public $leave_balance_id = "";
     protected static ?string $maxHeight = '300px';
     protected static ?string $pollingInterval = null;
-    // protected static bool $isLazy = false;
-
-    protected $listeners = [
-        'updateAllocationPieChart'
-    ];
-
-    public function updateAllocationPieChart($leave_balance_id)
-    {
-        $this->leave_balance_id = $leave_balance_id;
-    }
-
+    #[Reactive] 
+    public $record;
+ 
     protected function getData(): array
     {
-        if($this->leave_balance_id){
-            $Leavebalance = EmployeeLeaveBalance::find($this->leave_balance_id);
+        if($this->record){
+            $Leavebalance = EmployeeLeaveBalance::find($this->record);
             return [
                 'datasets' => [
                     [

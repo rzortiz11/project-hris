@@ -212,7 +212,6 @@ class EmployeeLeaveRequest extends Component implements HasForms, HasTable
                         $leave_balance->save();
                     }
 
-                    $leaveDaysUsed;
                     $record['status'] = 'approved';
                     $result = $record->save();
 
