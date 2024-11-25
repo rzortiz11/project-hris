@@ -24,8 +24,8 @@ class TodayBirthdayView extends Page
     {
         $today = Carbon::today()->format('m-d');
         // filter where today's birthday.
-        // $this->records = Employee::whereRaw('DATE_FORMAT(birthdate, "%m-%d") = ?', [$today])->get();
-        $this->records = Employee::all();
+        $this->records = Employee::whereRaw('DATE_FORMAT(birthdate, "%m-%d") = ?', [$today])->get();
+        // $this->records = Employee::all();
 
         if($this->records->isNotEmpty()){
             $this->records->each(function($record) {

@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Infolists\Infolist;
 use Filament\Tables;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -24,6 +25,8 @@ use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry;
 
 class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
 {
@@ -191,13 +194,17 @@ class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                ->color('primary'),
+                ->color('primary')
+                ->infolist(fn(Infolist $infolist) => EmployeeShiftChangeRequest::infolist($infolist)),
                 Tables\Actions\Action::make('Approved')
                 ->color('success')
                 ->icon('heroicon-s-check-circle')
                 ->action(function (ShiftChangeRequest $record, array $data) {
                     
                     $employee = Employee::find($record['employee_id']);
+                    $employee->employment->time_in = $record->new_time_in;
+                    $employee->employment->time_out = $record->new_time_out;
+                    $employee->employment->save();
             
                     $record['status'] = 'approved';
                     $result = $record->save();
@@ -233,6 +240,45 @@ class EmployeeShiftChangeRequest extends Component implements HasForms, HasTable
                 ]),
             ])
             ->defaultPaginationPageOption(5);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Grid::make()
+                ->schema([
+                    Infolists\Components\TextEntry::make('old_time_in')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('old_time_out')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('new_time_in')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('new_time_in')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('remarks')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('status')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('created_at')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary')
+                    ->date(),
+                ])->columns(3)
+            ]);
     }
 
     public static function approvedRequestNotification($recipient){

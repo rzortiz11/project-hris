@@ -122,9 +122,8 @@ class Dashboard extends Page implements HasForms
                         ])->extraAttributes(['style' => ' box-shadow: 0 2vw 4vw -1vw rgba(0,0,0,0.8);']),
                         Tab::make("Celebrating Birthday's")
                         ->badge(function () {
-                            return Employee::query()
-                            // add on birth today and query with birthday
-                            // ->where('status', 'approved')
+                            $today = Carbon::today()->format('m-d');
+                            return Employee::whereRaw('DATE_FORMAT(birthdate, "%m-%d") = ?', [$today])->get()
                             ->count();
                         })
                         ->icon('heroicon-o-cake')

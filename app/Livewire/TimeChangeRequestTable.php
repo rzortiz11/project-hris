@@ -151,7 +151,7 @@ class TimeChangeRequestTable extends Component implements HasForms, HasTable
                 })
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                // Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make()
                 ->form([
                     self::timeChangeForm($employee_id)
