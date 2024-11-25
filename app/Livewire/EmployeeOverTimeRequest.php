@@ -9,6 +9,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Infolists\Infolist;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
@@ -25,7 +26,8 @@ use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Filament\Notifications\Notification;
 use Filament\Notifications\Actions\Action;
 use Filament\Tables\Filters\SelectFilter;
-
+use Filament\Infolists;
+use Filament\Infolists\Components\TextEntry;
 class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
 {
     use InteractsWithForms;
@@ -214,7 +216,8 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()
-                ->color('primary'),
+                ->color('primary')
+                ->infolist(fn(Infolist $infolist) => EmployeeOverTimeRequest::infolist($infolist)),
                 Tables\Actions\Action::make('Approved')
                 ->color('success')
                 ->icon('heroicon-s-check-circle')
@@ -256,6 +259,61 @@ class EmployeeOverTimeRequest extends Component implements HasForms, HasTable
                 ]),
             ])
             ->defaultPaginationPageOption(5);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Grid::make()
+                ->schema([
+                    Infolists\Components\TextEntry::make('type')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('job_position')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('date_filling')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('date_from')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('time_from')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('date_to')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('time_to')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('hours')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('remarks')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('status')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary'),
+                    Infolists\Components\TextEntry::make('created_at')
+                    ->weight(FontWeight::Bold)
+                    ->size(TextEntry\TextEntrySize::Large)
+                    ->color('primary')
+                    ->date(),
+                ])->columns(3)
+            ]);
     }
 
     public static function approvedRequestNotification($recipient){
