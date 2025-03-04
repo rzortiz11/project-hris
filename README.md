@@ -55,13 +55,13 @@ open the project folder
  - update .env file configuration (FOR Project-hris)
 	
     - add additional .env for pusher
-	PUSHER_APP_ID=1817660
-	PUSHER_APP_KEY=11a093b62f2d4d330a70
-	PUSHER_APP_SECRET=f39bfd4156e8262aaffc
+	PUSHER_APP_ID=
+	PUSHER_APP_KEY=
+	PUSHER_APP_SECRET=
 	PUSHER_HOST=
-	PUSHER_PORT=443
-	PUSHER_SCHEME=https
-	PUSHER_APP_CLUSTER=ap1
+	PUSHER_PORT=
+	PUSHER_SCHEME=
+	PUSHER_APP_CLUSTER=
 	
 open docker desktop
 
