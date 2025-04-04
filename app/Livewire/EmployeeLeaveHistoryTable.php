@@ -244,6 +244,11 @@ class EmployeeLeaveHistoryTable extends Component implements HasForms, HasTable
                                 $set('hours',$convert_to_hours);
                             })
                         ])
+                        // ->rules([
+                        //     fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                        //         // add rules here to check if the from and to and convert to days is equal to whats left to employee leave balance
+                        //     },
+                        // ])
                         ->live()
                         ->columns(2),    
                         TextInput::make('hours')->readOnly(),

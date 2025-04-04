@@ -22,7 +22,7 @@ class DownloadPDFController extends Controller
 
         $filename = $payroll_data->fullname . '-payslip - ' . $cut_off_from . ' to ' . $cut_off_to . '.pdf';
 
-        $logo_path = public_path('/images/logo-morepower.png'); // Adjust path if necessary
+        $logo_path = public_path('/images/logo.png'); // Adjust path if necessary
         $logo_data = file_get_contents($logo_path); // Get image file content
         $logo_base64 = 'data:image/png;base64,' . base64_encode($logo_data); // Convert to base64
 

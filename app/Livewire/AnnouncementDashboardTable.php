@@ -66,7 +66,7 @@ class AnnouncementDashboardTable extends Component implements HasForms, HasTable
                             ImageColumn::make('avatar')
                             ->grow(false)
                             ->getStateUsing(function (Announcement $record): string {
-                                return $record->user->employee->picture;
+                                return isset($record->user->employee->pictur) ? $record->user->employee->picture : "";
                             })
                             ->circular(),
                             TextColumn::make('created_by')     
