@@ -45,10 +45,10 @@ LINK : https://learn.microsoft.com/en-us/windows/wsl/install-manual
 
 
 HOW TO RUN THE PROJECT
- - composer install 
-		- https://github.com/ZerrudOrtiz/project-hris.git
 
 Clone the Repo inside the wsl - (FOR project-hris)
+- git clone https://github.com/rortiz11/project-hris.git
+- composer install 
 
 open the project folder
  - code .
@@ -64,6 +64,12 @@ open the project folder
 	PUSHER_APP_CLUSTER=
 	
 open docker desktop
+
+✅ 1. Enable WSL Integration in Docker Desktop
+Open Docker Desktop on your Windows machine.
+Go to Settings → Resources → WSL Integration.
+Enable integration for your Ubuntu-20.04 distribution.
+Click Apply & Restart.
 
 run the project
  - source .bashrc
