@@ -75,5 +75,7 @@ run the project
  - source .bashrc
  - sail up
 
+- sail artisan key:generate
+- sail artisan storage:link
 COMMAND FOR database notification to works 
  - sail artisan queue:work
