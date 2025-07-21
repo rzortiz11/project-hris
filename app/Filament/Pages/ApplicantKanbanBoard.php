@@ -1,6 +1,4 @@
 <?php
-
-/*
 namespace App\Filament\Pages;
 
 use App\ApplicationStatusTypeEnum;
@@ -132,5 +130,5 @@ class ApplicantKanbanBoard extends KanbanBoard
         $applicant->save();
     }
 }
-*/
+
 ?>

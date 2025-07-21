@@ -33,9 +33,9 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('admin')
+            ->id('app')
             // ->path('app')
-            ->path('admin')
+            ->path('app')
             ->login()
             ->databaseNotifications()
             ->colors([
@@ -83,7 +83,7 @@ class AdminPanelProvider extends PanelProvider
             )
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
-            ->topNavigation()
+            // ->topNavigation()
             ->breadcrumbs(false)
             ->font('')
             ->renderHook(
@@ -94,7 +94,7 @@ class AdminPanelProvider extends PanelProvider
                 MenuItem::make()
                     ->label('Settings')
                     
-                    ->url(fn (): string => route('filament.admin.resources.users.edit', ['record' => auth()->id()]))
+                    ->url(fn (): string => route('filament.app.resources.users.edit', ['record' => auth()->id()]))
                     ->icon('heroicon-o-cog-6-tooth'),
             ])
             ->brandLogo(fn () => view('vendor.filament.components.brand'))

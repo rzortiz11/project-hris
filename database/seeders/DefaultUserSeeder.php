@@ -18,7 +18,7 @@ class DefaultUserSeeder extends Seeder
             [
                 'first_name' => 'Admin', 
                 'last_name' => 'User',
-                'email' => 'admin@morepower.ph',
+                'email' => 'admin@hris.com.ph',
                 'password' => Hash::make('admin1234')
             ],
         ];
