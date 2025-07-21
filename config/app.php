@@ -1,4 +1,5 @@
 <?php
+use Illuminate\Support\ServiceProvider;
 
 return [
 
@@ -27,6 +28,23 @@ return [
     */
 
     'env' => env('APP_ENV', 'production'),
+
+    
+    'providers' => ServiceProvider::defaultProviders()->merge([
+        /*
+         * Package Service Providers...
+         */
+
+        /*
+         * Application Service Providers...
+         */
+        App\Providers\AppServiceProvider::class,
+        App\Providers\AuthServiceProvider::class,
+        App\Providers\Filament\AdminPanelProvider::class,
+        Spatie\Permission\PermissionServiceProvider::class,
+        App\Providers\ImportServiceProvider::class,
+        App\Providers\ExportServiceProvider::class,
+    ])->toArray(),
 
     /*
     |--------------------------------------------------------------------------
@@ -65,7 +83,9 @@ return [
     |
     */
 
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    // 'timezone' => env('APP_TIMEZONE', 'UTC'),
+
+    'timezone' => 'Asia/Manila',
 
     /*
     |--------------------------------------------------------------------------

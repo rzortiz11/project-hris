@@ -1,0 +1,51 @@
+✅ Final Setup: Linux Cron to Run Laravel Scheduler (WSL + Sail)
+🧩 Step-by-Step Instructions
+
+🔧 1. Open your crontab in WSL  
+    crontab -e
+
+    on first setup 
+        (no crontab for rzortiz - using an empty one)
+
+        Select an editor.  To change later, run 'select-editor'.
+        1. /bin/nano        <---- easiest
+        2. /usr/bin/vim.basic
+        3. /usr/bin/vim.tiny
+        4. /bin/ed
+
+        Choose 1-4 [1]: 1
+
+        That will open an empty crontab file in nano (the easiest editor).
+
+        Inside the file that opens, go to the bottom and paste:
+
+        * * * * * cd /home/yourusername/project-hris && ./vendor/bin/sail artisan schedule:run >> storage/logs/scheduler.log 2>&1
+        ex on my case.
+            * * * * * cd /home/rzortiz/project-hris && ./vendor/bin/sail artisan schedule:run >> storage/logs/scheduler.log 2>&1
+
+        💾 To Save and Exit Nano:
+        Press CTRL + X
+
+        Press Y (to confirm save)
+
+        Press Enter (to confirm the file name)
+
+🔍 4. Make sure cron service is running in WSL
+
+Check status:
+    sudo service cron status
+
+Start if needed:
+    sudo service cron start
+
+
+✅ 5. Confirm it works
+After a couple of minutes, check the log:
+    cat storage/logs/scheduler.log
+Or watch it live:
+    tail -f storage/logs/scheduler.log
+
+
+🛑 Option 1: Stop the Entire Cron Service (Temporarily)
+If you're using WSL or Linux, this stops all cron jobs from running:
+    sudo service cron stop
