@@ -79,3 +79,7 @@ run the project
 - sail artisan storage:link
 COMMAND FOR database notification to works 
  - sail artisan queue:work
+
+Read crontab_setup.txt to make the scheduler works
+
+Login URL : http://localhost/app/login
