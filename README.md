@@ -57,6 +57,14 @@ HOW TO RUN THE PROJECT
 
 Clone the Repo inside the wsl - (FOR project-hris)
 - git clone https://github.com/rortiz11/project-hris.git
+- incase of missing extensions for php 8.2
+Install the missing PHP 8.2 extensions:
+
+sudo apt install -y \
+  php8.2-xml \
+  php8.2-intl \
+  php8.2-gd \
+  php8.2-curl
 - composer install 
 
 open the project folder
