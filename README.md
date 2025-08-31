@@ -16,7 +16,7 @@ LINK : https://learn.microsoft.com/en-us/windows/wsl/install-manual
 
 2. Download LINUX OS (I USED UBUNTU IN MICROSOFT STORE)
 
-3. RUN the UBUNTU
+3. RUN the UBUNTU 24.04.1+
 
 4. Update Package Lists:
 	 - Run the following command to update the package lists:
