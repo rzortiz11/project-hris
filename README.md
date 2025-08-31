@@ -65,6 +65,7 @@ sudo apt install -y \
   php8.2-intl \
   php8.2-gd \
   php8.2-curl
+sudo apt install -y php8.2-zip
 - composer install 
 
 open the project folder
