@@ -19,8 +19,17 @@ LINK : https://learn.microsoft.com/en-us/windows/wsl/install-manual
 3. RUN the UBUNTU 24.04.1+
 
 4. Update Package Lists:
-	 - Run the following command to update the package lists:
-		 sudo apt update
+# Update package index
+sudo apt update
+
+# Install prerequisites for adding PPAs
+sudo apt install -y software-properties-common ca-certificates lsb-release apt-transport-https
+
+# Add the PHP PPA repository
+sudo add-apt-repository ppa:ondrej/php -y
+
+# Update again to load new packages
+sudo apt update
 
 5. Download and Install PHP : 
 	 - Choose the PHP version you want to install. In this case, I'll use PHP 8.2 as an example. You can replace it with the version you prefer:
